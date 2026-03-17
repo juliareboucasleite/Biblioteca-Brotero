@@ -18,7 +18,7 @@ type LibraryProps = {
 export default function Library({ livros }: LibraryProps) {
     return (
         <>
-            <Head title="Biblioteca" />
+            <Head title="Biblioteca Brotero" />
 
             <div className="brotero-scope">
                 <BroteroHeader />

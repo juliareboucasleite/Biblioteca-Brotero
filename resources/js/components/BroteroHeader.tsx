@@ -1,5 +1,3 @@
-import React from 'react';
-
 export function BroteroHeader() {
     return (
         <header className="header-brotero">
@@ -7,27 +5,22 @@ export function BroteroHeader() {
                 <div className="header-inner">
                     <a href="/biblioteca" className="header-brand">
                         <img
-                            src="/images/logo-brotero.png"
+                            src="/images/logo.png"
                             alt="Biblioteca Brotero"
                             className="header-logo"
                         />
                         <span className="header-titulo">Biblioteca Brotero</span>
                     </a>
 
-                    <form className="header-search">
-                        <button type="button" className="header-search-all">
-                            Todos
-                        </button>
+                    <form className="header-search" action="/biblioteca" method="get">
                         <input
                             type="text"
                             className="header-search-input"
                             placeholder="Pesquisar livros..."
+                            name="q"
                         />
-                        <button type="submit" className="header-search-btn">
-                            <span className="icon-search" aria-hidden="true">
-                                🔍
-                            </span>
-                            <span className="sr-only">Pesquisar</span>
+                        <button type="submit" className="header-search-btn" aria-label="Pesquisar">
+                            <span className="icon-search" aria-hidden="true">⌕</span>
                         </button>
                     </form>
                 </div>

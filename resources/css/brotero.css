@@ -20,11 +20,11 @@
     --max-largura: 1200px;
 }
 
-/* Wrapper das páginas Biblioteca: fundo e layout */
+/* Wrapper das páginas Biblioteca: fundo e layout (sticky footer) */
 .brotero-scope {
     background: var(--brotero-fundo);
     color: var(--brotero-texto);
-    min-height: 100%;
+    min-height: 100vh;
     display: flex;
     flex-direction: column;
 }
@@ -42,12 +42,13 @@
     color: #fff;
     padding: 10px 0;
     min-height: 60px;
+    margin-bottom: 30px; /* Espaçamento em baixo do header */
 }
 
 .header-inner {
     display: flex;
     align-items: center;
-    gap: 16px;
+    gap: 30px;
     flex-wrap: wrap;
 }
 
@@ -77,47 +78,50 @@
     white-space: nowrap;
 }
 
+/* Barra de pesquisa no header (estilo antigo style.css + Amazon) */
 .header-search {
     display: flex;
     flex: 1;
     min-width: 0;
     max-width: 1000px;
-}
-
-.header-search-all {
-    padding: 8px 10px;
-    background: #f3f3f3;
-    border: none;
-    border-radius: var(--raio) 0 0 var(--raio);
-    font-size: 12px;
-    color: #555;
-    cursor: pointer;
-    border-right: 1px solid var(--brotero-borda);
+    height: 40px;
+    background: #fff;
+    border-radius: 1px;
+    overflow: hidden;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.12);
 }
 
 .header-search-input {
     flex: 1;
     min-width: 0;
-    padding: 8px 12px;
+    padding: 8px 14px;
     border: none;
     font-size: 15px;
+    background: transparent;
+    color: var(--brotero-texto);
+}
+
+.header-search-input::placeholder {
+    color: var(--brotero-texto-cinza);
 }
 
 .header-search-input:focus {
-    outline: 2px solid var(--brotero-primaria);
-    outline-offset: -2px;
+    outline: none;
 }
 
 .header-search-btn {
-    padding: 8px 14px;
+    padding: 0 16px;
     border: none;
-    border-radius: 0 var(--raio) var(--raio) 0;
+    border-radius: 0;
     background: var(--brotero-primaria-claro);
     color: #fff;
     cursor: pointer;
-    font-size: 18px;
+    font-size: 1.25rem;
     line-height: 1;
     transition: background 0.15s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
 }
 
 .header-search-btn:hover {
@@ -126,7 +130,8 @@
 
 .icon-search {
     display: inline-block;
-    font-size: 18px;
+    font-size: 1.25rem;
+    line-height: 1;
 }
 
 /* --- Layout principal --- */
@@ -134,7 +139,7 @@
     display: flex;
     gap: 18px;
     align-items: flex-start;
-    padding: 20px 0 32px;
+    padding: 26px 0 32px;
     flex: 1;
 }
 
@@ -330,6 +335,8 @@
     opacity: 0;
     pointer-events: none;
     transition: opacity 0.2s ease;
+    /* posição atualizada por JS para seguir o rato */
+    will-change: left, top;
 }
 
 .card-livro-capa:hover .card-livro-take-btn {
@@ -545,7 +552,7 @@
 
 /* --- Footer Brotero --- */
 footer.brotero-footer {
-    margin-top: auto;
+    margin-top: 32px;
     background: #3c3c3c;
     color: #ccc;
     padding: 16px 0;

@@ -1,8 +1,7 @@
 import { Head } from '@inertiajs/react';
 import { BroteroFooter } from '@/components/BroteroFooter';
 import { BroteroHeader } from '@/components/BroteroHeader';
-import AppLayout from '@/layouts/app-layout';
-import type { BreadcrumbItem } from '@/types';
+import { LISTA_ESCOLAS } from '@/constants/escolas';
 
 type LivroDetalhe = {
     id: string;
@@ -11,25 +10,21 @@ type LivroDetalhe = {
     desc: string;
 };
 
+const TEXTO_PLACEHOLDER = 'Os livros aparecerão aqui';
+
+function isPlaceholder(livro: LivroDetalhe): boolean {
+    return livro.titulo === TEXTO_PLACEHOLDER || !livro.titulo?.trim();
+}
+
 type LibraryBookProps = {
     livro: LivroDetalhe;
 };
 
-const breadcrumbs = (livro: LivroDetalhe): BreadcrumbItem[] => [
-    {
-        title: 'Biblioteca',
-        href: '/biblioteca',
-    },
-    {
-        title: livro.titulo || 'Livro',
-        href: '/biblioteca/livro',
-    },
-];
-
 export default function LibraryBook({ livro }: LibraryBookProps) {
+    const placeholder = isPlaceholder(livro);
+
     return (
-        <AppLayout breadcrumbs={breadcrumbs(livro)}>
-            <Head title={livro.titulo || 'Livro'} />
+        <>
 
             <div className="brotero-scope">
                 <BroteroHeader />
@@ -47,16 +42,25 @@ export default function LibraryBook({ livro }: LibraryBookProps) {
                         </div>
                         <div className="pagina-livro-desc">
                             <h1 className="pagina-livro-title" id="pagina-livro-title">
-                                {livro.titulo}
+                                {placeholder ? 'Livro' : livro.titulo}
                             </h1>
-                            <p className="pagina-livro-author" id="pagina-livro-author">
-                                {livro.autor}
-                            </p>
-                            <div className="pagina-livro-sinopse">
-                                <p className="pagina-livro-desc-text" id="pagina-livro-desc">
-                                    {livro.desc}
+                            {!placeholder && (
+                                <>
+                                    <p className="pagina-livro-author" id="pagina-livro-author">
+                                        {livro.autor}
+                                    </p>
+                                    <div className="pagina-livro-sinopse">
+                                        <p className="pagina-livro-desc-text" id="pagina-livro-desc">
+                                            {livro.desc}
+                                        </p>
+                                    </div>
+                                </>
+                            )}
+                            {placeholder && (
+                                <p className="pagina-livro-desc-text">
+                                    Selecione um livro no catálogo para ver a ficha e requisitar.
                                 </p>
-                            </div>
+                            )}
                         </div>
                         <aside className="pagina-livro-opcoes">
                             <h2 className="pagina-livro-opcoes-titulo">Como deseja retirar?</h2>
@@ -81,7 +85,9 @@ export default function LibraryBook({ livro }: LibraryBookProps) {
                                         className="pagina-livro-select"
                                         required
                                     >
-                                        <option>Escola Secundária Avelar Brotero</option>
+                                        {LISTA_ESCOLAS.map((escola) => (
+                                            <option key={escola}>{escola}</option>
+                                        ))}
                                         <option>Outra escola...</option>
                                     </select>
                                 </div>
@@ -92,11 +98,10 @@ export default function LibraryBook({ livro }: LibraryBookProps) {
                         </aside>
                     </div>
                 </div>
-                </main>
+            </main>
 
-                <BroteroFooter />
+            <BroteroFooter />
             </div>
-        </AppLayout>
+        </>
     );
 }
-

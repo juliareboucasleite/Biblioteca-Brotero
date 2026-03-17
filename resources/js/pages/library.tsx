@@ -1,30 +1,23 @@
 import { Head } from '@inertiajs/react';
-import AppLayout from '@/layouts/app-layout';
-import type { BreadcrumbItem } from '@/types';
-import { BroteroHeader } from '@/components/BroteroHeader';
 import { BroteroFooter } from '@/components/BroteroFooter';
+import { BroteroHeader } from '@/components/BroteroHeader';
+import { CardLivro } from '@/components/CardLivro';
+import { LISTA_ESCOLAS } from '@/constants/escolas';
 
 type Livro = {
     id: string;
     titulo: string;
     autor: string;
-    desc: string;
+    desc: string; 
 };
 
 type LibraryProps = {
     livros: Livro[];
 };
 
-const breadcrumbs: BreadcrumbItem[] = [
-    {
-        title: 'Biblioteca',
-        href: '/biblioteca',
-    },
-];
-
 export default function Library({ livros }: LibraryProps) {
     return (
-        <AppLayout breadcrumbs={breadcrumbs}>
+        <>
             <Head title="Biblioteca" />
 
             <div className="brotero-scope">
@@ -32,7 +25,7 @@ export default function Library({ livros }: LibraryProps) {
 
                 <main className="container layout-main">
                 <aside className="sidebar-categorias box-brotero">
-                    <h2 className="sidebar-titulo">Livros</h2>
+                    <h2 className="sidebar-titulo">Categorias</h2>
                     <ul className="sidebar-lista">
                         <li>
                             <button type="button" className="sidebar-link">
@@ -190,7 +183,9 @@ export default function Library({ livros }: LibraryProps) {
                                 <label htmlFor="filtro-escola">Base das escolas</label>
                                 <select id="filtro-escola" name="escola">
                                     <option>Todas as escolas</option>
-                                    <option>Escola Secundária Avelar Brotero</option>
+                                    {LISTA_ESCOLAS.map((escola) => (
+                                        <option key={escola}>{escola}</option>
+                                    ))}
                                 </select>
                             </div>
                         </div>
@@ -205,21 +200,7 @@ export default function Library({ livros }: LibraryProps) {
                         </div>
                         <div className="livros-grid">
                             {livros.map((livro) => (
-                                <article key={livro.id} className="card-livro box-brotero">
-                                    <a
-                                        href={`/biblioteca/livro?id=${encodeURIComponent(
-                                            livro.id,
-                                        )}&titulo=${encodeURIComponent(
-                                            livro.titulo,
-                                        )}&autor=${encodeURIComponent(
-                                            livro.autor,
-                                        )}&desc=${encodeURIComponent(livro.desc)}`}
-                                        className="card-livro-capa"
-                                        aria-label="Ver livro e requisitar"
-                                    >
-                                        <span className="card-livro-take-btn">take it</span>
-                                    </a>
-                                </article>
+                                <CardLivro key={livro.id} livro={livro} />
                             ))}
                         </div>
                     </section>
@@ -250,9 +231,8 @@ export default function Library({ livros }: LibraryProps) {
                 </div>
             </main>
 
-                <BroteroFooter />
+            <BroteroFooter />
             </div>
-        </AppLayout>
+        </>
     );
 }
-

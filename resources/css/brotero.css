@@ -1,0 +1,642 @@
+/* --- Estilo Biblioteca Brotero --- */
+:root {
+    --brotero-primaria: #4a6572;
+    --brotero-primaria-escuro: #3d5663;
+    --brotero-primaria-claro: #5d7a8c;
+    --brotero-fundo: #e8ecf0;
+    --brotero-branco: #fff;
+    --brotero-texto: #1c2128;
+    --brotero-texto-cinza: #5c656d;
+    --brotero-texto-link: #3d6b7c;
+    --brotero-texto-link-hover: #2d5160;
+    --brotero-borda: #c2cbd4;
+    --brotero-borda-suave: #d8dfe6;
+    --brotero-dark: #2c3e50;
+    --brotero-nav: var(--brotero-primaria);
+    --brotero-laranja: var(--brotero-primaria);
+    --brotero-laranja-hover: #e8ecf0;
+    --brotero-laranja-escuro: var(--brotero-primaria-escuro);
+    --raio: 6px;
+    --max-largura: 1200px;
+}
+
+/* Wrapper das páginas Biblioteca: fundo e layout */
+.brotero-scope {
+    background: var(--brotero-fundo);
+    color: var(--brotero-texto);
+    min-height: 100%;
+    display: flex;
+    flex-direction: column;
+}
+
+.brotero-scope .container {
+    width: 100%;
+    max-width: var(--max-largura);
+    margin: 0 auto;
+    padding: 0 18px;
+}
+
+/* --- Header --- */
+.header-brotero {
+    background: var(--brotero-nav);
+    color: #fff;
+    padding: 10px 0;
+    min-height: 60px;
+}
+
+.header-inner {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    flex-wrap: wrap;
+}
+
+.header-brand {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    color: #fff;
+    text-decoration: none;
+    margin-right: 8px;
+}
+
+.header-brand:hover {
+    color: #e8ecf0;
+    text-decoration: none;
+}
+
+.header-logo {
+    height: 36px;
+    width: auto;
+    display: block;
+}
+
+.header-titulo {
+    font-size: 1.25rem;
+    font-weight: 700;
+    white-space: nowrap;
+}
+
+.header-search {
+    display: flex;
+    flex: 1;
+    min-width: 0;
+    max-width: 1000px;
+}
+
+.header-search-all {
+    padding: 8px 10px;
+    background: #f3f3f3;
+    border: none;
+    border-radius: var(--raio) 0 0 var(--raio);
+    font-size: 12px;
+    color: #555;
+    cursor: pointer;
+    border-right: 1px solid var(--brotero-borda);
+}
+
+.header-search-input {
+    flex: 1;
+    min-width: 0;
+    padding: 8px 12px;
+    border: none;
+    font-size: 15px;
+}
+
+.header-search-input:focus {
+    outline: 2px solid var(--brotero-primaria);
+    outline-offset: -2px;
+}
+
+.header-search-btn {
+    padding: 8px 14px;
+    border: none;
+    border-radius: 0 var(--raio) var(--raio) 0;
+    background: var(--brotero-primaria-claro);
+    color: #fff;
+    cursor: pointer;
+    font-size: 18px;
+    line-height: 1;
+    transition: background 0.15s ease;
+}
+
+.header-search-btn:hover {
+    background: var(--brotero-primaria-escuro);
+}
+
+.icon-search {
+    display: inline-block;
+    font-size: 18px;
+}
+
+/* --- Layout principal --- */
+.layout-main {
+    display: flex;
+    gap: 18px;
+    align-items: flex-start;
+    padding: 20px 0 32px;
+    flex: 1;
+}
+
+.sidebar-categorias {
+    width: 220px;
+    flex-shrink: 0;
+    padding: 12px 0;
+}
+
+.sidebar-titulo {
+    margin: 0 14px 10px;
+    font-size: 1rem;
+    font-weight: 700;
+    color: var(--brotero-texto);
+}
+
+.sidebar-lista {
+    list-style: none;
+    margin: 0;
+    padding: 6px 0 10px;
+    border-top: 1px solid var(--brotero-borda);
+}
+
+.sidebar-lista li {
+    margin: 0;
+}
+
+.sidebar-link {
+    display: block;
+    width: 100%;
+    padding: 6px 14px;
+    text-align: left;
+    border: none;
+    background: transparent;
+    color: var(--brotero-texto);
+    font-size: 13px;
+    cursor: pointer;
+    transition: background 0.15s ease;
+}
+
+.sidebar-link:hover {
+    background: #f3f3f3;
+}
+
+.sidebar-link:focus {
+    outline: 2px solid var(--brotero-primaria);
+    outline-offset: -2px;
+}
+
+.conteudo-main {
+    flex: 1;
+    min-width: 0;
+}
+
+/* --- Caixas estilo Brotero --- */
+.box-brotero {
+    background: var(--brotero-branco);
+    border: 1px solid var(--brotero-borda);
+    border-radius: var(--raio);
+    padding: 16px 18px;
+}
+
+.titulo-secao-brotero {
+    margin: 0 0 12px;
+    font-size: 1.1rem;
+    font-weight: 700;
+    color: var(--brotero-texto);
+}
+
+.pesquisa-livros {
+    margin-bottom: 20px;
+}
+
+.filtros-titulo {
+    margin: 0 0 8px;
+    font-size: 12px;
+    font-weight: 700;
+    color: var(--brotero-texto-cinza);
+    text-transform: uppercase;
+    letter-spacing: 0.02em;
+}
+
+.filtros-pesquisa {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 12px 20px;
+}
+
+.filtro-item {
+    min-width: 160px;
+    flex: 1;
+    max-width: 220px;
+}
+
+.filtros-pesquisa label {
+    display: block;
+    margin-bottom: 4px;
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--brotero-texto-cinza);
+}
+
+.filtros-pesquisa select {
+    width: 100%;
+    padding: 6px 10px;
+    font-size: 13px;
+    border: 1px solid var(--brotero-borda);
+    border-radius: var(--raio);
+    background: var(--brotero-branco);
+    color: var(--brotero-texto);
+}
+
+.filtros-pesquisa select:focus {
+    outline: 2px solid var(--brotero-primaria);
+    outline-offset: 0;
+}
+
+.secao-brotero {
+    margin-bottom: 24px;
+}
+
+.secao-head {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 12px;
+    margin-bottom: 12px;
+    padding: 0 2px;
+}
+
+.secao-titulo {
+    margin: 0;
+    font-size: 1.2rem;
+    font-weight: 700;
+    color: var(--brotero-texto);
+}
+
+.link-ver-mais {
+    font-size: 13px;
+    color: var(--brotero-texto-link);
+    white-space: nowrap;
+}
+
+.link-ver-mais:hover {
+    color: var(--brotero-texto-link-hover);
+    text-decoration: underline;
+}
+
+.livros-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+    gap: 16px;
+}
+
+.card-livro {
+    background: var(--brotero-branco);
+    border: 1px solid var(--brotero-borda);
+    border-radius: var(--raio);
+    padding: 0;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+    transition: box-shadow 0.15s ease;
+}
+
+.card-livro:hover {
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.12);
+}
+
+.card-livro-capa {
+    position: relative;
+    aspect-ratio: 2/3;
+    background: linear-gradient(145deg, #e8e8e8 0%, #d0d0d0 100%);
+    min-height: 200px;
+    text-decoration: none;
+    color: inherit;
+    display: block;
+}
+
+.card-livro-take-btn {
+    position: absolute;
+    left: 0;
+    top: 0;
+    transform: translate(-50%, -50%);
+    padding: 8px 16px;
+    border: none;
+    border-radius: 16px;
+    background: #000;
+    color: #fff;
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.2s ease;
+}
+
+.card-livro-capa:hover .card-livro-take-btn {
+    opacity: 1;
+}
+
+.card-livro-info {
+    padding: 10px 12px;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    flex: 1;
+}
+
+.card-livro-titulo {
+    margin: 0;
+    font-size: 14px;
+    font-weight: 700;
+    line-height: 1.3;
+    color: var(--brotero-texto);
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+}
+
+.card-livro-autor {
+    margin: 0;
+    font-size: 12px;
+    color: var(--brotero-texto-cinza);
+    -webkit-line-clamp: 1;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+    display: -webkit-box;
+}
+
+.secao-aviso {
+    margin: 0;
+    padding: 16px;
+    background: var(--brotero-branco);
+    border: 1px dashed var(--brotero-borda);
+    border-radius: var(--raio);
+    font-size: 14px;
+    color: var(--brotero-texto-cinza);
+    grid-column: 1 / -1;
+}
+
+/* --- Página do livro --- */
+.pagina-livro-main {
+    padding: 24px 0 48px;
+    flex: 1;
+}
+
+.pagina-livro-voltar {
+    margin: 0 0 24px;
+}
+
+.link-voltar {
+    font-size: 14px;
+    color: var(--brotero-texto-link);
+}
+
+.link-voltar:hover {
+    text-decoration: underline;
+}
+
+.pagina-livro-layout {
+    display: grid;
+    grid-template-columns: 280px 1fr 320px;
+    gap: 32px;
+    align-items: start;
+}
+
+.pagina-livro-capa-wrap {
+    position: sticky;
+    top: 24px;
+}
+
+.pagina-livro-capa {
+    aspect-ratio: 2/3;
+    background: linear-gradient(145deg, #e8e8e8 0%, #d0d0d0 100%);
+    border-radius: 6px;
+    min-height: 0;
+    width: 100%;
+}
+
+.pagina-livro-desc {
+    min-width: 0;
+}
+
+.pagina-livro-title {
+    margin: 0 0 8px;
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: var(--brotero-texto);
+    line-height: 1.3;
+}
+
+.pagina-livro-author {
+    margin: 0 0 16px;
+    font-size: 15px;
+    color: var(--brotero-texto-cinza);
+}
+
+.pagina-livro-sinopse {
+    font-size: 15px;
+    line-height: 1.6;
+    color: var(--brotero-texto);
+}
+
+.pagina-livro-desc-text {
+    margin: 0;
+}
+
+.pagina-livro-opcoes {
+    border: 1px solid var(--brotero-borda);
+    border-radius: var(--raio);
+    padding: 20px;
+    background: var(--brotero-branco);
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.06);
+}
+
+.pagina-livro-opcoes-titulo {
+    margin: 0 0 16px;
+    font-size: 1.05rem;
+    font-weight: 700;
+    color: var(--brotero-texto);
+}
+
+.pagina-livro-retirada {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    margin-bottom: 18px;
+}
+
+.pagina-livro-radio {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    cursor: pointer;
+    font-size: 14px;
+    color: var(--brotero-texto);
+}
+
+.pagina-livro-radio input {
+    width: 18px;
+    height: 18px;
+    accent-color: var(--brotero-primaria);
+}
+
+.pagina-livro-escola label {
+    display: block;
+    margin-bottom: 6px;
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--brotero-texto-cinza);
+}
+
+.pagina-livro-select {
+    width: 100%;
+    padding: 10px 12px;
+    font-size: 14px;
+    border: 1px solid var(--brotero-borda);
+    border-radius: 6px;
+    background: var(--brotero-branco);
+    color: var(--brotero-texto);
+}
+
+.pagina-livro-submit {
+    width: 100%;
+    margin-top: 12px;
+    padding: 12px 20px;
+    border: none;
+    border-radius: var(--raio);
+    background: var(--brotero-primaria);
+    color: #fff;
+    font-size: 15px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: opacity 0.15s ease;
+}
+
+.pagina-livro-submit:hover {
+    opacity: 0.9;
+}
+
+@media (max-width: 900px) {
+    .pagina-livro-layout {
+        grid-template-columns: 1fr 1fr;
+        grid-template-areas: "capa desc" "opcoes opcoes";
+    }
+
+    .pagina-livro-capa-wrap {
+        grid-area: capa;
+    }
+
+    .pagina-livro-desc {
+        grid-area: desc;
+    }
+
+    .pagina-livro-opcoes {
+        grid-area: opcoes;
+    }
+}
+
+@media (max-width: 600px) {
+    .pagina-livro-layout {
+        grid-template-columns: 1fr;
+        grid-template-areas: "capa" "desc" "opcoes";
+    }
+}
+
+/* --- Footer Brotero --- */
+footer.brotero-footer {
+    margin-top: auto;
+    background: #3c3c3c;
+    color: #ccc;
+    padding: 16px 0;
+    font-size: 12px;
+}
+
+.brotero-footer .footer-inner {
+    text-align: center;
+}
+
+.brotero-footer .footer-redes {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 1rem 1.5rem;
+    margin-bottom: 1rem;
+}
+
+.brotero-footer .footer-rede {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.35rem;
+    color: #ccc;
+    text-decoration: none;
+}
+
+.brotero-footer .footer-rede:hover {
+    color: #fff;
+    text-decoration: underline;
+}
+
+.brotero-footer .footer-inner p {
+    margin: 4px 0;
+}
+
+.brotero-footer a {
+    color: #5d7a8c;
+}
+
+.brotero-footer a:hover {
+    color: #e8ecf0;
+    text-decoration: underline;
+}
+
+
+@media (max-width: 768px) {
+    .header-inner {
+        flex-direction: column;
+        align-items: stretch;
+    }
+
+    .header-search {
+        max-width: none;
+    }
+
+    .layout-main {
+        flex-direction: column;
+    }
+
+    .sidebar-categorias {
+        width: 100%;
+    }
+
+    .livros-grid {
+        grid-template-columns: repeat(auto-fill, minmax(130px, 1fr));
+        gap: 12px;
+    }
+
+    .card-livro-capa {
+        min-height: 160px;
+    }
+}
+
+@media (max-width: 480px) {
+    .header-logo {
+        height: 30px;
+    }
+
+    .header-titulo {
+        font-size: 1rem;
+    }
+
+    .brotero-scope .container {
+        padding: 0 12px;
+    }
+
+    .filtros-pesquisa {
+        flex-direction: column;
+    }
+
+    .filtro-item {
+        max-width: none;
+    }
+}

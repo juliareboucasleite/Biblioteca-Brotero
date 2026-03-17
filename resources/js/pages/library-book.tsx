@@ -1,4 +1,4 @@
-import { Head } from '@inertiajs/react';
+
 import { BroteroFooter } from '@/components/BroteroFooter';
 import { BroteroHeader } from '@/components/BroteroHeader';
 import { LISTA_ESCOLAS } from '@/constants/escolas';
@@ -25,7 +25,6 @@ export default function LibraryBook({ livro }: LibraryBookProps) {
 
     return (
         <>
-
             <div className="brotero-scope">
                 <BroteroHeader />
 

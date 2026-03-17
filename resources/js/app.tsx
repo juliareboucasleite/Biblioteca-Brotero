@@ -25,6 +25,20 @@ createInertiaApp({
                 </TooltipProvider>
             </StrictMode>,
         );
+
+
+        const loader = document.getElementById('initial-loading');
+
+        if (loader) {
+            loader.classList.add('hidden');
+            loader.addEventListener(
+                'transitionend',
+                () => {
+                    loader.remove();
+                },
+                { once: true },
+            );
+        }
     },
     progress: {
         color: '#4B5563',

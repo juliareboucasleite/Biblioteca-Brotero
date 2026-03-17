@@ -26,6 +26,38 @@
         html.dark {
             background-color: oklch(0.145 0 0);
         }
+
+        /* Ecrã de carregamento inicial */
+        #initial-loading {
+            position: fixed;
+            inset: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: #e5edf2;
+            z-index: 9999;
+            transition: opacity 0.25s ease;
+        }
+
+        #initial-loading.hidden {
+            opacity: 0;
+            pointer-events: none;
+        }
+
+        #initial-loading .spinner {
+            width: 46px;
+            height: 46px;
+            border-radius: 999px;
+            border: 4px solid rgba(0, 0, 0, 0.08);
+            border-top-color: #1f4c6b;
+            animation: spin 0.7s linear infinite;
+        }
+
+        @keyframes spin {
+            to {
+                transform: rotate(360deg);
+            }
+        }
     </style>
 
     <title inertia>{{ config('app.name', 'Biblioteca Brotero - Biblioteca Online') }}</title>
@@ -42,6 +74,9 @@
 </head>
 
 <body class="font-sans antialiased">
+    <div id="initial-loading">
+        <div class="spinner" aria-label="A carregar..."></div>
+    </div>
     @inertia
 </body>
 

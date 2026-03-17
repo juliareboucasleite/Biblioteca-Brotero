@@ -17,7 +17,7 @@
     --brotero-laranja-hover: #e8ecf0;
     --brotero-laranja-escuro: var(--brotero-primaria-escuro);
     --raio: 6px;
-    --max-largura: 1200px;
+    --max-largura: 1220px;
 }
 
 /* Wrapper das páginas Biblioteca: fundo e layout (sticky footer) */
@@ -33,7 +33,7 @@
     width: 100%;
     max-width: var(--max-largura);
     margin: 0 auto;
-    padding: 0 18px;
+    padding: 0 10px;
 }
 
 /* --- Header --- */
@@ -225,13 +225,13 @@
 .filtros-pesquisa {
     display: flex;
     flex-wrap: wrap;
-    gap: 12px 20px;
+    gap: 10px 16px;
 }
 
 .filtro-item {
-    min-width: 160px;
+    min-width: 150px;
     flex: 1;
-    max-width: 220px;
+    max-width: 200px;
 }
 
 .filtros-pesquisa label {
@@ -358,6 +358,7 @@
     line-height: 1.3;
     color: var(--brotero-texto);
     display: -webkit-box;
+    line-clamp: 2;
     -webkit-line-clamp: 2;
     -webkit-box-orient: vertical;
     overflow: hidden;
@@ -367,6 +368,7 @@
     margin: 0;
     font-size: 12px;
     color: var(--brotero-texto-cinza);
+    line-clamp: 1;
     -webkit-line-clamp: 1;
     -webkit-box-orient: vertical;
     overflow: hidden;

@@ -5,6 +5,8 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
 use Inertia\Response;
+use App\Models\Book;
+use App\Models\Category;
 
 /**
  * Catálogo e página de detalhe do livro (Biblioteca Brotero)
@@ -13,16 +15,121 @@ use Inertia\Response;
  */
 class BibliotecaController extends Controller
 {
+    private function applyFilters(Request $request, $query)
+    {
+        $categoriaId = $request->query('categoria');
+        $q = trim((string) $request->query('q', ''));
+        $lingua = trim((string) $request->query('lingua', ''));
+
+        if ($categoriaId !== '') {
+            $query->whereHas('categories', function ($q2) use ($categoriaId) {
+                $q2->whereKey($categoriaId);
+            });
+        }
+
+        if ($lingua !== '') {
+            // Guarda no DB como "pt", "pt-BR", "en" etc.
+            $query->where('language', 'like', $lingua.'%');
+        }
+
+        if ($q !== '') {
+            $query->where(function ($q2) use ($q) {
+                $q2->where('title', 'like', '%'.$q.'%')
+                    ->orWhere('description', 'like', '%'.$q.'%')
+                    ->orWhereHas('authors', function ($q3) use ($q) {
+                        $q3->where('name', 'like', '%'.$q.'%');
+                    });
+            });
+        }
+
+        return [$categoriaId ?: null, $q ?: null, $lingua ?: null];
+    }
     /**
      * Listagem do catálogo (index da biblioteca)
      * Futuro: Livro::query()->when($filtros)->paginate().
      */
-    public function index(): Response
+    public function index(Request $request): Response
     {
-        $livros = $this->livrosEmDestaque();
+        $livrosQuery = Book::query()
+            ->with(['authors'])
+            ->latest('id');
+
+        [$categoriaId, $q, $lingua] = $this->applyFilters($request, $livrosQuery);
+
+        $livros = $livrosQuery
+            ->take(10)
+            ->get()
+            ->map(function (Book $book) {
+                return [
+                    'id' => (string) $book->id,
+                    'titulo' => (string) ($book->title ?? ''),
+                    'autor' => $book->authors?->pluck('name')->filter()->implode(', ') ?: 'Autor desconhecido',
+                    'desc' => (string) ($book->description ?? ''),
+                    'capa' => $book->cover_image ? (string) $book->cover_image : null,
+                ];
+            })
+            ->values()
+            ->all();
+
+        if (empty($livros)) {
+            $livros = $this->livrosEmDestaque();
+        }
+
+        $categorias = Category::query()
+            ->orderBy('name')
+            ->get(['id', 'name'])
+            ->map(fn (Category $c) => ['id' => (string) $c->id, 'nome' => (string) $c->name])
+            ->values()
+            ->all();
 
         return Inertia::render('library', [
             'livros' => $livros,
+            'categorias' => $categorias,
+            'categoriaSelecionada' => $categoriaId ? (string) $categoriaId : null,
+            'q' => $q,
+            'lingua' => $lingua,
+        ]);
+    }
+
+    public function livros(Request $request): Response
+    {
+        $livrosQuery = Book::query()
+            ->with(['authors'])
+            ->latest('id');
+
+        [$categoriaId, $q, $lingua] = $this->applyFilters($request, $livrosQuery);
+
+        $livros = $livrosQuery
+            ->get()
+            ->map(function (Book $book) {
+                return [
+                    'id' => (string) $book->id,
+                    'titulo' => (string) ($book->title ?? ''),
+                    'autor' => $book->authors?->pluck('name')->filter()->implode(', ') ?: 'Autor desconhecido',
+                    'desc' => (string) ($book->description ?? ''),
+                    'capa' => $book->cover_image ? (string) $book->cover_image : null,
+                ];
+            })
+            ->values()
+            ->all();
+
+        if (empty($livros)) {
+            $livros = $this->livrosEmDestaque();
+        }
+
+        $categorias = Category::query()
+            ->orderBy('name')
+            ->get(['id', 'name'])
+            ->map(fn (Category $c) => ['id' => (string) $c->id, 'nome' => (string) $c->name])
+            ->values()
+            ->all();
+
+        return Inertia::render('library-all', [
+            'livros' => $livros,
+            'categorias' => $categorias,
+            'categoriaSelecionada' => $categoriaId ? (string) $categoriaId : null,
+            'q' => $q,
+            'lingua' => $lingua,
         ]);
     }
 
@@ -37,6 +144,7 @@ class BibliotecaController extends Controller
             'titulo' => $request->query('titulo', 'Título do livro'),
             'autor' => $request->query('autor', 'Autor'),
             'desc' => $request->query('desc', 'Descrição do livro aparecerá aqui.'),
+            'capa' => $request->query('capa'),
         ];
 
         return Inertia::render('library-book', [

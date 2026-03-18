@@ -1,21 +1,100 @@
 import { Head } from '@inertiajs/react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import { BroteroFooter } from '@/components/BroteroFooter';
 import { BroteroHeader } from '@/components/BroteroHeader';
 import { CardLivro } from '@/components/CardLivro';
 import { LISTA_ESCOLAS } from '@/constants/escolas';
+
+type Categoria = {
+    id: string;
+    nome: string;
+};
 
 type Livro = {
     id: string;
     titulo: string;
     autor: string;
     desc: string; 
+    capa?: string | null;
 };
 
 type LibraryProps = {
     livros: Livro[];
+    categorias: Categoria[];
+    categoriaSelecionada?: string | null;
 };
 
-export default function Library({ livros }: LibraryProps) {
+export default function Library({ livros, categorias, categoriaSelecionada }: LibraryProps) {
+    const [lista, setLista] = useState<Livro[]>(livros);
+    const lastServerSnapshot = useMemo(() => JSON.stringify(livros), [livros]);
+    const snapshotRef = useRef(lastServerSnapshot);
+
+    useEffect(() => {
+        // Mantém o estado sincronizado quando o Inertia re-renderiza com novos props.
+        if (snapshotRef.current !== lastServerSnapshot) {
+            snapshotRef.current = lastServerSnapshot;
+            setLista(livros);
+        }
+    }, [lastServerSnapshot, livros]);
+
+    useEffect(() => {
+        let cancelled = false;
+        let timeoutId: number | undefined;
+
+        const tick = async () => {
+            try {
+                const url = categoriaSelecionada
+                    ? `/books?limit=10&categoria=${encodeURIComponent(categoriaSelecionada)}`
+                    : '/books?limit=10';
+
+                const res = await fetch(url, {
+                    headers: { Accept: 'application/json' },
+                });
+
+                if (!res.ok) {
+                    return;
+                }
+
+                const data = (await res.json()) as Array<{
+                    id: number | string;
+                    title?: string | null;
+                    description?: string | null;
+                    cover_image?: string | null;
+                    authors?: Array<{ name?: string | null }> | null;
+                }>;
+
+                const mapped: Livro[] = (data ?? []).map((b) => ({
+                    id: String(b.id),
+                    titulo: b.title?.toString() ?? '',
+                    autor: (b.authors ?? [])
+                        .map((a) => a?.name?.toString()?.trim())
+                        .filter((x): x is string => Boolean(x))
+                        .join(', ') || 'Autor desconhecido',
+                    desc: b.description?.toString() ?? '',
+                    capa: b.cover_image?.toString() ?? null,
+                }));
+
+                if (!cancelled && mapped.length > 0) {
+                    setLista(mapped);
+                }
+            } finally {
+                if (!cancelled) {
+                    timeoutId = window.setTimeout(tick, 5000);
+                }
+            }
+        };
+
+        timeoutId = window.setTimeout(tick, 1500);
+
+        return () => {
+            cancelled = true;
+
+            if (timeoutId) {
+                window.clearTimeout(timeoutId);
+            }
+        };
+    }, [categoriaSelecionada]);
+
     return (
         <>
             <Head title="Biblioteca Brotero" />
@@ -28,125 +107,25 @@ export default function Library({ livros }: LibraryProps) {
                     <h2 className="sidebar-titulo">Categorias</h2>
                     <ul className="sidebar-lista">
                         <li>
-                            <button type="button" className="sidebar-link">
-                                Artes e Fotografia
-                            </button>
+                            <a
+                                href="/biblioteca"
+                                className="sidebar-link"
+                                aria-current={!categoriaSelecionada ? 'page' : undefined}
+                            >
+                                Todas
+                            </a>
                         </li>
-                        <li>
-                            <button type="button" className="sidebar-link">
-                                Biografias, Diários e Factos Reais
-                            </button>
-                        </li>
-                        <li>
-                            <button type="button" className="sidebar-link">
-                                Calendários e Anuários
-                            </button>
-                        </li>
-                        <li>
-                            <button type="button" className="sidebar-link">
-                                Ciências, Tecnologia e Medicina
-                            </button>
-                        </li>
-                        <li>
-                            <button type="button" className="sidebar-link">
-                                Livros de Receitas, Comida e Vinho
-                            </button>
-                        </li>
-                        <li>
-                            <button type="button" className="sidebar-link">
-                                Referência
-                            </button>
-                        </li>
-                        <li>
-                            <button type="button" className="sidebar-link">
-                                Comics, Manga e Romances Gráficos
-                            </button>
-                        </li>
-                        <li>
-                            <button type="button" className="sidebar-link">
-                                Desporto e Ar Livre
-                            </button>
-                        </li>
-                        <li>
-                            <button type="button" className="sidebar-link">
-                                Direito
-                            </button>
-                        </li>
-                        <li>
-                            <button type="button" className="sidebar-link">
-                                Negócios e Economia
-                            </button>
-                        </li>
-                        <li>
-                            <button type="button" className="sidebar-link">
-                                Ficção Científica e Fantasia
-                            </button>
-                        </li>
-                        <li>
-                            <button type="button" className="sidebar-link">
-                                História
-                            </button>
-                        </li>
-                        <li>
-                            <button type="button" className="sidebar-link">
-                                Artesanato, Tempos Livres e Lar
-                            </button>
-                        </li>
-                        <li>
-                            <button type="button" className="sidebar-link">
-                                Livros Infantis
-                            </button>
-                        </li>
-                        <li>
-                            <button type="button" className="sidebar-link">
-                                Computadores e Internet
-                            </button>
-                        </li>
-                        <li>
-                            <button type="button" className="sidebar-link">
-                                Adolescente e Jovem Adulto
-                            </button>
-                        </li>
-                        <li>
-                            <button type="button" className="sidebar-link">
-                                Livros Escolares e Educação
-                            </button>
-                        </li>
-                        <li>
-                            <button type="button" className="sidebar-link">
-                                Viagens e Turismo
-                            </button>
-                        </li>
-                        <li>
-                            <button type="button" className="sidebar-link">
-                                Literatura e Ficção Policial, Noir e Suspense
-                            </button>
-                        </li>
-                        <li>
-                            <button type="button" className="sidebar-link">
-                                Política e Governo
-                            </button>
-                        </li>
-                        <li>
-                            <button type="button" className="sidebar-link">
-                                Religião e Espiritualidade
-                            </button>
-                        </li>
-                        <li>
-                            <button type="button" className="sidebar-link">
-                                Romance
-                            </button>
-                        </li>
-                        <li>
-                            <button type="button" className="sidebar-link">
-                                Ciências Sociais
-                            </button>
-                        </li>
-                        <li>
-                            <button type="button" className="sidebar-link">
-                                Saúde e Desenvolvimento Pessoal
-                            </button>
-                        </li>
+                        {categorias.map((c) => (
+                            <li key={c.id}>
+                                <a
+                                    href={`/biblioteca?categoria=${encodeURIComponent(c.id)}`}
+                                    className="sidebar-link"
+                                    aria-current={categoriaSelecionada === c.id ? 'page' : undefined}
+                                >
+                                    {c.nome}
+                                </a>
+                            </li>
+                        ))}
                     </ul>
                 </aside>
 
@@ -194,12 +173,19 @@ export default function Library({ livros }: LibraryProps) {
                     <section className="secao-livros secao-brotero">
                         <div className="secao-head">
                             <h3 className="secao-titulo">Novos livros adicionados</h3>
-                            <a href="#" className="link-ver-mais">
+                            <a
+                                href={
+                                    categoriaSelecionada
+                                        ? `/biblioteca/livros?categoria=${encodeURIComponent(categoriaSelecionada)}`
+                                        : '/biblioteca/livros'
+                                }
+                                className="link-ver-mais"
+                            >
                                 Ver mais
                             </a>
                         </div>
-                        <div className="livros-grid">
-                            {livros.map((livro) => (
+                        <div className="livros-row" aria-label="Lista de livros recentes">
+                            {lista.slice(0, 10).map((livro) => (
                                 <CardLivro key={livro.id} livro={livro} />
                             ))}
                         </div>

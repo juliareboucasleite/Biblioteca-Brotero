@@ -8,6 +8,7 @@ type LivroDetalhe = {
     titulo: string;
     autor: string;
     desc: string;
+    capa?: string | null;
 };
 
 const TEXTO_PLACEHOLDER = 'Os livros aparecerão aqui';
@@ -22,6 +23,7 @@ type LibraryBookProps = {
 
 export default function LibraryBook({ livro }: LibraryBookProps) {
     const placeholder = isPlaceholder(livro);
+    const hasCover = Boolean(livro.capa && livro.capa.trim().length > 0);
 
     return (
         <>
@@ -37,7 +39,17 @@ export default function LibraryBook({ livro }: LibraryBookProps) {
                     </p>
                     <div className="pagina-livro-layout">
                         <div className="pagina-livro-capa-wrap">
-                            <div className="pagina-livro-capa" id="pagina-livro-capa" />
+                            <div className="pagina-livro-capa" id="pagina-livro-capa">
+                                {hasCover && (
+                                    <img
+                                        className="pagina-livro-img"
+                                        src={livro.capa as string}
+                                        alt={`Capa do livro ${placeholder ? 'Livro' : livro.titulo}`}
+                                        loading="lazy"
+                                        referrerPolicy="no-referrer"
+                                    />
+                                )}
+                            </div>
                         </div>
                         <div className="pagina-livro-desc">
                             <h1 className="pagina-livro-title" id="pagina-livro-title">

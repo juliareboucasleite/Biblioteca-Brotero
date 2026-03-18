@@ -294,6 +294,19 @@
     gap: 16px;
 }
 
+.livros-row {
+    display: flex;
+    gap: 16px;
+    overflow-x: auto;
+    padding-bottom: 6px;
+    scroll-snap-type: x proximity;
+}
+
+.livros-row > .card-livro {
+    flex: 0 0 160px;
+    scroll-snap-align: start;
+}
+
 .card-livro {
     background: var(--brotero-branco);
     border: 1px solid var(--brotero-borda);
@@ -317,6 +330,14 @@
     text-decoration: none;
     color: inherit;
     display: block;
+}
+
+.card-livro-img {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
 }
 
 .card-livro-take-btn {
@@ -418,11 +439,21 @@
 }
 
 .pagina-livro-capa {
+    position: relative;
     aspect-ratio: 2/3;
     background: linear-gradient(145deg, #e8e8e8 0%, #d0d0d0 100%);
     border-radius: 6px;
     min-height: 0;
     width: 100%;
+}
+
+.pagina-livro-img {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    border-radius: 6px;
 }
 
 .pagina-livro-desc {

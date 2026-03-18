@@ -5,6 +5,7 @@ type Livro = {
     titulo: string;
     autor: string;
     desc: string;
+    capa?: string | null;
 };
 
 type CardLivroProps = {
@@ -22,7 +23,8 @@ export function CardLivro({ livro }: CardLivroProps) {
         });
     }, []);
 
-    const href = `/biblioteca/livro?id=${encodeURIComponent(livro.id)}&titulo=${encodeURIComponent(livro.titulo)}&autor=${encodeURIComponent(livro.autor)}&desc=${encodeURIComponent(livro.desc)}`;
+    const href = `/biblioteca/livro?id=${encodeURIComponent(livro.id)}&titulo=${encodeURIComponent(livro.titulo)}&autor=${encodeURIComponent(livro.autor)}&desc=${encodeURIComponent(livro.desc)}&capa=${encodeURIComponent(livro.capa ?? '')}`;
+    const hasCover = Boolean(livro.capa && livro.capa.trim().length > 0);
 
     return (
         <article className="card-livro box-brotero">
@@ -33,6 +35,15 @@ export function CardLivro({ livro }: CardLivroProps) {
                 onMouseEnter={updatePosition}
                 onMouseMove={updatePosition}
             >
+                {hasCover && (
+                    <img
+                        className="card-livro-img"
+                        src={livro.capa as string}
+                        alt={`Capa do livro ${livro.titulo}`}
+                        loading="lazy"
+                        referrerPolicy="no-referrer"
+                    />
+                )}
                 <span
                     className="card-livro-take-btn"
                     style={

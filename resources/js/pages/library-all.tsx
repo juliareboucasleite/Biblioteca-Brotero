@@ -27,10 +27,8 @@ export default function LibraryAll({ livros, categorias, categoriaSelecionada }:
     return (
         <>
             <Head title="Biblioteca Brotero - Todos os livros" />
-
             <div className="brotero-scope">
                 <BroteroHeader />
-
                 <main className="container layout-main">
                     <aside className="sidebar-categorias box-brotero">
                         <h2 className="sidebar-titulo">Categorias</h2>
@@ -121,8 +119,7 @@ export default function LibraryAll({ livros, categorias, categoriaSelecionada }:
                         </section>
                     </div>
                 </main>
-
-                <BroteroFooter />
+            <BroteroFooter />
             </div>
         </>
     );

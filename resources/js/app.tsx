@@ -26,7 +26,6 @@ createInertiaApp({
             </StrictMode>,
         );
 
-
         const loader = document.getElementById('initial-loading');
 
         if (loader) {
@@ -45,5 +44,4 @@ createInertiaApp({
     },
 });
 
-// This will set light / dark mode on load...
 initializeTheme();

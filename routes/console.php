@@ -5,6 +5,7 @@ use Illuminate\Support\Facades\Artisan;
 use App\Models\Author;
 use App\Models\Book;
 use App\Models\Category;
+use App\Models\BookRequest;
 use App\Services\GoogleBooksService;
 
 Artisan::command('inspire', function () {
@@ -122,3 +123,30 @@ Artisan::command('books:enrich-google {--limit=50 : Máximo de livros a atualiza
 
     $this->info("Concluído. Atualizados: {$updated}, sem alterações: {$skipped}, falhas: {$failed}.");
 })->purpose('Enriquecer livros com dados da Google Books (por ISBN)');
+
+Artisan::command('book-requests:expire', function () {
+    $now = now();
+    $expired = BookRequest::query()
+        ->where('status', 'created')
+        ->where('pickup_deadline', '<', $now)
+        ->update([
+            'status' => 'expired',
+        ]);
+
+    $this->info("Pedidos expirados (prazo de levantamento): {$expired}.");
+})->purpose('Marcar pedidos com prazo de levantamento vencido como expirados');
+
+Artisan::command('book-requests:apply-fines', function () {
+    $now = now();
+    $affected = BookRequest::query()
+        ->where('status', 'created')
+        ->whereNull('returned_at')
+        ->where('return_deadline', '<', $now)
+        ->whereNull('fine_applied_at')
+        ->update([
+            'fine_amount' => 5,
+            'fine_applied_at' => $now,
+        ]);
+
+    $this->info("Multas aplicadas (sem devolução após 1 mês): {$affected}.");
+})->purpose('Aplicar multa de 5 euros em pedidos não devolvidos após 1 mês');

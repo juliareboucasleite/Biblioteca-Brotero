@@ -17,7 +17,7 @@ class BibliotecaController extends Controller
 {
     private function applyFilters(Request $request, $query)
     {
-        $categoriaId = $request->query('categoria');
+        $categoriaId = trim((string) $request->query('categoria', ''));
         $q = trim((string) $request->query('q', ''));
         $lingua = trim((string) $request->query('lingua', ''));
 
@@ -42,7 +42,7 @@ class BibliotecaController extends Controller
             });
         }
 
-        return [$categoriaId ?: null, $q ?: null, $lingua ?: null];
+        return [$categoriaId !== '' ? $categoriaId : null, $q !== '' ? $q : null, $lingua !== '' ? $lingua : null];
     }
     /**
      * Listagem do catálogo (index da biblioteca)

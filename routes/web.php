@@ -3,6 +3,7 @@
 use App\Http\Controllers\BibliotecaController;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\BookController;
+use App\Http\Controllers\BookRequestController;
 
 // Home da aplicação: redireciona sempre para a Biblioteca (React)
 Route::redirect('/', '/biblioteca')->name('home');
@@ -15,3 +16,6 @@ Route::get('/biblioteca/livros', [BibliotecaController::class, 'livros'])->name(
 Route::get('/biblioteca/livro', [BibliotecaController::class, 'livro'])->name('biblioteca.livro');
 Route::post('/books/isbn', [BookController::class, 'storeFromIsbn']);
 Route::get('/books/{id}/details', [BookController::class, 'showDetails']);
+Route::post('/biblioteca/requisitar', [BookRequestController::class, 'store'])
+    ->withoutMiddleware([\Illuminate\Foundation\Http\Middleware\VerifyCsrfToken::class])
+    ->name('biblioteca.requisitar');

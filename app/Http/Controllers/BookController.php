@@ -14,6 +14,8 @@ class BookController extends Controller
     {
         $limit = (int) $request->query('limit', 0);
         $categoriaId = $request->query('categoria');
+        $q = trim((string) $request->query('q', ''));
+        $lingua = trim((string) $request->query('lingua', ''));
 
         $query = Book::query()
             ->with(['authors', 'categories', 'details'])
@@ -22,6 +24,20 @@ class BookController extends Controller
         if (!empty($categoriaId)) {
             $query->whereHas('categories', function ($q) use ($categoriaId) {
                 $q->whereKey($categoriaId);
+            });
+        }
+
+        if ($lingua !== '') {
+            $query->where('language', 'like', $lingua.'%');
+        }
+
+        if ($q !== '') {
+            $query->where(function ($q2) use ($q) {
+                $q2->where('title', 'like', '%'.$q.'%')
+                    ->orWhere('description', 'like', '%'.$q.'%')
+                    ->orWhereHas('authors', function ($q3) use ($q) {
+                        $q3->where('name', 'like', '%'.$q.'%');
+                    });
             });
         }
 

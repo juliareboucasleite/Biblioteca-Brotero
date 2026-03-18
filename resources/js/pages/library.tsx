@@ -22,9 +22,11 @@ type LibraryProps = {
     livros: Livro[];
     categorias: Categoria[];
     categoriaSelecionada?: string | null;
+    q?: string | null;
+    lingua?: string | null;
 };
 
-export default function Library({ livros, categorias, categoriaSelecionada }: LibraryProps) {
+export default function Library({ livros, categorias, categoriaSelecionada, q, lingua }: LibraryProps) {
     const [lista, setLista] = useState<Livro[]>(livros);
     const lastServerSnapshot = useMemo(() => JSON.stringify(livros), [livros]);
     const snapshotRef = useRef(lastServerSnapshot);
@@ -43,9 +45,12 @@ export default function Library({ livros, categorias, categoriaSelecionada }: Li
 
         const tick = async () => {
             try {
-                const url = categoriaSelecionada
-                    ? `/books?limit=10&categoria=${encodeURIComponent(categoriaSelecionada)}`
-                    : '/books?limit=10';
+                const url = `/books?${new URLSearchParams({
+                    limit: '10',
+                    ...(categoriaSelecionada ? { categoria: categoriaSelecionada } : {}),
+                    ...(q ? { q } : {}),
+                    ...(lingua ? { lingua } : {}),
+                }).toString()}`;
 
                 const res = await fetch(url, {
                     headers: { Accept: 'application/json' },
@@ -93,7 +98,7 @@ export default function Library({ livros, categorias, categoriaSelecionada }: Li
                 window.clearTimeout(timeoutId);
             }
         };
-    }, [categoriaSelecionada]);
+    }, [categoriaSelecionada, lingua, q]);
 
     return (
         <>
@@ -108,7 +113,14 @@ export default function Library({ livros, categorias, categoriaSelecionada }: Li
                     <ul className="sidebar-lista">
                         <li>
                             <a
-                                href="/biblioteca"
+                                href={
+                                    q || lingua
+                                        ? `/biblioteca?${new URLSearchParams({
+                                              ...(q ? { q } : {}),
+                                              ...(lingua ? { lingua } : {}),
+                                          }).toString()}`
+                                        : '/biblioteca'
+                                }
                                 className="sidebar-link"
                                 aria-current={!categoriaSelecionada ? 'page' : undefined}
                             >
@@ -118,7 +130,11 @@ export default function Library({ livros, categorias, categoriaSelecionada }: Li
                         {categorias.map((c) => (
                             <li key={c.id}>
                                 <a
-                                    href={`/biblioteca?categoria=${encodeURIComponent(c.id)}`}
+                                    href={`/biblioteca?${new URLSearchParams({
+                                        categoria: c.id,
+                                        ...(q ? { q } : {}),
+                                        ...(lingua ? { lingua } : {}),
+                                    }).toString()}`}
                                     className="sidebar-link"
                                     aria-current={categoriaSelecionada === c.id ? 'page' : undefined}
                                 >
@@ -133,18 +149,27 @@ export default function Library({ livros, categorias, categoriaSelecionada }: Li
                     <section className="pesquisa-livros box-brotero">
                         <h2 className="titulo-secao-brotero">Filtros e pesquisa avançada</h2>
                         <p className="filtros-titulo">Filtrar por:</p>
-                        <div className="filtros-pesquisa">
+                        <form className="filtros-pesquisa" action="/biblioteca" method="get">
+                            {categoriaSelecionada && (
+                                <input type="hidden" name="categoria" value={categoriaSelecionada} />
+                            )}
+                            {q && <input type="hidden" name="q" value={q} />}
                             <div className="filtro-item">
                                 <label htmlFor="filtro-lingua">Língua</label>
-                                <select id="filtro-lingua" name="lingua">
-                                    <option>Todas as línguas</option>
-                                    <option>Português</option>
-                                    <option>Inglês</option>
-                                    <option>Francês</option>
-                                    <option>Espanhol</option>
-                                    <option>Alemão</option>
-                                    <option>Italiano</option>
-                                    <option>Holandês</option>
+                                <select
+                                    id="filtro-lingua"
+                                    name="lingua"
+                                    defaultValue={lingua ?? ''}
+                                    onChange={(e) => e.currentTarget.form?.submit()}
+                                >
+                                    <option value="">Todas as línguas</option>
+                                    <option value="pt">Português</option>
+                                    <option value="en">Inglês</option>
+                                    <option value="fr">Francês</option>
+                                    <option value="es">Espanhol</option>
+                                    <option value="de">Alemão</option>
+                                    <option value="it">Italiano</option>
+                                    <option value="nl">Holandês</option>
                                 </select>
                             </div>
                             <div className="filtro-item">
@@ -167,18 +192,18 @@ export default function Library({ livros, categorias, categoriaSelecionada }: Li
                                     ))}
                                 </select>
                             </div>
-                        </div>
+                        </form>
                     </section>
 
                     <section className="secao-livros secao-brotero">
                         <div className="secao-head">
                             <h3 className="secao-titulo">Novos livros adicionados</h3>
                             <a
-                                href={
-                                    categoriaSelecionada
-                                        ? `/biblioteca/livros?categoria=${encodeURIComponent(categoriaSelecionada)}`
-                                        : '/biblioteca/livros'
-                                }
+                                href={`/biblioteca/livros?${new URLSearchParams({
+                                    ...(categoriaSelecionada ? { categoria: categoriaSelecionada } : {}),
+                                    ...(q ? { q } : {}),
+                                    ...(lingua ? { lingua } : {}),
+                                }).toString()}`}
                                 className="link-ver-mais"
                             >
                                 Ver mais

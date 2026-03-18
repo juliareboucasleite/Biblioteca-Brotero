@@ -480,6 +480,50 @@
     color: var(--brotero-texto);
 }
 
+.pagina-livro-meta {
+    margin-top: 18px;
+    padding: 16px;
+    border: 1px solid var(--brotero-borda);
+    border-radius: 6px;
+    background: var(--brotero-branco);
+}
+
+.pagina-livro-meta-titulo {
+    margin: 0 0 10px;
+    font-size: 16px;
+    font-weight: 700;
+    color: var(--brotero-texto);
+}
+
+.pagina-livro-meta-grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 10px 20px;
+}
+
+.pagina-livro-meta-item strong {
+    display: block;
+    font-size: 13px;
+    font-weight: 700;
+    color: var(--brotero-texto-cinza);
+    margin-bottom: 2px;
+}
+
+.pagina-livro-meta-item span {
+    font-size: 14px;
+    color: var(--brotero-texto);
+}
+
+.pagina-livro-autor-bloco {
+    margin-top: 18px;
+}
+
+.pagina-livro-autor-texto {
+    margin: 0;
+    color: var(--brotero-texto);
+    font-size: 15px;
+}
+
 .pagina-livro-desc-text {
     margin: 0;
 }
@@ -497,6 +541,26 @@
     font-size: 1.05rem;
     font-weight: 700;
     color: var(--brotero-texto);
+}
+
+.pagina-livro-erro {
+    margin: 0 0 12px;
+    font-size: 14px;
+    color: #b42318;
+    background: #fef3f2;
+    border: 1px solid #fecaca;
+    padding: 10px 12px;
+    border-radius: 6px;
+}
+
+.pagina-livro-sucesso {
+    margin: 0 0 12px;
+    font-size: 14px;
+    color: #067647;
+    background: #ecfdf5;
+    border: 1px solid #bbf7d0;
+    padding: 10px 12px;
+    border-radius: 6px;
 }
 
 .pagina-livro-retirada {

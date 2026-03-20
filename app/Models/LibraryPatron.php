@@ -13,6 +13,8 @@ use Illuminate\Notifications\Notifiable;
  * @property string $card_number
  * @property \Illuminate\Support\Carbon $birth_date
  * @property string|null $name
+ * @property string|null $email
+ * @property int $points
  */
 class LibraryPatron extends Authenticatable
 {
@@ -28,6 +30,8 @@ class LibraryPatron extends Authenticatable
         'card_number',
         'birth_date',
         'name',
+        'email',
+        'points',
     ];
 
     /**
@@ -44,6 +48,24 @@ class LibraryPatron extends Authenticatable
     {
         return [
             'birth_date' => 'date',
+            'points' => 'integer',
         ];
+    }
+
+    /**
+     * @return \Illuminate\Database\Eloquent\Relations\BelongsToMany<Book, $this>
+     */
+    public function favoriteBooks()
+    {
+        return $this->belongsToMany(Book::class, 'book_favorites', 'library_patron_id', 'book_id')
+            ->withTimestamps();
+    }
+
+    /** Canal opcional de e-mail: só se o leitor tiver email na base. */
+    public function routeNotificationForMail(): ?string
+    {
+        $email = $this->email;
+
+        return is_string($email) && $email !== '' ? $email : null;
     }
 }

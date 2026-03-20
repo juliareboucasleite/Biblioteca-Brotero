@@ -15,6 +15,13 @@ export function BookDetailContent({
     authorsLabel,
 }: BookDetailContentProps) {
     const details = bookApi?.details ?? null;
+    const categoriasLabel =
+        bookApi?.categories
+            ?.map((c) => c?.name?.trim())
+            .filter((x): x is string => Boolean(x))
+            .join(', ') ?? '';
+    const disponivel =
+        bookApi?.available === true ? true : bookApi?.available === false ? false : null;
 
     if (placeholder) {
         return (
@@ -41,6 +48,19 @@ export function BookDetailContent({
             <p className="m-0 mb-[16px] text-[15px] text-(--brotero-texto-cinza)" id="pagina-livro-author">
                 {authorsLabel}
             </p>
+            {categoriasLabel !== '' ? (
+                <p className="m-0 mb-[10px] text-[14px] text-(--brotero-texto-cinza)">
+                    <span className="font-semibold text-(--brotero-texto)">Categorias: </span>
+                    {categoriasLabel}
+                </p>
+            ) : null}
+            {disponivel !== null ? (
+                <p
+                    className={`m-0 mb-[12px] text-[14px] font-semibold ${disponivel ? 'text-green-700' : 'text-amber-800'}`}
+                >
+                    {disponivel ? 'Disponível para requisição' : 'Indisponível no momento (exemplar requisitado)'}
+                </p>
+            ) : null}
             <div className="text-[15px] leading-[1.6] text-(--brotero-texto)">
                 <p className="m-0" id="pagina-livro-desc">
                     {bookApi?.description ?? livro.desc}

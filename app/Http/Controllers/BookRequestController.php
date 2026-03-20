@@ -4,12 +4,14 @@ namespace App\Http\Controllers;
 
 use App\Models\Book;
 use App\Models\BookRequest;
+use App\Models\LibraryPatron;
+use App\Services\PatronGamificationService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 
 class BookRequestController extends Controller
 {
-    public function store(Request $request): JsonResponse
+    public function store(Request $request, PatronGamificationService $gamification): JsonResponse
     {
         $payload = $request->validate([
             'book_id' => ['required', 'integer', 'exists:books,id'],
@@ -19,6 +21,13 @@ class BookRequestController extends Controller
         ]);
 
         $book = Book::query()->findOrFail($payload['book_id']);
+
+        if (! $book->isAvailableForRequest()) {
+            return response()->json([
+                'ok' => false,
+                'error' => 'Este livro já se encontra requisitado. Tente mais tarde ou active as notificações de favoritos.',
+            ], 422);
+        }
 
         $requestType = $payload['request_type'];
         $now = now();
@@ -54,9 +63,16 @@ class BookRequestController extends Controller
             'fine_applied_at' => null,
         ]);
 
+        $patron = LibraryPatron::query()
+            ->where('card_number', (string) $payload['card_number'])
+            ->first();
+        $gamification->onBookRequested($patron);
+
+        $multaInfo = 'Multa por atraso: 0,50 € por dia completo após a data de devolução.';
+
         $message = $requestType === 'escola'
-            ? "Requisitar na biblioteca escolhida em até 3 dias. Prazo: {$pickupDeadline->format('d/m/Y')}. Leitura: 1 mês (devolução até {$returnDeadline->format('d/m/Y')}). Multa: 5 euros após 1 mês sem devolução."
-            : "Código do cacifo: {$cacifoCode}. Levantamento em até 3 dias. Se não for levantado, o cacifo é recolhido e terá que solicitar novamente. Leitura: 1 mês (devolução até {$returnDeadline->format('d/m/Y')}). Multa: 5 euros após 1 mês sem devolução.";
+            ? "Requisitar na biblioteca escolhida em até 3 dias. Prazo: {$pickupDeadline->format('d/m/Y')}. Leitura: 1 mês (devolução até {$returnDeadline->format('d/m/Y')}). {$multaInfo}"
+            : "Código do cacifo: {$cacifoCode}. Levantamento em até 3 dias. Se não for levantado, o cacifo é recolhido e terá que solicitar novamente. Leitura: 1 mês (devolução até {$returnDeadline->format('d/m/Y')}). {$multaInfo}";
 
         return response()->json([
             'ok' => true,

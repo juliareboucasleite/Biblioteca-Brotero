@@ -20,6 +20,8 @@ type Props = {
     categoriaSelecionada?: string | null;
     q?: string;
     lingua?: string;
+    authorId?: string;
+    ano?: string;
     /** Se true, os links vão para `/biblioteca/livros` (lista completa). */
     todosLivros?: boolean;
 };
@@ -32,6 +34,8 @@ const CategorySidebar: React.FC<Props> = ({
     categoriaSelecionada,
     q,
     lingua,
+    authorId,
+    ano,
     todosLivros = false,
 }) => {
     const basePath = todosLivros ? '/biblioteca/livros' : '/biblioteca';
@@ -55,7 +59,7 @@ const CategorySidebar: React.FC<Props> = ({
             <ul className="list-none m-0 max-h-[min(70vh,calc(100svh-12rem))] overflow-y-auto overscroll-contain border-t border-(--brotero-borda) py-[6px] pb-[10px] pr-1">
                 <li>
                     <a
-                        href={buildUrl({ q, lingua })}
+                        href={buildUrl({ q, lingua, author_id: authorId, ano })}
                         className={linkClass}
                         aria-current={!categoriaSelecionada ? 'page' : undefined}
                     >
@@ -70,6 +74,8 @@ const CategorySidebar: React.FC<Props> = ({
                                 categoria: c.id,
                                 q,
                                 lingua,
+                                author_id: authorId,
+                                ano,
                             })}
                             className={linkClass}
                             aria-current={

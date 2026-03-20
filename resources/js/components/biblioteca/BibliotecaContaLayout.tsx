@@ -4,7 +4,7 @@ import { BroteroFooter } from '@/components/BroteroFooter';
 import { BroteroHeader } from '@/components/BroteroHeader';
 import { cn } from '@/lib/utils';
 
-type ContaSecao = 'pedidos' | 'historico' | 'perfil';
+type ContaSecao = 'pedidos' | 'historico' | 'favoritos' | 'perfil';
 
 type BibliotecaContaLayoutProps = {
     title: string;
@@ -34,6 +34,9 @@ export function BibliotecaContaLayout({ title, secao, children }: BibliotecaCont
                         </a>
                         <a href="/biblioteca/conta/historico" className={active('historico')}>
                             Histórico
+                        </a>
+                        <a href="/biblioteca/conta/favoritos" className={active('favoritos')}>
+                            Favoritos
                         </a>
                         <a href="/biblioteca/conta/perfil" className={active('perfil')}>
                             Perfil

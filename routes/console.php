@@ -6,6 +6,8 @@ use App\Models\Author;
 use App\Models\Book;
 use App\Models\Category;
 use App\Models\BookRequest;
+use App\Services\BookReturnService;
+use App\Services\BookFineCalculator;
 use App\Services\GoogleBooksService;
 
 Artisan::command('inspire', function () {
@@ -136,17 +138,32 @@ Artisan::command('book-requests:expire', function () {
     $this->info("Pedidos expirados (prazo de levantamento): {$expired}.");
 })->purpose('Marcar pedidos com prazo de levantamento vencido como expirados');
 
-Artisan::command('book-requests:apply-fines', function () {
-    $now = now();
-    $affected = BookRequest::query()
+Artisan::command('book-requests:apply-fines', function (BookFineCalculator $calculator) {
+    $requests = BookRequest::query()
         ->where('status', 'created')
         ->whereNull('returned_at')
-        ->where('return_deadline', '<', $now)
-        ->whereNull('fine_applied_at')
-        ->update([
-            'fine_amount' => 5,
-            'fine_applied_at' => $now,
-        ]);
+        ->whereNotNull('return_deadline')
+        ->where('return_deadline', '<', now())
+        ->cursor();
 
-    $this->info("Multas aplicadas (sem devolução após 1 mês): {$affected}.");
-})->purpose('Aplicar multa de 5 euros em pedidos não devolvidos após 1 mês');
+    $updated = 0;
+
+    foreach ($requests as $request) {
+        $before = (float) $request->fine_amount;
+        $calculator->persistFine($request);
+        $request->refresh();
+
+        if ((float) $request->fine_amount !== $before || (float) $request->fine_amount > 0) {
+            $updated++;
+        }
+    }
+
+    $this->info("Multas atualizadas (0,50 €/dia após o prazo): {$updated} pedidos processados.");
+})->purpose('Recalcular multas (0,50 € por dia completo em atraso) em pedidos ativos');
+
+Artisan::command('books:mark-returned {book_request : ID do pedido em book_requests}', function (BookReturnService $returns) {
+    $id = (int) $this->argument('book_request');
+    $req = BookRequest::query()->findOrFail($id);
+    $returns->markReturned($req);
+    $this->info("Pedido #{$req->id} marcado como devolvido.");
+})->purpose('Marcar requisição como devolvida (staff) e notificar favoritos');

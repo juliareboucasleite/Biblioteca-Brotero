@@ -2,6 +2,7 @@ import { Head } from '@inertiajs/react';
 import { BibliotecaFiltrosAvancados } from '@/components/biblioteca/BibliotecaFiltrosAvancados';
 import { BibliotecaMainRow } from '@/components/biblioteca/BibliotecaMainRow';
 import { BibliotecaPageShell } from '@/components/biblioteca/BibliotecaPageShell';
+import type { AutorFiltroOption } from '@/components/biblioteca/BibliotecaFiltrosAvancados';
 import { BookSectionHeader } from '@/components/biblioteca/BookSectionHeader';
 import { CardLivro } from '@/components/CardLivro';
 import CategorySidebar from '@/components/CategorySidebar';
@@ -13,7 +14,26 @@ type LibraryAllProps = {
     categoriaSelecionada?: string | null;
     q?: string | null;
     lingua?: string | null;
+    autores?: AutorFiltroOption[];
+    authorSelecionado?: string | null;
+    ano?: string | null;
 };
+
+function buildQuery(
+    categoriaSelecionada?: string | null,
+    q?: string | null,
+    lingua?: string | null,
+    authorSelecionado?: string | null,
+    ano?: string | null,
+): string {
+    return new URLSearchParams({
+        ...(categoriaSelecionada ? { categoria: categoriaSelecionada } : {}),
+        ...(q ? { q } : {}),
+        ...(lingua ? { lingua } : {}),
+        ...(authorSelecionado ? { author_id: authorSelecionado } : {}),
+        ...(ano ? { ano } : {}),
+    }).toString();
+}
 
 export default function LibraryAll({
     livros,
@@ -21,10 +41,12 @@ export default function LibraryAll({
     categoriaSelecionada,
     q,
     lingua,
+    autores = [],
+    authorSelecionado,
+    ano,
 }: LibraryAllProps) {
-    const voltarHref = categoriaSelecionada
-        ? `/biblioteca?categoria=${encodeURIComponent(categoriaSelecionada)}`
-        : '/biblioteca';
+    const qs = buildQuery(categoriaSelecionada, q, lingua, authorSelecionado, ano);
+    const voltarHref = qs ? `/biblioteca?${qs}` : '/biblioteca';
 
     return (
         <>
@@ -38,6 +60,8 @@ export default function LibraryAll({
                             categoriaSelecionada={categoriaSelecionada ?? undefined}
                             q={q ?? undefined}
                             lingua={lingua ?? undefined}
+                            authorId={authorSelecionado ?? undefined}
+                            ano={ano ?? undefined}
                             todosLivros
                         />
                     }
@@ -47,6 +71,9 @@ export default function LibraryAll({
                         categoriaSelecionada={categoriaSelecionada}
                         q={q}
                         lingua={lingua}
+                        autores={autores}
+                        authorSelecionado={authorSelecionado}
+                        ano={ano}
                         autoSubmitLingua
                     />
 

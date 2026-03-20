@@ -2,9 +2,11 @@
 
 namespace App\Http\Middleware;
 
-use Illuminate\Http\Request;
-use Inertia\Middleware;
 use App\Models\LibraryPatron;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Schema;
+use Inertia\Middleware;
 
 class HandleInertiaRequests extends Middleware
 {
@@ -43,12 +45,13 @@ class HandleInertiaRequests extends Middleware
                 'user' => $request->user('web'),
                 'patron' => $this->patronForFrontend($request->user('patron')),
             ],
+            'favoriteBookIds' => $this->favoriteBookIds($request),
             'sidebarOpen' => ! $request->hasCookie('sidebar_state') || $request->cookie('sidebar_state') === 'true',
         ];
     }
 
     /**
-     * @return array{id: int, name: string|null, card_number: string}|null
+     * @return array{id: int, name: string|null, card_number: string, points: int}|null
      */
     private function patronForFrontend(?LibraryPatron $patron): ?array
     {
@@ -60,6 +63,30 @@ class HandleInertiaRequests extends Middleware
             'id' => (int) $patron->id,
             'name' => $patron->name,
             'card_number' => $patron->card_number,
+            'points' => (int) ($patron->points ?? 0),
         ];
+    }
+
+    /**
+     * @return list<string>
+     */
+    private function favoriteBookIds(Request $request): array
+    {
+        $patron = $request->user('patron');
+
+        if (! $patron instanceof LibraryPatron) {
+            return [];
+        }
+
+        if (! Schema::hasTable('book_favorites')) {
+            return [];
+        }
+
+        return DB::table('book_favorites')
+            ->where('library_patron_id', $patron->id)
+            ->pluck('book_id')
+            ->map(static fn ($id): string => (string) $id)
+            ->values()
+            ->all();
     }
 }

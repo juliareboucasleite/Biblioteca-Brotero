@@ -27,14 +27,16 @@ type Filters = {
     categoriaSelecionada?: string | null;
     q?: string | null;
     lingua?: string | null;
+    authorSelecionado?: string | null;
+    ano?: string | null;
 };
 
 /**
- * Mantém a lista de livros alinhada com o servidor e atualiza via `/books` em intervalos curtos.
+ * Mantém a lista de livros alinhada com o servidor e atualiza via `/books/search` em intervalos curtos.
  */
 export function useBibliotecaLivrosPolling(
     livros: LivroCatalogo[],
-    { categoriaSelecionada, q, lingua }: Filters,
+    { categoriaSelecionada, q, lingua, authorSelecionado, ano }: Filters,
 ): LivroCatalogo[] {
     const [lista, setLista] = useState<LivroCatalogo[]>(livros);
     const lastServerSnapshot = useMemo(() => JSON.stringify(livros), [livros]);
@@ -90,7 +92,7 @@ export function useBibliotecaLivrosPolling(
                 window.clearTimeout(timeoutId);
             }
         };
-    }, [categoriaSelecionada, lingua, q]);
+    }, [ano, authorSelecionado, categoriaSelecionada, lingua, q]);
 
     return lista;
 }

@@ -48,12 +48,57 @@ class BookController extends Controller
         return $query->get();
     }
 
+    /**
+     * Pesquisa avançada (filtros composáveis) — devolve o mesmo formato JSON que `index`.
+     */
+    public function search(Request $request)
+    {
+        $authorId = $request->query('author_id');
+        $categoryId = $request->query('category_id', $request->query('categoria'));
+        $year = $request->query('year', $request->query('ano'));
+        $language = trim((string) $request->query('language', $request->query('lingua', '')));
+        $q = trim((string) $request->query('q', ''));
+        $limit = min(max((int) $request->query('limit', 50), 1), 200);
+
+        $query = Book::query()
+            ->with(['authors', 'categories', 'details'])
+            ->latest('id')
+            ->when($authorId, function ($qBook) use ($authorId): void {
+                $qBook->whereHas('authors', function ($qAuthor) use ($authorId): void {
+                    $qAuthor->whereKey($authorId);
+                });
+            })
+            ->when($categoryId, function ($qBook) use ($categoryId): void {
+                $qBook->whereHas('categories', function ($qCat) use ($categoryId): void {
+                    $qCat->whereKey($categoryId);
+                });
+            })
+            ->when($year !== null && $year !== '' && is_numeric($year), function ($qBook) use ($year): void {
+                $qBook->where('published_year', (int) $year);
+            })
+            ->when($language !== '', function ($qBook) use ($language): void {
+                $qBook->where('language', 'like', $language.'%');
+            })
+            ->when($q !== '', function ($qBook) use ($q): void {
+                $qBook->where(function ($inner) use ($q): void {
+                    $inner->where('title', 'like', '%'.$q.'%')
+                        ->orWhere('description', 'like', '%'.$q.'%')
+                        ->orWhereHas('authors', function ($qAuthor) use ($q): void {
+                            $qAuthor->where('name', 'like', '%'.$q.'%');
+                        });
+                });
+            });
+
+        return $query->limit($limit)->get();
+    }
+
     public function show(int $id)
     {
         $book = Book::with(['authors', 'categories', 'details'])->findOrFail($id);
         $recommended = $this->recommendationsBySharedAuthors($book, 12);
 
         $payload = $book->toArray();
+        $payload['available'] = $book->isAvailableForRequest();
         $payload['recommendations'] = $recommended->map(function (Book $b): array {
             return [
                 'id' => $b->id,

@@ -1,6 +1,8 @@
 import clsx from 'clsx';
+import { router, usePage } from '@inertiajs/react';
 import { useCallback, useState } from 'react';
 import type { MouseEvent } from 'react';
+import type { Auth } from '@/types/auth';
 import type { LivroCatalogo } from '@/types';
 
 type CardLivroProps = {
@@ -8,7 +10,10 @@ type CardLivroProps = {
     className?: string;
 };
 
+type PageProps = { auth: Auth; favoriteBookIds?: string[] };
+
 export function CardLivro({ livro, className }: CardLivroProps) {
+    const { auth, favoriteBookIds = [] } = usePage<PageProps>().props;
     const [position, setPosition] = useState<{ x: number; y: number } | null>(null);
 
     const updatePosition = useCallback((e: MouseEvent<HTMLAnchorElement>) => {
@@ -19,8 +24,28 @@ export function CardLivro({ livro, className }: CardLivroProps) {
         });
     }, []);
 
-    const href = `/biblioteca/livro?id=${encodeURIComponent(livro.id)}&titulo=${encodeURIComponent(livro.titulo)}&autor=${encodeURIComponent(livro.autor)}&desc=${encodeURIComponent(livro.desc)}&capa=${encodeURIComponent(livro.capa ?? '')}`;
+    const href = `/biblioteca/livro/${encodeURIComponent(livro.id)}`;
     const hasCover = Boolean(livro.capa && livro.capa.trim().length > 0);
+    const isFavorite = favoriteBookIds.includes(String(livro.id));
+
+    const onToggleFavorite = (e: MouseEvent<HTMLButtonElement>) => {
+        e.preventDefault();
+        e.stopPropagation();
+
+        if (!auth.patron) {
+            window.location.href = '/biblioteca/entrar';
+
+            return;
+        }
+
+        const bookId = encodeURIComponent(livro.id);
+
+        if (isFavorite) {
+            router.delete(`/biblioteca/conta/favoritos/${bookId}`, { preserveScroll: true });
+        } else {
+            router.post(`/biblioteca/conta/favoritos/${bookId}`, {}, { preserveScroll: true });
+        }
+    };
 
     return (
         <article
@@ -29,33 +54,47 @@ export function CardLivro({ livro, className }: CardLivroProps) {
                 className,
             )}
         >
-            <a
-                href={href}
-                className="group relative aspect-2/3 bg-linear-to-br from-[#e8e8e8] to-[#d0d0d0] min-h-[200px] max-[768px]:min-h-[160px] block no-underline text-inherit"
-                aria-label="Ver livro e requisitar"
-                onMouseEnter={updatePosition}
-                onMouseMove={updatePosition}
-            >
-                {hasCover && (
-                    <img
-                        className="absolute inset-0 w-full h-full object-cover"
-                        src={livro.capa as string}
-                        alt={`Capa do livro ${livro.titulo}`}
-                        loading="lazy"
-                        referrerPolicy="no-referrer"
-                    />
-                )}
-                <span
-                    className="absolute left-0 top-0 -translate-x-1/2 -translate-y-1/2 px-[16px] py-[8px] rounded-[16px] bg-black text-white text-[13px] font-semibold cursor-pointer opacity-0 pointer-events-none transition-opacity duration-200 ease-in-out will-change-[left,top] group-hover:opacity-100 group-hover:pointer-events-auto"
-                    style={
-                        position !== null
-                            ? { left: position.x, top: position.y }
-                            : { left: '50%', top: '50%' }
-                    }
+            <div className="relative">
+                <a
+                    href={href}
+                    className="group relative aspect-2/3 bg-linear-to-br from-[#e8e8e8] to-[#d0d0d0] min-h-[200px] max-[768px]:min-h-[160px] block no-underline text-inherit"
+                    aria-label="Ver livro e requisitar"
+                    onMouseEnter={updatePosition}
+                    onMouseMove={updatePosition}
                 >
-                    take it
-                </span>
-            </a>
+                    {hasCover && (
+                        <img
+                            className="absolute inset-0 w-full h-full object-cover"
+                            src={livro.capa as string}
+                            alt={`Capa do livro ${livro.titulo}`}
+                            loading="lazy"
+                            referrerPolicy="no-referrer"
+                        />
+                    )}
+                    <span
+                        className="absolute left-0 top-0 -translate-x-1/2 -translate-y-1/2 px-[16px] py-[8px] rounded-[16px] bg-black text-white text-[13px] font-semibold cursor-pointer opacity-0 pointer-events-none transition-opacity duration-200 ease-in-out will-change-[left,top] group-hover:opacity-100 group-hover:pointer-events-auto"
+                        style={
+                            position !== null
+                                ? { left: position.x, top: position.y }
+                                : { left: '50%', top: '50%' }
+                        }
+                    >
+                        take it
+                    </span>
+                </a>
+                <button
+                    type="button"
+                    className={clsx(
+                        'absolute top-[8px] right-[8px] z-10 w-[36px] h-[36px] rounded-full border border-(--brotero-borda) bg-(--brotero-branco) text-[18px] leading-none flex items-center justify-center cursor-pointer shadow-sm hover:shadow-md transition-shadow',
+                        isFavorite && 'bg-red-50 border-red-200',
+                    )}
+                    title={isFavorite ? 'Remover dos favoritos' : 'Adicionar aos favoritos'}
+                    aria-label={isFavorite ? 'Remover dos favoritos' : 'Adicionar aos favoritos'}
+                    onClick={onToggleFavorite}
+                >
+                    {isFavorite ? '❤︎' : '♡'}
+                </button>
+            </div>
             {(livro.requisicoes_count ?? 0) > 0 ? (
                 <p className="m-0 px-[10px] py-[8px] text-[12px] font-semibold text-(--brotero-texto-cinza) border-t border-(--brotero-borda)">
                     {livro.requisicoes_count}{' '}

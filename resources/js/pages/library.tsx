@@ -1,7 +1,10 @@
 import { Head } from '@inertiajs/react';
+import type { AutorFiltroOption } from '@/components/biblioteca/BibliotecaFiltrosAvancados';
 import { BibliotecaFiltrosAvancados } from '@/components/biblioteca/BibliotecaFiltrosAvancados';
 import { BibliotecaMainRow } from '@/components/biblioteca/BibliotecaMainRow';
 import { BibliotecaPageShell } from '@/components/biblioteca/BibliotecaPageShell';
+import type { RankingCatalogoEntrada } from '@/components/biblioteca/BibliotecaRankingCatalogo';
+import { BibliotecaRankingCatalogo } from '@/components/biblioteca/BibliotecaRankingCatalogo';
 import { BibliotecaSectionPlaceholder } from '@/components/biblioteca/BibliotecaSectionPlaceholder';
 import { BookSectionHeader } from '@/components/biblioteca/BookSectionHeader';
 import { CardLivro } from '@/components/CardLivro';
@@ -21,17 +24,25 @@ type LibraryProps = {
     categoriaSelecionada?: string | null;
     q?: string | null;
     lingua?: string | null;
+    autores?: AutorFiltroOption[];
+    authorSelecionado?: string | null;
+    ano?: string | null;
+    rankingCatalogo?: RankingCatalogoEntrada[];
 };
 
 function buildBibliotecaQuery(
     categoriaSelecionada?: string | null,
     q?: string | null,
     lingua?: string | null,
+    authorSelecionado?: string | null,
+    ano?: string | null,
 ): string {
     return new URLSearchParams({
         ...(categoriaSelecionada ? { categoria: categoriaSelecionada } : {}),
         ...(q ? { q } : {}),
         ...(lingua ? { lingua } : {}),
+        ...(authorSelecionado ? { author_id: authorSelecionado } : {}),
+        ...(ano ? { ano } : {}),
     }).toString();
 }
 
@@ -44,9 +55,13 @@ export default function Library({
     categoriaSelecionada,
     q,
     lingua,
+    autores = [],
+    authorSelecionado,
+    ano,
+    rankingCatalogo = [],
 }: LibraryProps) {
-    const lista = useBibliotecaLivrosPolling(livros, { categoriaSelecionada, q, lingua });
-    const query = buildBibliotecaQuery(categoriaSelecionada, q, lingua);
+    const lista = useBibliotecaLivrosPolling(livros, { categoriaSelecionada, q, lingua, authorSelecionado, ano });
+    const query = buildBibliotecaQuery(categoriaSelecionada, q, lingua, authorSelecionado, ano);
     const temRecomendados = livrosRecomendados.length > 0;
     const qParaAutor =
         q !== null && q !== undefined && String(q).trim() !== ''
@@ -76,6 +91,8 @@ export default function Library({
                             categoriaSelecionada={categoriaSelecionada ?? undefined}
                             q={q ?? undefined}
                             lingua={lingua ?? undefined}
+                            authorId={authorSelecionado ?? undefined}
+                            ano={ano ?? undefined}
                         />
                     }
                 >
@@ -84,6 +101,9 @@ export default function Library({
                         categoriaSelecionada={categoriaSelecionada}
                         q={q}
                         lingua={lingua}
+                        autores={autores}
+                        authorSelecionado={authorSelecionado}
+                        ano={ano}
                         autoSubmitLingua
                     />
 
@@ -186,6 +206,8 @@ export default function Library({
                             </div>
                         )}
                     </section>
+
+                    <BibliotecaRankingCatalogo ranking={rankingCatalogo} />
                 </BibliotecaMainRow>
             </BibliotecaPageShell>
         </>

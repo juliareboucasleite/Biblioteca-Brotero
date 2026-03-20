@@ -6,8 +6,10 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Collection;
 use Inertia\Inertia;
 use Inertia\Response;
+use App\Models\Author;
 use App\Models\Book;
 use App\Models\Category;
+use App\Services\PatronRankingService;
 
 /**
  * Catálogo e página de detalhe do livro (Biblioteca Brotero)
@@ -16,9 +18,14 @@ use App\Models\Category;
  */
 class BibliotecaController extends Controller
 {
-    private function applyFilters(Request $request, $query)
+    /**
+     * @return array{0: string|null, 1: string|null, 2: string|null, 3: string|null, 4: string|null}
+     */
+    private function applyFilters(Request $request, $query): array
     {
         $categoriaId = trim((string) $request->query('categoria', ''));
+        $authorId = trim((string) $request->query('author_id', ''));
+        $ano = trim((string) $request->query('ano', ''));
         $q = trim((string) $request->query('q', ''));
         $lingua = trim((string) $request->query('lingua', ''));
 
@@ -26,6 +33,16 @@ class BibliotecaController extends Controller
             $query->whereHas('categories', function ($q2) use ($categoriaId) {
                 $q2->whereKey($categoriaId);
             });
+        }
+
+        if ($authorId !== '') {
+            $query->whereHas('authors', function ($q2) use ($authorId) {
+                $q2->whereKey($authorId);
+            });
+        }
+
+        if ($ano !== '' && ctype_digit($ano)) {
+            $query->where('published_year', (int) $ano);
         }
 
         if ($lingua !== '') {
@@ -43,19 +60,42 @@ class BibliotecaController extends Controller
             });
         }
 
-        return [$categoriaId !== '' ? $categoriaId : null, $q !== '' ? $q : null, $lingua !== '' ? $lingua : null];
+        return [
+            $categoriaId !== '' ? $categoriaId : null,
+            $q !== '' ? $q : null,
+            $lingua !== '' ? $lingua : null,
+            $authorId !== '' ? $authorId : null,
+            $ano !== '' && ctype_digit($ano) ? $ano : null,
+        ];
+    }
+
+    /**
+     * @return list<array{id: string, name: string}>
+     */
+    private function autoresParaFiltro(): array
+    {
+        return Author::query()
+            ->orderBy('name')
+            ->limit(400)
+            ->get(['id', 'name'])
+            ->map(fn (Author $a) => [
+                'id' => (string) $a->id,
+                'name' => (string) $a->name,
+            ])
+            ->values()
+            ->all();
     }
     /**
      * Listagem do catálogo (index da biblioteca)
      * Futuro: Livro::query()->when($filtros)->paginate().
      */
-    public function index(Request $request): Response
+    public function index(Request $request, PatronRankingService $rankingService): Response
     {
         $livrosQuery = Book::query()
             ->with(['authors'])
             ->latest('id');
 
-        [$categoriaId, $q, $lingua] = $this->applyFilters($request, $livrosQuery);
+        [$categoriaId, $q, $lingua, $authorId, $ano] = $this->applyFilters($request, $livrosQuery);
 
         $booksFeatured = (clone $livrosQuery)->take(10)->get();
 
@@ -78,6 +118,8 @@ class BibliotecaController extends Controller
 
         $livrosMaisPedidos = $this->livrosMaisPedidosPorRequisicao(12);
 
+        $rankingCatalogo = $rankingService->topEntries(10);
+
         $categorias = Category::query()
             ->orderBy('name')
             ->get(['id', 'name'])
@@ -94,6 +136,10 @@ class BibliotecaController extends Controller
             'categoriaSelecionada' => $categoriaId ? (string) $categoriaId : null,
             'q' => $q,
             'lingua' => $lingua,
+            'autores' => $this->autoresParaFiltro(),
+            'authorSelecionado' => $authorId ? (string) $authorId : null,
+            'ano' => $ano ? (string) $ano : null,
+            'rankingCatalogo' => $rankingCatalogo,
         ]);
     }
 
@@ -103,7 +149,7 @@ class BibliotecaController extends Controller
             ->with(['authors'])
             ->latest('id');
 
-        [$categoriaId, $q, $lingua] = $this->applyFilters($request, $livrosQuery);
+        [$categoriaId, $q, $lingua, $authorId, $ano] = $this->applyFilters($request, $livrosQuery);
 
         $livros = $livrosQuery
             ->get()
@@ -128,6 +174,9 @@ class BibliotecaController extends Controller
             'categoriaSelecionada' => $categoriaId ? (string) $categoriaId : null,
             'q' => $q,
             'lingua' => $lingua,
+            'autores' => $this->autoresParaFiltro(),
+            'authorSelecionado' => $authorId ? (string) $authorId : null,
+            'ano' => $ano ? (string) $ano : null,
         ]);
     }
 
@@ -144,6 +193,28 @@ class BibliotecaController extends Controller
             'desc' => $request->query('desc', 'Descrição do livro aparecerá aqui.'),
             'capa' => $request->query('capa'),
         ];
+
+        $categorias = Category::query()
+            ->orderBy('name')
+            ->get(['id', 'name'])
+            ->map(fn (Category $c) => ['id' => (string) $c->id, 'name' => (string) $c->name])
+            ->values()
+            ->all();
+
+        return Inertia::render('library-book', [
+            'livro' => $livro,
+            'categorias' => $categorias,
+        ]);
+    }
+
+    /**
+     * Ficha completa do livro por ID (slug de rota).
+     */
+    public function livroShow(Book $book): Response
+    {
+        $book->loadMissing(['authors']);
+
+        $livro = $this->mapearLivroParaFrontend($book);
 
         $categorias = Category::query()
             ->orderBy('name')

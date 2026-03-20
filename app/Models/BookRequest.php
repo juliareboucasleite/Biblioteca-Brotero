@@ -4,6 +4,11 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 
+/**
+ * Requisição de livro.
+ *
+ * status: created | expired | returned | cancelled
+ */
 class BookRequest extends Model
 {
     protected $fillable = [
@@ -20,6 +25,9 @@ class BookRequest extends Model
         'returned_at',
         'fine_amount',
         'fine_applied_at',
+        'notified_due_soon_at',
+        'notified_overdue_at',
+        'notified_available_at',
     ];
 
     public function book()
@@ -38,6 +46,9 @@ class BookRequest extends Model
             'returned_at' => 'datetime',
             'fine_applied_at' => 'datetime',
             'fine_amount' => 'decimal:2',
+            'notified_due_soon_at' => 'datetime',
+            'notified_overdue_at' => 'datetime',
+            'notified_available_at' => 'datetime',
         ];
     }
 }

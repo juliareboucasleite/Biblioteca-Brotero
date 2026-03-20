@@ -11,4 +11,6 @@ export type PedidoLeitor = {
     return_deadline: string | null;
     returned_at: string | null;
     created_at: string | null;
+    /** Multa acumulada em atraso (EUR), string decimal. */
+    fine_amount?: string;
 };

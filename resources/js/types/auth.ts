@@ -15,6 +15,8 @@ export type LibraryPatronAuth = {
     id: number;
     name: string | null;
     card_number: string;
+    /** Pontos de gamificação (requisição / devolução no prazo). */
+    points?: number;
 };
 
 export type Auth = {

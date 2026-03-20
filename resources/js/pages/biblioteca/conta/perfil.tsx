@@ -5,6 +5,7 @@ type Props = {
         name: string | null;
         card_number: string;
         data_nascimento: string;
+        pontos: number;
     };
 };
 
@@ -33,6 +34,12 @@ export default function BibliotecaContaPerfil({ perfil }: Props) {
                             Data de nascimento
                         </dt>
                         <dd className="m-0 text-[15px] text-(--brotero-texto)">{perfil.data_nascimento}</dd>
+                    </div>
+                    <div>
+                        <dt className="text-[12px] font-bold text-(--brotero-texto-cinza) uppercase tracking-wide">
+                            Pontos
+                        </dt>
+                        <dd className="m-0 text-[15px] text-(--brotero-texto) font-semibold">{perfil.pontos}</dd>
                     </div>
                 </dl>
                 <p className="mt-[20px] mb-0 text-[13px] text-(--brotero-texto-cinza)">

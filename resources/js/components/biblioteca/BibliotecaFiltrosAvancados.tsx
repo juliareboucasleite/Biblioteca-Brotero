@@ -6,12 +6,17 @@ const inputSelectClass =
 
 const labelClass = 'block mb-[4px] text-[12px] font-semibold text-(--brotero-texto-cinza)';
 
+export type AutorFiltroOption = { id: string; name: string };
+
 type BibliotecaFiltrosAvancadosProps = {
     /** Destino GET ao submeter (normalmente `/biblioteca` ou `/biblioteca/livros`). */
     formAction: string;
     categoriaSelecionada?: string | null;
     q?: string | null;
     lingua?: string | null;
+    autores?: AutorFiltroOption[];
+    authorSelecionado?: string | null;
+    ano?: string | null;
     /** Se true, a alteração da língua submete o formulário automaticamente. */
     autoSubmitLingua?: boolean;
 };
@@ -21,6 +26,9 @@ export function BibliotecaFiltrosAvancados({
     categoriaSelecionada,
     q,
     lingua,
+    autores = [],
+    authorSelecionado,
+    ano,
     autoSubmitLingua = false,
 }: BibliotecaFiltrosAvancadosProps) {
     return (
@@ -31,11 +39,44 @@ export function BibliotecaFiltrosAvancados({
             <p className="m-0 mb-[8px] text-[12px] font-bold text-(--brotero-texto-cinza) uppercase tracking-[0.02em]">
                 Filtrar por:
             </p>
-            <form className="flex flex-wrap gap-y-[10px] gap-x-[16px]" action={formAction} method="get">
+            <form className="flex flex-wrap gap-y-[10px] gap-x-[16px] items-end" action={formAction} method="get">
                 {categoriaSelecionada && (
                     <input type="hidden" name="categoria" value={categoriaSelecionada} />
                 )}
                 {q ? <input type="hidden" name="q" value={q} /> : null}
+                <div className="min-w-[150px] flex-1 max-w-[220px]">
+                    <label htmlFor="filtro-autor" className={labelClass}>
+                        Autor
+                    </label>
+                    <select
+                        id="filtro-autor"
+                        name="author_id"
+                        defaultValue={authorSelecionado ?? ''}
+                        className={inputSelectClass}
+                    >
+                        <option value="">Todos os autores</option>
+                        {autores.map((a) => (
+                            <option key={a.id} value={a.id}>
+                                {a.name}
+                            </option>
+                        ))}
+                    </select>
+                </div>
+                <div className="w-[100px] shrink-0">
+                    <label htmlFor="filtro-ano" className={labelClass}>
+                        Ano
+                    </label>
+                    <input
+                        id="filtro-ano"
+                        name="ano"
+                        type="number"
+                        min={1000}
+                        max={3000}
+                        placeholder="ex. 2020"
+                        defaultValue={ano ?? ''}
+                        className={inputSelectClass}
+                    />
+                </div>
                 <div className="min-w-[150px] flex-1 max-w-[200px]">
                     <label htmlFor="filtro-lingua" className={labelClass}>
                         Língua
@@ -74,6 +115,14 @@ export function BibliotecaFiltrosAvancados({
                             <option key={escola}>{escola}</option>
                         ))}
                     </select>
+                </div>
+                <div className="w-full min-[500px]:w-auto shrink-0">
+                    <button
+                        type="submit"
+                        className="w-full min-[500px]:w-auto px-[16px] py-[8px] rounded-(--raio) bg-(--brotero-primaria) text-white text-[14px] font-semibold border-0 cursor-pointer hover:opacity-95"
+                    >
+                        Aplicar filtros
+                    </button>
                 </div>
             </form>
         </section>

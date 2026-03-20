@@ -29,6 +29,8 @@ export type BookApi = {
     language?: string | null;
     authors?: Array<{ id: number | string; name?: string | null }> | null;
     categories?: Array<{ id: number | string; name?: string | null }> | null;
+    /** true se não houver requisição ativa para o exemplar. */
+    available?: boolean | null;
     details?: {
         publisher?: string | null;
         location?: string | null;

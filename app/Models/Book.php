@@ -35,5 +35,25 @@ class Book extends Model
     {
         return $this->hasMany(BookRequest::class);
     }
+
+    /**
+     * @return \Illuminate\Database\Eloquent\Relations\BelongsToMany<LibraryPatron, $this>
+     */
+    public function favoritedByPatrons()
+    {
+        return $this->belongsToMany(LibraryPatron::class, 'book_favorites', 'book_id', 'library_patron_id')
+            ->withTimestamps();
+    }
+
+    /**
+     * Indica se o exemplar está livre para nova requisição (sem empréstimo ativo).
+     */
+    public function isAvailableForRequest(): bool
+    {
+        return ! $this->bookRequests()
+            ->where('status', 'created')
+            ->whereNull('returned_at')
+            ->exists();
+    }
 }
 

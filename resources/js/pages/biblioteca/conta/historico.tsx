@@ -26,6 +26,8 @@ function estadoLabel(status: string): string {
             return 'Devolvido';
         case 'expired':
             return 'Expirado / encerrado';
+        case 'cancelled':
+            return 'Cancelado por si';
         default:
             return status;
     }
@@ -39,7 +41,7 @@ export default function BibliotecaContaHistorico({ historico }: Props) {
             </h2>
             {historico.length === 0 ? (
                 <p className="m-0 p-[16px] bg-(--brotero-branco) border border-dashed border-(--brotero-borda) rounded-(--raio) text-(--brotero-texto-cinza)">
-                    Ainda não há pedidos concluídos ou expirados associados ao seu cartão.
+                    Ainda não há pedidos concluídos, cancelados ou expirados associados ao seu cartão.
                 </p>
             ) : (
                 <ul className="m-0 p-0 list-none flex flex-col gap-[12px]">

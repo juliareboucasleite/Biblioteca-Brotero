@@ -50,7 +50,48 @@ class BookController extends Controller
 
     public function show(int $id)
     {
-        return Book::with(['authors', 'categories', 'details'])->findOrFail($id);
+        $book = Book::with(['authors', 'categories', 'details'])->findOrFail($id);
+        $recommended = $this->recommendationsBySharedAuthors($book, 12);
+
+        $payload = $book->toArray();
+        $payload['recommendations'] = $recommended->map(function (Book $b): array {
+            return [
+                'id' => $b->id,
+                'title' => $b->title,
+                'description' => $b->description,
+                'cover_image' => $b->cover_image,
+                'authors' => $b->authors->map(static fn (Author $a): array => [
+                    'id' => $a->id,
+                    'name' => $a->name,
+                ])->values()->all(),
+            ];
+        })->values()->all();
+
+        return $payload;
+    }
+
+    /**
+     * Livros que partilham pelo menos um autor com o livro dado (exclui o próprio).
+     *
+     * @return \Illuminate\Support\Collection<int, Book>
+     */
+    private function recommendationsBySharedAuthors(Book $book, int $limit = 12)
+    {
+        $authorIds = $book->authors->pluck('id');
+
+        if ($authorIds->isEmpty()) {
+            return collect();
+        }
+
+        return Book::query()
+            ->with(['authors:id,name'])
+            ->whereKeyNot($book->getKey())
+            ->whereHas('authors', function ($q) use ($authorIds): void {
+                $q->whereIn('authors.id', $authorIds);
+            })
+            ->latest('id')
+            ->limit(min($limit, 50))
+            ->get();
     }
 
     public function showDetails(int $id)

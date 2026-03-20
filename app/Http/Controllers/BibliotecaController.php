@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
+use Illuminate\Support\Collection;
 use Inertia\Inertia;
 use Inertia\Response;
 use App\Models\Book;
@@ -56,34 +57,39 @@ class BibliotecaController extends Controller
 
         [$categoriaId, $q, $lingua] = $this->applyFilters($request, $livrosQuery);
 
-        $livros = $livrosQuery
-            ->take(10)
-            ->get()
-            ->map(function (Book $book) {
-                return [
-                    'id' => (string) $book->id,
-                    'titulo' => (string) ($book->title ?? ''),
-                    'autor' => $book->authors?->pluck('name')->filter()->implode(', ') ?: 'Autor desconhecido',
-                    'desc' => (string) ($book->description ?? ''),
-                    'capa' => $book->cover_image ? (string) $book->cover_image : null,
-                ];
-            })
-            ->values()
-            ->all();
+        $booksFeatured = (clone $livrosQuery)->take(10)->get();
 
-        if (empty($livros)) {
+        $livrosRecomendados = [];
+        $recomendadoAutorNome = null;
+
+        if ($booksFeatured->isEmpty()) {
             $livros = $this->livrosEmDestaque();
+        } else {
+            $livros = $booksFeatured
+                ->map($this->mapearLivroParaFrontend(...))
+                ->values()
+                ->all();
+
+            [$livrosRecomendados, $recomendadoAutorNome] = $this->livrosRecomendadosPorAutorEmDestaque(
+                $booksFeatured,
+                12,
+            );
         }
+
+        $livrosMaisPedidos = $this->livrosMaisPedidosPorRequisicao(12);
 
         $categorias = Category::query()
             ->orderBy('name')
             ->get(['id', 'name'])
-            ->map(fn (Category $c) => ['id' => (string) $c->id, 'nome' => (string) $c->name])
+            ->map(fn (Category $c) => ['id' => (string) $c->id, 'name' => (string) $c->name])
             ->values()
             ->all();
 
         return Inertia::render('library', [
             'livros' => $livros,
+            'livrosRecomendados' => $livrosRecomendados,
+            'recomendadoAutorNome' => $recomendadoAutorNome,
+            'livrosMaisPedidos' => $livrosMaisPedidos,
             'categorias' => $categorias,
             'categoriaSelecionada' => $categoriaId ? (string) $categoriaId : null,
             'q' => $q,
@@ -101,15 +107,7 @@ class BibliotecaController extends Controller
 
         $livros = $livrosQuery
             ->get()
-            ->map(function (Book $book) {
-                return [
-                    'id' => (string) $book->id,
-                    'titulo' => (string) ($book->title ?? ''),
-                    'autor' => $book->authors?->pluck('name')->filter()->implode(', ') ?: 'Autor desconhecido',
-                    'desc' => (string) ($book->description ?? ''),
-                    'capa' => $book->cover_image ? (string) $book->cover_image : null,
-                ];
-            })
+            ->map($this->mapearLivroParaFrontend(...))
             ->values()
             ->all();
 
@@ -120,7 +118,7 @@ class BibliotecaController extends Controller
         $categorias = Category::query()
             ->orderBy('name')
             ->get(['id', 'name'])
-            ->map(fn (Category $c) => ['id' => (string) $c->id, 'nome' => (string) $c->name])
+            ->map(fn (Category $c) => ['id' => (string) $c->id, 'name' => (string) $c->name])
             ->values()
             ->all();
 
@@ -147,8 +145,16 @@ class BibliotecaController extends Controller
             'capa' => $request->query('capa'),
         ];
 
+        $categorias = Category::query()
+            ->orderBy('name')
+            ->get(['id', 'name'])
+            ->map(fn (Category $c) => ['id' => (string) $c->id, 'name' => (string) $c->name])
+            ->values()
+            ->all();
+
         return Inertia::render('library-book', [
             'livro' => $livro,
+            'categorias' => $categorias,
         ]);
     }
 
@@ -166,5 +172,109 @@ class BibliotecaController extends Controller
                 'desc' => 'Quando houver resultados de pesquisa, a descrição do livro será mostrada aqui.',
             ],
         ];
+    }
+
+    /**
+     * @param  Collection<int, Book>  $booksFeatured
+     * @return array{0: array<int, array<string, mixed>>, 1: string|null}
+     */
+    private function livrosRecomendadosPorAutorEmDestaque(Collection $booksFeatured, int $limit = 12): array
+    {
+        $authorCounts = [];
+
+        foreach ($booksFeatured as $book) {
+            foreach ($book->authors ?? [] as $author) {
+                $authorId = $author->id;
+
+                if (! isset($authorCounts[$authorId])) {
+                    $authorCounts[$authorId] = [
+                        'count' => 0,
+                        'name' => (string) ($author->name ?? ''),
+                    ];
+                }
+
+                $authorCounts[$authorId]['count']++;
+            }
+        }
+
+        if ($authorCounts === []) {
+            return [[], null];
+        }
+
+        $topAuthorId = null;
+        $topCount = -1;
+
+        foreach ($authorCounts as $authorId => $meta) {
+            $count = $meta['count'];
+
+            if ($count > $topCount || ($count === $topCount && ($topAuthorId === null || $authorId < $topAuthorId))) {
+                $topCount = $count;
+                $topAuthorId = $authorId;
+            }
+        }
+
+        $topName = trim((string) ($authorCounts[$topAuthorId]['name'] ?? ''));
+        $topName = $topName !== '' ? $topName : null;
+
+        $excludeIds = $booksFeatured->pluck('id')->filter()->all();
+
+        $more = Book::query()
+            ->with(['authors'])
+            ->when($excludeIds !== [], fn ($q) => $q->whereKeyNot($excludeIds))
+            ->whereHas('authors', function ($q) use ($topAuthorId): void {
+                $q->whereKey($topAuthorId);
+            })
+            ->latest('id')
+            ->limit(min($limit, 50))
+            ->get()
+            ->map($this->mapearLivroParaFrontend(...))
+            ->values()
+            ->all();
+
+        return [$more, $topName];
+    }
+
+    /**
+     * @return array{id: string, titulo: string, autor: string, desc: string, capa: string|null}
+     */
+    private function mapearLivroParaFrontend(Book $book): array
+    {
+        return [
+            'id' => (string) $book->id,
+            'titulo' => (string) ($book->title ?? ''),
+            'autor' => $book->authors?->pluck('name')->filter()->implode(', ') ?: 'Autor desconhecido',
+            'desc' => (string) ($book->description ?? ''),
+            'capa' => $book->cover_image ? (string) $book->cover_image : null,
+        ];
+    }
+
+    /**
+     * Livros ordenados pelo número de requisições (todos os pedidos em book_requests com book_id).
+     *
+     * @return array<int, array<string, mixed>>
+     */
+    private function livrosMaisPedidosPorRequisicao(int $limit = 12): array
+    {
+        $cap = min(max($limit, 1), 50);
+
+        $books = Book::query()
+            ->with(['authors'])
+            ->withCount('bookRequests as requisicoes_count')
+            ->having('requisicoes_count', '>', 0)
+            ->orderByDesc('requisicoes_count')
+            ->orderByDesc('id')
+            ->limit($cap)
+            ->get();
+
+        return $books
+            ->map(function (Book $book): array {
+                $row = $this->mapearLivroParaFrontend($book);
+
+                $row['requisicoes_count'] = (int) ($book->requisicoes_count ?? 0);
+
+                return $row;
+            })
+            ->values()
+            ->all();
     }
 }

@@ -1,0 +1,21 @@
+:root {
+    --brotero-primaria: #4a6572;
+    --brotero-primaria-escuro: #3d5663;
+    --brotero-primaria-claro: #5d7a8c;
+    --brotero-fundo: #e8ecf0;
+    --brotero-branco: #fff;
+    --brotero-texto: #1c2128;
+    --brotero-texto-cinza: #5c656d;
+    --brotero-texto-link: #3d6b7c;
+    --brotero-texto-link-hover: #2d5160;
+    --brotero-borda: #c2cbd4;
+    --brotero-borda-suave: #d8dfe6;
+    --brotero-dark: #2c3e50;
+    --brotero-nav: var(--brotero-primaria);
+    --brotero-laranja: var(--brotero-primaria);
+    --brotero-laranja-hover: #e8ecf0;
+    --brotero-laranja-escuro: var(--brotero-primaria-escuro);
+    --raio: 6px;
+    --max-largura: 1220px;
+}
+

@@ -1,249 +1,193 @@
 import { Head } from '@inertiajs/react';
-import { useEffect, useMemo, useRef, useState } from 'react';
-import { BroteroFooter } from '@/components/BroteroFooter';
-import { BroteroHeader } from '@/components/BroteroHeader';
+import { BibliotecaFiltrosAvancados } from '@/components/biblioteca/BibliotecaFiltrosAvancados';
+import { BibliotecaMainRow } from '@/components/biblioteca/BibliotecaMainRow';
+import { BibliotecaPageShell } from '@/components/biblioteca/BibliotecaPageShell';
+import { BibliotecaSectionPlaceholder } from '@/components/biblioteca/BibliotecaSectionPlaceholder';
+import { BookSectionHeader } from '@/components/biblioteca/BookSectionHeader';
 import { CardLivro } from '@/components/CardLivro';
-import { LISTA_ESCOLAS } from '@/constants/escolas';
-
-type Categoria = {
-    id: string;
-    nome: string;
-};
-
-type Livro = {
-    id: string;
-    titulo: string;
-    autor: string;
-    desc: string; 
-    capa?: string | null;
-};
+import CategorySidebar from '@/components/CategorySidebar';
+import { useBibliotecaLivrosPolling } from '@/hooks/useBibliotecaLivrosPolling';
+import type { Category, LivroCatalogo } from '@/types';
 
 type LibraryProps = {
-    livros: Livro[];
-    categorias: Categoria[];
+    livros: LivroCatalogo[];
+    /** Outras obras do autor mais frequente entre os «novos» (servidor). */
+    livrosRecomendados?: LivroCatalogo[];
+    /** Nome do autor usado nas recomendações (para título e pesquisa «Ver mais»). */
+    recomendadoAutorNome?: string | null;
+    /** Ordenados por número de requisições (desc). */
+    livrosMaisPedidos?: LivroCatalogo[];
+    categorias: Category[];
     categoriaSelecionada?: string | null;
     q?: string | null;
     lingua?: string | null;
 };
 
-export default function Library({ livros, categorias, categoriaSelecionada, q, lingua }: LibraryProps) {
-    const [lista, setLista] = useState<Livro[]>(livros);
-    const lastServerSnapshot = useMemo(() => JSON.stringify(livros), [livros]);
-    const snapshotRef = useRef(lastServerSnapshot);
+function buildBibliotecaQuery(
+    categoriaSelecionada?: string | null,
+    q?: string | null,
+    lingua?: string | null,
+): string {
+    return new URLSearchParams({
+        ...(categoriaSelecionada ? { categoria: categoriaSelecionada } : {}),
+        ...(q ? { q } : {}),
+        ...(lingua ? { lingua } : {}),
+    }).toString();
+}
 
-    useEffect(() => {
-        // Mantém o estado sincronizado quando o Inertia re-renderiza com novos props.
-        if (snapshotRef.current !== lastServerSnapshot) {
-            snapshotRef.current = lastServerSnapshot;
-            setLista(livros);
-        }
-    }, [lastServerSnapshot, livros]);
+export default function Library({
+    livros,
+    livrosRecomendados = [],
+    recomendadoAutorNome,
+    livrosMaisPedidos = [],
+    categorias,
+    categoriaSelecionada,
+    q,
+    lingua,
+}: LibraryProps) {
+    const lista = useBibliotecaLivrosPolling(livros, { categoriaSelecionada, q, lingua });
+    const query = buildBibliotecaQuery(categoriaSelecionada, q, lingua);
+    const temRecomendados = livrosRecomendados.length > 0;
+    const qParaAutor =
+        q !== null && q !== undefined && String(q).trim() !== ''
+            ? q
+            : recomendadoAutorNome !== null &&
+                recomendadoAutorNome !== undefined &&
+                recomendadoAutorNome.trim() !== ''
+              ? recomendadoAutorNome.trim()
+              : null;
+    const queryRecomendados = buildBibliotecaQuery(categoriaSelecionada, qParaAutor, lingua);
+    const tituloRecomendados = recomendadoAutorNome?.trim()
+        ? `Recomendado para si — ${recomendadoAutorNome.trim()}`
+        : 'Recomendado para si';
 
-    useEffect(() => {
-        let cancelled = false;
-        let timeoutId: number | undefined;
-
-        const tick = async () => {
-            try {
-                const url = `/books?${new URLSearchParams({
-                    limit: '10',
-                    ...(categoriaSelecionada ? { categoria: categoriaSelecionada } : {}),
-                    ...(q ? { q } : {}),
-                    ...(lingua ? { lingua } : {}),
-                }).toString()}`;
-
-                const res = await fetch(url, {
-                    headers: { Accept: 'application/json' },
-                });
-
-                if (!res.ok) {
-                    return;
-                }
-
-                const data = (await res.json()) as Array<{
-                    id: number | string;
-                    title?: string | null;
-                    description?: string | null;
-                    cover_image?: string | null;
-                    authors?: Array<{ name?: string | null }> | null;
-                }>;
-
-                const mapped: Livro[] = (data ?? []).map((b) => ({
-                    id: String(b.id),
-                    titulo: b.title?.toString() ?? '',
-                    autor: (b.authors ?? [])
-                        .map((a) => a?.name?.toString()?.trim())
-                        .filter((x): x is string => Boolean(x))
-                        .join(', ') || 'Autor desconhecido',
-                    desc: b.description?.toString() ?? '',
-                    capa: b.cover_image?.toString() ?? null,
-                }));
-
-                if (!cancelled && mapped.length > 0) {
-                    setLista(mapped);
-                }
-            } finally {
-                if (!cancelled) {
-                    timeoutId = window.setTimeout(tick, 5000);
-                }
-            }
-        };
-
-        timeoutId = window.setTimeout(tick, 1500);
-
-        return () => {
-            cancelled = true;
-
-            if (timeoutId) {
-                window.clearTimeout(timeoutId);
-            }
-        };
-    }, [categoriaSelecionada, lingua, q]);
+    const temMaisPedidos = livrosMaisPedidos.length > 0;
 
     return (
         <>
             <Head title="Biblioteca Brotero" />
 
-            <div className="brotero-scope">
-                <BroteroHeader />
+            <BibliotecaPageShell>
+                <BibliotecaMainRow
+                    className="pt-[26px] pb-[32px]"
+                    sidebar={
+                        <CategorySidebar
+                            categorias={categorias}
+                            categoriaSelecionada={categoriaSelecionada ?? undefined}
+                            q={q ?? undefined}
+                            lingua={lingua ?? undefined}
+                        />
+                    }
+                >
+                    <BibliotecaFiltrosAvancados
+                        formAction="/biblioteca"
+                        categoriaSelecionada={categoriaSelecionada}
+                        q={q}
+                        lingua={lingua}
+                        autoSubmitLingua
+                    />
 
-                <main className="container layout-main">
-                <aside className="sidebar-categorias box-brotero">
-                    <h2 className="sidebar-titulo">Categorias</h2>
-                    <ul className="sidebar-lista">
-                        <li>
-                            <a
-                                href={
-                                    q || lingua
-                                        ? `/biblioteca?${new URLSearchParams({
-                                              ...(q ? { q } : {}),
-                                              ...(lingua ? { lingua } : {}),
-                                          }).toString()}`
-                                        : '/biblioteca'
-                                }
-                                className="sidebar-link"
-                                aria-current={!categoriaSelecionada ? 'page' : undefined}
-                            >
-                                Todas
-                            </a>
-                        </li>
-                        {categorias.map((c) => (
-                            <li key={c.id}>
+                    <section className="mb-[24px]">
+                        <BookSectionHeader
+                            title="Novos livros adicionados"
+                            action={
                                 <a
-                                    href={`/biblioteca?${new URLSearchParams({
-                                        categoria: c.id,
-                                        ...(q ? { q } : {}),
-                                        ...(lingua ? { lingua } : {}),
-                                    }).toString()}`}
-                                    className="sidebar-link"
-                                    aria-current={categoriaSelecionada === c.id ? 'page' : undefined}
+                                    href={`/biblioteca/livros?${query}`}
+                                    className="text-[13px] text-(--brotero-texto-link) whitespace-nowrap hover:text-(--brotero-texto-link-hover) hover:underline"
                                 >
-                                    {c.nome}
+                                    Ver mais
                                 </a>
-                            </li>
-                        ))}
-                    </ul>
-                </aside>
-
-                <div className="conteudo-main">
-                    <section className="pesquisa-livros box-brotero">
-                        <h2 className="titulo-secao-brotero">Filtros e pesquisa avançada</h2>
-                        <p className="filtros-titulo">Filtrar por:</p>
-                        <form className="filtros-pesquisa" action="/biblioteca" method="get">
-                            {categoriaSelecionada && (
-                                <input type="hidden" name="categoria" value={categoriaSelecionada} />
-                            )}
-                            {q && <input type="hidden" name="q" value={q} />}
-                            <div className="filtro-item">
-                                <label htmlFor="filtro-lingua">Língua</label>
-                                <select
-                                    id="filtro-lingua"
-                                    name="lingua"
-                                    defaultValue={lingua ?? ''}
-                                    onChange={(e) => e.currentTarget.form?.submit()}
-                                >
-                                    <option value="">Todas as línguas</option>
-                                    <option value="pt">Português</option>
-                                    <option value="en">Inglês</option>
-                                    <option value="fr">Francês</option>
-                                    <option value="es">Espanhol</option>
-                                    <option value="de">Alemão</option>
-                                    <option value="it">Italiano</option>
-                                    <option value="nl">Holandês</option>
-                                </select>
-                            </div>
-                            <div className="filtro-item">
-                                <label htmlFor="filtro-tipo">Tipo de documento</label>
-                                <select id="filtro-tipo" name="tipo-documento">
-                                    <option>Tudo</option>
-                                    <option>Monografia (Texto Impresso)</option>
-                                    <option>Publicação Periódica</option>
-                                    <option>Registos Sonoros Musicais</option>
-                                    <option>Analítico</option>
-                                    <option>Multimédia</option>
-                                </select>
-                            </div>
-                            <div className="filtro-item">
-                                <label htmlFor="filtro-escola">Base das escolas</label>
-                                <select id="filtro-escola" name="escola">
-                                    <option>Todas as escolas</option>
-                                    {LISTA_ESCOLAS.map((escola) => (
-                                        <option key={escola}>{escola}</option>
-                                    ))}
-                                </select>
-                            </div>
-                        </form>
-                    </section>
-
-                    <section className="secao-livros secao-brotero">
-                        <div className="secao-head">
-                            <h3 className="secao-titulo">Novos livros adicionados</h3>
-                            <a
-                                href={`/biblioteca/livros?${new URLSearchParams({
-                                    ...(categoriaSelecionada ? { categoria: categoriaSelecionada } : {}),
-                                    ...(q ? { q } : {}),
-                                    ...(lingua ? { lingua } : {}),
-                                }).toString()}`}
-                                className="link-ver-mais"
-                            >
-                                Ver mais
-                            </a>
-                        </div>
-                        <div className="livros-row" aria-label="Lista de livros recentes">
+                            }
+                        />
+                        <div
+                            className="flex gap-[16px] overflow-x-auto pb-[6px] snap-x snap-proximity"
+                            aria-label="Lista de livros recentes"
+                        >
                             {lista.slice(0, 10).map((livro) => (
-                                <CardLivro key={livro.id} livro={livro} />
+                                <CardLivro
+                                    key={livro.id}
+                                    livro={livro}
+                                    className="w-[160px] flex-[0_0_160px] snap-start"
+                                />
                             ))}
                         </div>
                     </section>
 
-                    <section className="secao-livros secao-brotero">
-                        <div className="secao-head">
-                            <h3 className="secao-titulo">Recomendado para si</h3>
-                            <a href="#" className="link-ver-mais">
-                                Ver mais
-                            </a>
-                        </div>
-                        <div className="livros-grid">
-                            <p className="secao-aviso">Recomendações personalizadas.</p>
-                        </div>
+                    <section className="mb-[24px]">
+                        <BookSectionHeader
+                            title={tituloRecomendados}
+                            action={
+                                <a
+                                    href={
+                                        temRecomendados
+                                            ? `/biblioteca/livros?${queryRecomendados}`
+                                            : `/biblioteca/livros?${query}`
+                                    }
+                                    className="text-[13px] text-(--brotero-texto-link) whitespace-nowrap hover:text-(--brotero-texto-link-hover) hover:underline"
+                                >
+                                    Ver mais
+                                </a>
+                            }
+                        />
+                        {temRecomendados ? (
+                            <div
+                                className="flex gap-[16px] overflow-x-auto pb-[6px] snap-x snap-proximity"
+                                aria-label="Livros recomendados por autor em destaque"
+                            >
+                                {livrosRecomendados.map((livro) => (
+                                    <CardLivro
+                                        key={livro.id}
+                                        livro={livro}
+                                        className="w-[160px] flex-[0_0_160px] snap-start"
+                                    />
+                                ))}
+                            </div>
+                        ) : (
+                            <div className="grid grid-cols-[repeat(auto-fill,minmax(160px,1fr))] gap-[16px] max-[768px]:grid-cols-[repeat(auto-fill,minmax(130px,1fr))] max-[768px]:gap-[12px]">
+                                <BibliotecaSectionPlaceholder>
+                                    Quando houver livros com autores na base de dados, sugerimos aqui outras
+                                    obras do autor mais presente nos novos títulos.
+                                </BibliotecaSectionPlaceholder>
+                            </div>
+                        )}
                     </section>
 
-                    <section className="secao-livros secao-brotero">
-                        <div className="secao-head">
-                            <h3 className="secao-titulo">Os mais pedidos</h3>
-                            <a href="#" className="link-ver-mais">
-                                Ver mais
-                            </a>
-                        </div>
-                        <div className="livros-grid">
-                            <p className="secao-aviso">Livros mais requisitados.</p>
-                        </div>
+                    <section className="mb-[24px]">
+                        <BookSectionHeader
+                            title="Os mais pedidos"
+                            action={
+                                <a
+                                    href={`/biblioteca/livros?${query}`}
+                                    className="text-[13px] text-(--brotero-texto-link) whitespace-nowrap hover:text-(--brotero-texto-link-hover) hover:underline"
+                                >
+                                    Ver mais
+                                </a>
+                            }
+                        />
+                        {temMaisPedidos ? (
+                            <div
+                                className="flex gap-[16px] overflow-x-auto pb-[6px] snap-x snap-proximity"
+                                aria-label="Livros mais requisitados"
+                            >
+                                {livrosMaisPedidos.map((livro) => (
+                                    <CardLivro
+                                        key={livro.id}
+                                        livro={livro}
+                                        className="w-[160px] flex-[0_0_160px] snap-start"
+                                    />
+                                ))}
+                            </div>
+                        ) : (
+                            <div className="grid grid-cols-[repeat(auto-fill,minmax(160px,1fr))] gap-[16px] max-[768px]:grid-cols-[repeat(auto-fill,minmax(130px,1fr))] max-[768px]:gap-[12px]">
+                                <BibliotecaSectionPlaceholder>
+                                    Ainda não há requisições registadas por livro. Quando os leitores requisitarem
+                                    obras, as mais pedidas aparecerão aqui (por número de pedidos).
+                                </BibliotecaSectionPlaceholder>
+                            </div>
+                        )}
                     </section>
-                </div>
-            </main>
-
-            <BroteroFooter />
-            </div>
+                </BibliotecaMainRow>
+            </BibliotecaPageShell>
         </>
     );
 }

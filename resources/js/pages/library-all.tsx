@@ -1,127 +1,75 @@
 import { Head } from '@inertiajs/react';
-import { BroteroFooter } from '@/components/BroteroFooter';
-import { BroteroHeader } from '@/components/BroteroHeader';
+import { BibliotecaFiltrosAvancados } from '@/components/biblioteca/BibliotecaFiltrosAvancados';
+import { BibliotecaMainRow } from '@/components/biblioteca/BibliotecaMainRow';
+import { BibliotecaPageShell } from '@/components/biblioteca/BibliotecaPageShell';
+import { BookSectionHeader } from '@/components/biblioteca/BookSectionHeader';
 import { CardLivro } from '@/components/CardLivro';
-import { LISTA_ESCOLAS } from '@/constants/escolas';
-
-type Categoria = {
-    id: string;
-    nome: string;
-};
-
-type Livro = {
-    id: string;
-    titulo: string;
-    autor: string;
-    desc: string;
-    capa?: string | null;
-};
+import CategorySidebar from '@/components/CategorySidebar';
+import type { Category, LivroCatalogo } from '@/types';
 
 type LibraryAllProps = {
-    livros: Livro[];
-    categorias: Categoria[];
+    livros: LivroCatalogo[];
+    categorias: Category[];
     categoriaSelecionada?: string | null;
+    q?: string | null;
+    lingua?: string | null;
 };
 
-export default function LibraryAll({ livros, categorias, categoriaSelecionada }: LibraryAllProps) {
+export default function LibraryAll({
+    livros,
+    categorias,
+    categoriaSelecionada,
+    q,
+    lingua,
+}: LibraryAllProps) {
+    const voltarHref = categoriaSelecionada
+        ? `/biblioteca?categoria=${encodeURIComponent(categoriaSelecionada)}`
+        : '/biblioteca';
+
     return (
         <>
             <Head title="Biblioteca Brotero - Todos os livros" />
-            <div className="brotero-scope">
-                <BroteroHeader />
-                <main className="container layout-main">
-                    <aside className="sidebar-categorias box-brotero">
-                        <h2 className="sidebar-titulo">Categorias</h2>
-                        <ul className="sidebar-lista">
-                            <li>
-                                <a
-                                    href="/biblioteca/livros"
-                                    className="sidebar-link"
-                                    aria-current={!categoriaSelecionada ? 'page' : undefined}
-                                >
-                                    Todas
-                                </a>
-                            </li>
-                            {categorias.map((c) => (
-                                <li key={c.id}>
-                                    <a
-                                        href={`/biblioteca/livros?categoria=${encodeURIComponent(c.id)}`}
-                                        className="sidebar-link"
-                                        aria-current={categoriaSelecionada === c.id ? 'page' : undefined}
-                                    >
-                                        {c.nome}
-                                    </a>
-                                </li>
-                            ))}
-                        </ul>
-                    </aside>
+            <BibliotecaPageShell>
+                <BibliotecaMainRow
+                    className="pt-[26px] pb-[32px]"
+                    sidebar={
+                        <CategorySidebar
+                            categorias={categorias}
+                            categoriaSelecionada={categoriaSelecionada ?? undefined}
+                            q={q ?? undefined}
+                            lingua={lingua ?? undefined}
+                            todosLivros
+                        />
+                    }
+                >
+                    <BibliotecaFiltrosAvancados
+                        formAction="/biblioteca/livros"
+                        categoriaSelecionada={categoriaSelecionada}
+                        q={q}
+                        lingua={lingua}
+                        autoSubmitLingua
+                    />
 
-                    <div className="conteudo-main">
-                        <section className="pesquisa-livros box-brotero">
-                            <h2 className="titulo-secao-brotero">Filtros e pesquisa avançada</h2>
-                            <p className="filtros-titulo">Filtrar por:</p>
-                            <div className="filtros-pesquisa">
-                                <div className="filtro-item">
-                                    <label htmlFor="filtro-lingua">Língua</label>
-                                    <select id="filtro-lingua" name="lingua">
-                                        <option>Todas as línguas</option>
-                                        <option>Português</option>
-                                        <option>Inglês</option>
-                                        <option>Francês</option>
-                                        <option>Espanhol</option>
-                                        <option>Alemão</option>
-                                        <option>Italiano</option>
-                                        <option>Holandês</option>
-                                    </select>
-                                </div>
-                                <div className="filtro-item">
-                                    <label htmlFor="filtro-tipo">Tipo de documento</label>
-                                    <select id="filtro-tipo" name="tipo-documento">
-                                        <option>Tudo</option>
-                                        <option>Monografia (Texto Impresso)</option>
-                                        <option>Publicação Periódica</option>
-                                        <option>Registos Sonoros Musicais</option>
-                                        <option>Analítico</option>
-                                        <option>Multimédia</option>
-                                    </select>
-                                </div>
-                                <div className="filtro-item">
-                                    <label htmlFor="filtro-escola">Base das escolas</label>
-                                    <select id="filtro-escola" name="escola">
-                                        <option>Todas as escolas</option>
-                                        {LISTA_ESCOLAS.map((escola) => (
-                                            <option key={escola}>{escola}</option>
-                                        ))}
-                                    </select>
-                                </div>
-                            </div>
-                        </section>
-
-                        <section className="secao-livros secao-brotero">
-                            <div className="secao-head">
-                                <h3 className="secao-titulo">Todos os livros</h3>
+                    <section className="mb-[24px]">
+                        <BookSectionHeader
+                            title="Todos os livros"
+                            action={
                                 <a
-                                    href={
-                                        categoriaSelecionada
-                                            ? `/biblioteca?categoria=${encodeURIComponent(categoriaSelecionada)}`
-                                            : '/biblioteca'
-                                    }
-                                    className="link-ver-mais"
+                                    href={voltarHref}
+                                    className="text-[13px] text-(--brotero-texto-link) whitespace-nowrap hover:text-(--brotero-texto-link-hover) hover:underline"
                                 >
                                     Voltar
                                 </a>
-                            </div>
-                            <div className="livros-grid">
-                                {livros.map((livro) => (
-                                    <CardLivro key={livro.id} livro={livro} />
-                                ))}
-                            </div>
-                        </section>
-                    </div>
-                </main>
-            <BroteroFooter />
-            </div>
+                            }
+                        />
+                        <div className="grid grid-cols-[repeat(auto-fill,minmax(160px,1fr))] gap-[16px] max-[768px]:grid-cols-[repeat(auto-fill,minmax(130px,1fr))] max-[768px]:gap-[12px]">
+                            {livros.map((livro) => (
+                                <CardLivro key={livro.id} livro={livro} />
+                            ))}
+                        </div>
+                    </section>
+                </BibliotecaMainRow>
+            </BibliotecaPageShell>
         </>
     );
 }
-

@@ -3,8 +3,13 @@
 namespace App\Providers;
 
 use Carbon\CarbonImmutable;
+use Illuminate\Auth\Middleware\Authenticate;
+use Illuminate\Auth\Middleware\RedirectIfAuthenticated;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Date;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Route;
 use Illuminate\Support\ServiceProvider;
 use Illuminate\Validation\Rules\Password;
 
@@ -32,6 +37,32 @@ class AppServiceProvider extends ServiceProvider
     protected function configureDefaults(): void
     {
         Date::use(CarbonImmutable::class);
+
+        RedirectIfAuthenticated::redirectUsing(function (Request $request): string {
+            if (Auth::guard('patron')->check()) {
+                return route('biblioteca.conta.pedidos');
+            }
+
+            if (Route::has('dashboard')) {
+                return route('dashboard');
+            }
+
+            return '/biblioteca';
+        });
+
+        Authenticate::redirectUsing(function (Request $request): ?string {
+            $path = ltrim($request->path(), '/');
+
+            if (str_starts_with($path, 'biblioteca/conta')) {
+                return route('biblioteca.login');
+            }
+
+            if (Route::has('login')) {
+                return route('login');
+            }
+
+            return '/login';
+        });
 
         DB::prohibitDestructiveCommands(
             app()->isProduction(),

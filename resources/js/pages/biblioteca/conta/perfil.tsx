@@ -1,0 +1,44 @@
+import { BibliotecaContaLayout } from '@/components/biblioteca/BibliotecaContaLayout';
+
+type Props = {
+    perfil: {
+        name: string | null;
+        card_number: string;
+        data_nascimento: string;
+    };
+};
+
+export default function BibliotecaContaPerfil({ perfil }: Props) {
+    return (
+        <BibliotecaContaLayout title="O meu perfil" secao="perfil">
+            <h2 className="m-0 mb-[16px] text-[1.15rem] font-bold text-(--brotero-texto)">Perfil do leitor</h2>
+            <div className="p-[20px] bg-(--brotero-branco) border border-(--brotero-borda) rounded-(--raio) max-w-[480px]">
+                <dl className="m-0 grid gap-[12px]">
+                    <div>
+                        <dt className="text-[12px] font-bold text-(--brotero-texto-cinza) uppercase tracking-wide">
+                            Nome
+                        </dt>
+                        <dd className="m-0 text-[15px] text-(--brotero-texto)">
+                            {perfil.name?.trim() ? perfil.name : '—'}
+                        </dd>
+                    </div>
+                    <div>
+                        <dt className="text-[12px] font-bold text-(--brotero-texto-cinza) uppercase tracking-wide">
+                            Cartão
+                        </dt>
+                        <dd className="m-0 text-[15px] text-(--brotero-texto) font-mono">{perfil.card_number}</dd>
+                    </div>
+                    <div>
+                        <dt className="text-[12px] font-bold text-(--brotero-texto-cinza) uppercase tracking-wide">
+                            Data de nascimento
+                        </dt>
+                        <dd className="m-0 text-[15px] text-(--brotero-texto)">{perfil.data_nascimento}</dd>
+                    </div>
+                </dl>
+                <p className="mt-[20px] mb-0 text-[13px] text-(--brotero-texto-cinza)">
+                    Para atualizar estes dados ou repor a senha de acesso, contacte a biblioteca.
+                </p>
+            </div>
+        </BibliotecaContaLayout>
+    );
+}

@@ -39,6 +39,7 @@ class BookRequestController extends Controller
         }
 
         $bookRequest = BookRequest::create([
+            'book_id' => $book->id,
             'request_type' => $requestType,
             'book_title' => (string) ($book->title ?? ''),
             'isbn' => $book->isbn,

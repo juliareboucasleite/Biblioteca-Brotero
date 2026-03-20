@@ -4,6 +4,7 @@ namespace App\Http\Middleware;
 
 use Illuminate\Http\Request;
 use Inertia\Middleware;
+use App\Models\LibraryPatron;
 
 class HandleInertiaRequests extends Middleware
 {
@@ -39,9 +40,26 @@ class HandleInertiaRequests extends Middleware
             ...parent::share($request),
             'name' => config('app.name'),
             'auth' => [
-                'user' => $request->user(),
+                'user' => $request->user('web'),
+                'patron' => $this->patronForFrontend($request->user('patron')),
             ],
             'sidebarOpen' => ! $request->hasCookie('sidebar_state') || $request->cookie('sidebar_state') === 'true',
+        ];
+    }
+
+    /**
+     * @return array{id: int, name: string|null, card_number: string}|null
+     */
+    private function patronForFrontend(?LibraryPatron $patron): ?array
+    {
+        if ($patron === null) {
+            return null;
+        }
+
+        return [
+            'id' => (int) $patron->id,
+            'name' => $patron->name,
+            'card_number' => $patron->card_number,
         ];
     }
 }

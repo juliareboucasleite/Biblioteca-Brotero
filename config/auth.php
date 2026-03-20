@@ -42,6 +42,10 @@ return [
             'driver' => 'session',
             'provider' => 'users',
         ],
+        'patron' => [
+            'driver' => 'session',
+            'provider' => 'library_patrons',
+        ],
     ],
 
     /*
@@ -66,11 +70,10 @@ return [
             'driver' => 'eloquent',
             'model' => env('AUTH_MODEL', User::class),
         ],
-
-        // 'users' => [
-        //     'driver' => 'database',
-        //     'table' => 'users',
-        // ],
+        'library_patrons' => [
+            'driver' => 'eloquent',
+            'model' => App\Models\LibraryPatron::class,
+        ],
     ],
 
     /*

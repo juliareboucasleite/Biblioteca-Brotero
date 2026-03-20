@@ -10,8 +10,16 @@ export type User = {
     [key: string]: unknown;
 };
 
+/** Leitor autenticado na área «Minha conta» (cartão). */
+export type LibraryPatronAuth = {
+    id: number;
+    name: string | null;
+    card_number: string;
+};
+
 export type Auth = {
-    user: User;
+    user: User | null;
+    patron: LibraryPatronAuth | null;
 };
 
 export type TwoFactorSetupData = {

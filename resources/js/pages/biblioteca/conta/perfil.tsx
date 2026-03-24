@@ -1,3 +1,4 @@
+import { Link } from '@inertiajs/react';
 import { BibliotecaContaLayout } from '@/components/biblioteca/BibliotecaContaLayout';
 
 type Props = {
@@ -42,7 +43,14 @@ export default function BibliotecaContaPerfil({ perfil }: Props) {
                         <dd className="m-0 text-[15px] text-(--brotero-texto) font-semibold">{perfil.pontos}</dd>
                     </div>
                 </dl>
-                <p className="mt-[20px] mb-0 text-[13px] text-(--brotero-texto-cinza)">
+                <p className="mt-[16px] mb-0 text-[13px] text-(--brotero-texto-cinza)">
+                    Os pontos refletem a sua participação no{' '}
+                    <Link href="/ranking" className="text-(--brotero-texto-link) hover:underline">
+                        ranking da biblioteca
+                    </Link>
+                    .
+                </p>
+                <p className="mt-[12px] mb-0 text-[13px] text-(--brotero-texto-cinza)">
                     Para atualizar estes dados ou repor a senha de acesso, contacte a biblioteca brotero.
                 </p>
             </div>

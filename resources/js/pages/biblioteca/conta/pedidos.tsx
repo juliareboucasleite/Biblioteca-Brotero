@@ -1,50 +1,72 @@
-import { router } from '@inertiajs/react';
+import { Link, router, usePage } from '@inertiajs/react';
+import { useState } from 'react';
 import { BibliotecaContaLayout } from '@/components/biblioteca/BibliotecaContaLayout';
+import {
+    Dialog,
+    DialogContent,
+    DialogDescription,
+    DialogFooter,
+    DialogHeader,
+    DialogTitle,
+} from '@/components/ui/dialog';
+import { Spinner } from '@/components/ui/spinner';
+import { formatDt, formatEur } from '@/lib/format';
 import type { PedidoLeitor } from '@/types';
 
 type Props = {
     pedidos: PedidoLeitor[];
 };
 
-function formatEur(val: string | undefined): string {
-    if (val === undefined || val === null) {
-        return '—';
-    }
-
-    const n = Number(val);
-
-    if (!Number.isFinite(n) || n <= 0) {
-        return '0,00 €';
-    }
-
-    return new Intl.NumberFormat('pt-PT', { style: 'currency', currency: 'EUR' }).format(n);
-}
-
-function formatDt(iso: string | null): string {
-    if (!iso) {
-        return '—';
-    }
-
-    try {
-        return new Intl.DateTimeFormat('pt-PT', {
-            dateStyle: 'short',
-            timeStyle: 'short',
-        }).format(new Date(iso));
-    } catch {
-        return iso;
-    }
-}
-
 export default function BibliotecaContaPedidos({ pedidos }: Props) {
+    const { flash } = usePage().props;
+    const [confirmPedido, setConfirmPedido] = useState<PedidoLeitor | null>(null);
+    const [pendingId, setPendingId] = useState<number | null>(null);
+
+    const isBusy = pendingId !== null;
+
+    function handleConfirmCancel(): void {
+        if (!confirmPedido) {
+            return;
+        }
+
+        const id = confirmPedido.id;
+
+        setPendingId(id);
+
+        router.delete(`/biblioteca/conta/pedidos/${id}`, {
+            preserveScroll: true,
+            onFinish: () => {
+                setPendingId(null);
+                setConfirmPedido(null);
+            },
+        });
+    }
+
     return (
         <BibliotecaContaLayout title="Os meus pedidos" secao="pedidos">
+            {flash?.success ? (
+                <p
+                    className="m-0 mb-[12px] rounded-(--raio) border border-emerald-200 bg-emerald-50 px-[14px] py-[10px] text-[13px] text-emerald-900"
+                    role="status"
+                >
+                    {flash.success}
+                </p>
+            ) : null}
+            {flash?.error ? (
+                <p
+                    className="m-0 mb-[12px] rounded-(--raio) border border-red-200 bg-red-50 px-[14px] py-[10px] text-[13px] text-red-900"
+                    role="alert"
+                >
+                    {flash.error}
+                </p>
+            ) : null}
             <h2 className="m-0 mb-[16px] text-[1.15rem] font-bold text-(--brotero-texto)">Pedidos ativos</h2>
             {pedidos.length === 0 ? (
                 <p className="m-0 p-[16px] bg-(--brotero-branco) border border-dashed border-(--brotero-borda) rounded-(--raio) text-(--brotero-texto-cinza)">
                     Não tem requisições em curso. Explore o{' '}
-                    <a href="/biblioteca" className="text-(--brotero-texto-link) hover:underline">
+                    <Link href="/biblioteca" className="text-(--brotero-texto-link) hover:underline">
                         catálogo
-                    </a>
+                    </Link>
                     .
                 </p>
             ) : (
@@ -74,20 +96,9 @@ export default function BibliotecaContaPedidos({ pedidos }: Props) {
                             <div className="flex shrink-0 justify-center sm:justify-end sm:self-center">
                                 <button
                                     type="button"
-                                    className="px-[12px] py-[6px] text-[13px] font-semibold rounded-(--raio) border border-(--brotero-borda) bg-(--brotero-branco) text-(--brotero-texto) cursor-pointer hover:bg-[#f5f5f5] whitespace-nowrap"
-                                    onClick={() => {
-                                        if (
-                                            !window.confirm(
-                                                `Cancelar o pedido de «${p.book_title}»? O livro voltará a ficar disponível no catálogo.`,
-                                            )
-                                        ) {
-                                            return;
-                                        }
-
-                                        router.delete(`/biblioteca/conta/pedidos/${p.id}`, {
-                                            preserveScroll: true,
-                                        });
-                                    }}
+                                    className="px-[12px] py-[6px] text-[13px] font-semibold rounded-(--raio) border border-(--brotero-borda) bg-(--brotero-branco) text-(--brotero-texto) cursor-pointer hover:bg-(--brotero-laranja-hover) whitespace-nowrap disabled:cursor-not-allowed disabled:opacity-60"
+                                    disabled={isBusy}
+                                    onClick={() => setConfirmPedido(p)}
                                 >
                                     Cancelar pedido
                                 </button>
@@ -96,6 +107,54 @@ export default function BibliotecaContaPedidos({ pedidos }: Props) {
                     ))}
                 </ul>
             )}
+
+            <Dialog
+                open={confirmPedido !== null}
+                onOpenChange={(open) => {
+                    if (!open && !isBusy) {
+                        setConfirmPedido(null);
+                    }
+                }}
+            >
+                <DialogContent className="border-(--brotero-borda) bg-(--brotero-branco) text-(--brotero-texto) sm:max-w-md">
+                    <DialogHeader>
+                        <DialogTitle className="text-(--brotero-texto)">Cancelar pedido</DialogTitle>
+                        <DialogDescription className="text-(--brotero-texto-cinza)">
+                            {confirmPedido ? (
+                                <>
+                                    Cancelar o pedido de «{confirmPedido.book_title}»? O livro voltará a ficar
+                                    disponível no catálogo.
+                                </>
+                            ) : null}
+                        </DialogDescription>
+                    </DialogHeader>
+                    <DialogFooter className="gap-2 sm:gap-2">
+                        <button
+                            type="button"
+                            className="px-[12px] py-[6px] text-[13px] font-semibold rounded-(--raio) border border-(--brotero-borda) bg-(--brotero-branco) text-(--brotero-texto) cursor-pointer hover:bg-(--brotero-laranja-hover) disabled:cursor-not-allowed disabled:opacity-60"
+                            disabled={isBusy}
+                            onClick={() => setConfirmPedido(null)}
+                        >
+                            Voltar
+                        </button>
+                        <button
+                            type="button"
+                            className="inline-flex items-center justify-center gap-2 px-[12px] py-[6px] text-[13px] font-semibold rounded-(--raio) border border-(--brotero-primaria) bg-(--brotero-primaria) text-white cursor-pointer hover:bg-(--brotero-primaria-escuro) disabled:cursor-not-allowed disabled:opacity-60"
+                            disabled={isBusy}
+                            onClick={handleConfirmCancel}
+                        >
+                            {isBusy ? (
+                                <>
+                                    <Spinner className="size-4 text-white" aria-hidden />
+                                    <span>A cancelar…</span>
+                                </>
+                            ) : (
+                                'Confirmar cancelamento'
+                            )}
+                        </button>
+                    </DialogFooter>
+                </DialogContent>
+            </Dialog>
         </BibliotecaContaLayout>
     );
 }

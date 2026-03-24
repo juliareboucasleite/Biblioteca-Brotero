@@ -2,11 +2,12 @@
 
 namespace App\Http\Controllers;
 
-use Illuminate\Http\Request;
-use App\Models\Book;
-use App\Services\GoogleBooksService;
 use App\Models\Author;
+use App\Models\Book;
 use App\Models\Category;
+use App\Services\GoogleBooksService;
+use Illuminate\Http\Request;
+use Illuminate\Support\Collection;
 
 class BookController extends Controller
 {
@@ -14,6 +15,8 @@ class BookController extends Controller
     {
         $limit = (int) $request->query('limit', 0);
         $categoriaId = $request->query('categoria');
+        $authorId = trim((string) $request->query('author_id', ''));
+        $ano = trim((string) $request->query('ano', ''));
         $q = trim((string) $request->query('q', ''));
         $lingua = trim((string) $request->query('lingua', ''));
 
@@ -21,10 +24,20 @@ class BookController extends Controller
             ->with(['authors', 'categories', 'details'])
             ->latest('id');
 
-        if (!empty($categoriaId)) {
+        if (! empty($categoriaId)) {
             $query->whereHas('categories', function ($q) use ($categoriaId) {
                 $q->whereKey($categoriaId);
             });
+        }
+
+        if ($authorId !== '') {
+            $query->whereHas('authors', function ($q2) use ($authorId) {
+                $q2->whereKey($authorId);
+            });
+        }
+
+        if ($ano !== '' && ctype_digit($ano)) {
+            $query->where('published_year', (int) $ano);
         }
 
         if ($lingua !== '') {
@@ -95,11 +108,17 @@ class BookController extends Controller
     public function show(int $id)
     {
         $book = Book::with(['authors', 'categories', 'details'])->findOrFail($id);
-        $recommended = $this->recommendationsBySharedAuthors($book, 12);
+        $recommendedByAuthor = $this->recommendationsBySharedAuthors($book, 12);
+        $excludeForCategory = $recommendedByAuthor->pluck('id')->all();
+        $recommendedByCategory = $this->recommendationsBySharedCategories($book, $excludeForCategory, 12);
 
-        $payload = $book->toArray();
-        $payload['available'] = $book->isAvailableForRequest();
-        $payload['recommendations'] = $recommended->map(function (Book $b): array {
+        $excludeForFallback = array_merge(
+            $recommendedByAuthor->pluck('id')->all(),
+            $recommendedByCategory->pluck('id')->all(),
+        );
+        $recommendedFallback = $this->recommendationsLatestExcluding($book, $excludeForFallback, 12);
+
+        $mapBook = function (Book $b): array {
             return [
                 'id' => $b->id,
                 'title' => $b->title,
@@ -110,7 +129,13 @@ class BookController extends Controller
                     'name' => $a->name,
                 ])->values()->all(),
             ];
-        })->values()->all();
+        };
+
+        $payload = $book->toArray();
+        $payload['available'] = $book->isAvailableForRequest();
+        $payload['recommendations'] = $recommendedByAuthor->map($mapBook)->values()->all();
+        $payload['category_recommendations'] = $recommendedByCategory->map($mapBook)->values()->all();
+        $payload['fallback_recommendations'] = $recommendedFallback->map($mapBook)->values()->all();
 
         return $payload;
     }
@@ -118,7 +143,7 @@ class BookController extends Controller
     /**
      * Livros que partilham pelo menos um autor com o livro dado (exclui o próprio).
      *
-     * @return \Illuminate\Support\Collection<int, Book>
+     * @return Collection<int, Book>
      */
     private function recommendationsBySharedAuthors(Book $book, int $limit = 12)
     {
@@ -134,6 +159,52 @@ class BookController extends Controller
             ->whereHas('authors', function ($q) use ($authorIds): void {
                 $q->whereIn('authors.id', $authorIds);
             })
+            ->latest('id')
+            ->limit(min($limit, 50))
+            ->get();
+    }
+
+    /**
+     * Livros que partilham pelo menos uma categoria com o livro dado (exclui o próprio e os já listados).
+     *
+     * @param  list<int|string>  $excludeIds
+     * @return Collection<int, Book>
+     */
+    private function recommendationsBySharedCategories(Book $book, array $excludeIds, int $limit = 12)
+    {
+        $categoryIds = $book->categories->pluck('id');
+
+        if ($categoryIds->isEmpty()) {
+            return collect();
+        }
+
+        $excludeIds = array_values(array_unique(array_merge([$book->getKey()], $excludeIds)));
+
+        return Book::query()
+            ->with(['authors:id,name'])
+            ->whereKeyNot($book->getKey())
+            ->whereNotIn('id', $excludeIds)
+            ->whereHas('categories', function ($q) use ($categoryIds): void {
+                $q->whereIn('categories.id', $categoryIds);
+            })
+            ->latest('id')
+            ->limit(min($limit, 50))
+            ->get();
+    }
+
+    /**
+     * Últimos livros no catálogo (exclui o atual e IDs adicionais), para quando não há autor/categoria.
+     *
+     * @param  list<int|string>  $excludeIds
+     * @return Collection<int, Book>
+     */
+    private function recommendationsLatestExcluding(Book $book, array $excludeIds, int $limit = 12)
+    {
+        $excludeIds = array_values(array_unique(array_merge([$book->getKey()], $excludeIds)));
+
+        return Book::query()
+            ->with(['authors:id,name'])
+            ->whereNotIn('id', $excludeIds)
             ->latest('id')
             ->limit(min($limit, 50))
             ->get();
@@ -155,7 +226,7 @@ class BookController extends Controller
             'published_year',
             'pages',
             'cover_image',
-            'language'
+            'language',
         ]));
 
         // autores
@@ -179,12 +250,12 @@ class BookController extends Controller
     public function storeFromIsbn(Request $request, GoogleBooksService $googleBooks)
     {
         $request->validate([
-            'isbn' => 'required'
+            'isbn' => 'required',
         ]);
 
         $data = $googleBooks->getByIsbn($request->isbn);
 
-        if (!$data) {
+        if (! $data) {
             return response()->json(['error' => 'Livro não encontrado'], 404);
         }
 
@@ -193,26 +264,26 @@ class BookController extends Controller
         if ($book) {
             // Enriquecimento "não destrutivo": só completa campos vazios.
             $updates = [];
-            if (empty($book->title) && !empty($data['title'])) {
+            if (empty($book->title) && ! empty($data['title'])) {
                 $updates['title'] = $data['title'];
             }
-            if (empty($book->description) && !empty($data['description'])) {
+            if (empty($book->description) && ! empty($data['description'])) {
                 $updates['description'] = $data['description'];
             }
-            if (empty($book->published_year) && !empty($data['published_year'])) {
+            if (empty($book->published_year) && ! empty($data['published_year'])) {
                 $updates['published_year'] = $data['published_year'];
             }
-            if (empty($book->pages) && !empty($data['pages'])) {
+            if (empty($book->pages) && ! empty($data['pages'])) {
                 $updates['pages'] = $data['pages'];
             }
-            if (empty($book->cover_image) && !empty($data['cover'])) {
+            if (empty($book->cover_image) && ! empty($data['cover'])) {
                 $updates['cover_image'] = $data['cover'];
             }
-            if (empty($book->language) && !empty($data['language'])) {
+            if (empty($book->language) && ! empty($data['language'])) {
                 $updates['language'] = $data['language'];
             }
 
-            if (!empty($updates)) {
+            if (! empty($updates)) {
                 $book->fill($updates)->save();
             }
         } else {
@@ -227,21 +298,21 @@ class BookController extends Controller
             ]);
         }
 
-        if (!empty($data['authors'])) {
+        if (! empty($data['authors'])) {
             foreach ($data['authors'] as $authorName) {
                 $author = Author::firstOrCreate(['name' => $authorName]);
                 $book->authors()->syncWithoutDetaching([$author->id]);
             }
         }
 
-        if (!empty($data['categories'])) {
+        if (! empty($data['categories'])) {
             foreach ($data['categories'] as $categoryName) {
                 $category = Category::firstOrCreate(['name' => $categoryName]);
                 $book->categories()->syncWithoutDetaching([$category->id]);
             }
         }
 
-        if (!empty($data['publisher'])) {
+        if (! empty($data['publisher'])) {
             $book->details()->updateOrCreate(
                 ['book_id' => $book->id],
                 ['publisher' => $data['publisher']]

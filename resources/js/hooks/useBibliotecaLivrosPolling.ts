@@ -32,7 +32,7 @@ type Filters = {
 };
 
 /**
- * Mantém a lista de livros alinhada com o servidor e atualiza via `/books/search` em intervalos curtos.
+ * Mantém a lista de livros alinhada com o servidor e atualiza via `GET /books` (mesmos parâmetros que a página).
  */
 export function useBibliotecaLivrosPolling(
     livros: LivroCatalogo[],
@@ -60,6 +60,8 @@ export function useBibliotecaLivrosPolling(
                     ...(categoriaSelecionada ? { categoria: categoriaSelecionada } : {}),
                     ...(q ? { q } : {}),
                     ...(lingua ? { lingua } : {}),
+                    ...(authorSelecionado ? { author_id: authorSelecionado } : {}),
+                    ...(ano ? { ano } : {}),
                 }).toString()}`;
 
                 const res = await fetch(url, {
@@ -73,7 +75,7 @@ export function useBibliotecaLivrosPolling(
                 const data = (await res.json()) as BooksJsonRow[];
                 const mapped = mapBooksResponse(data);
 
-                if (!cancelled && mapped.length > 0) {
+                if (!cancelled) {
                     setLista(mapped);
                 }
             } finally {

@@ -9,12 +9,3 @@ export const OPCOES_LINGUA = [
     { value: 'it', label: 'Italiano' },
     { value: 'nl', label: 'Holandês' },
 ] as const;
-
-export const OPCOES_TIPO_DOCUMENTO = [
-    'Tudo',
-    'Monografia (Texto Impresso)',
-    'Publicação Periódica',
-    'Registos Sonoros Musicais',
-    'Analítico',
-    'Multimédia',
-] as const;

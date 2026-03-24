@@ -1,24 +1,11 @@
 import { BibliotecaContaLayout } from '@/components/biblioteca/BibliotecaContaLayout';
+import { formatDt } from '@/lib/format';
+import { cn } from '@/lib/utils';
 import type { PedidoLeitor } from '@/types';
 
 type Props = {
     historico: PedidoLeitor[];
 };
-
-function formatDt(iso: string | null): string {
-    if (!iso) {
-        return '—';
-    }
-
-    try {
-        return new Intl.DateTimeFormat('pt-PT', {
-            dateStyle: 'short',
-            timeStyle: 'short',
-        }).format(new Date(iso));
-    } catch {
-        return iso;
-    }
-}
 
 function estadoLabel(status: string): string {
     switch (status) {
@@ -31,6 +18,30 @@ function estadoLabel(status: string): string {
         default:
             return status;
     }
+}
+
+function EstadoBadge({ status }: { status: string }) {
+    const label = estadoLabel(status);
+
+    const variantClass =
+        status === 'returned'
+            ? 'bg-emerald-50 text-emerald-900 border border-emerald-200'
+            : status === 'expired'
+              ? 'bg-amber-50 text-amber-900 border border-amber-200'
+              : status === 'cancelled'
+                ? 'bg-(--brotero-fundo) text-(--brotero-texto) border border-(--brotero-borda)'
+                : 'bg-neutral-100 text-neutral-800 border border-neutral-200';
+
+    return (
+        <span
+            className={cn(
+                'inline-flex shrink-0 items-center rounded-full px-[10px] py-[3px] text-[12px] font-semibold leading-tight',
+                variantClass,
+            )}
+        >
+            {label}
+        </span>
+    );
 }
 
 export default function BibliotecaContaHistorico({ historico }: Props) {
@@ -50,11 +61,9 @@ export default function BibliotecaContaHistorico({ historico }: Props) {
                             key={p.id}
                             className="p-[16px] bg-(--brotero-branco) border border-(--brotero-borda) rounded-(--raio)"
                         >
-                            <p className="m-0 mb-[6px] text-[16px] font-bold text-(--brotero-texto)">
-                                {p.book_title}{' '}
-                                <span className="text-[13px] font-semibold text-(--brotero-texto-cinza)">
-                                    ({estadoLabel(p.status)})
-                                </span>
+                            <p className="m-0 mb-[8px] flex flex-wrap items-center gap-x-2 gap-y-1 text-[16px] font-bold text-(--brotero-texto)">
+                                <span className="min-w-0">{p.book_title}</span>
+                                <EstadoBadge status={p.status} />
                             </p>
                             <p className="m-0 text-[13px] text-(--brotero-texto-cinza)">
                                 Pedido: {formatDt(p.created_at)}

@@ -5,6 +5,8 @@ import { BibliotecaPageShell } from '@/components/biblioteca/BibliotecaPageShell
 import { BookCover } from '@/components/biblioteca/BookCover';
 import { BookDetailContent } from '@/components/biblioteca/BookDetailContent';
 import { BookRecommendationsByAuthor } from '@/components/biblioteca/BookRecommendationsByAuthor';
+import { BookRecommendationsByCategory } from '@/components/biblioteca/BookRecommendationsByCategory';
+import { BookRecommendationsRow } from '@/components/biblioteca/BookRecommendationsRow';
 import { BookRequestAside } from '@/components/biblioteca/BookRequestAside';
 import { useBookDetailApi } from '@/hooks/useBookDetailApi';
 import type { LivroCatalogo } from '@/types';
@@ -20,6 +22,12 @@ export default function LibraryBook({ livro }: LibraryBookProps) {
     const coverSrc = (bookApi?.cover_image ?? livro.capa) || null;
     const authorsFromApi = bookApi?.authors?.map((a) => a?.name?.trim()).filter(Boolean) ?? [];
     const authorsLabel = authorsFromApi.length > 0 ? authorsFromApi.join(', ') : livro.autor;
+
+    const categoriesFromApi =
+        bookApi?.categories
+            ?.map((c) => c?.name?.trim())
+            .filter((x): x is string => Boolean(x)) ?? [];
+    const categoriesLabel = categoriesFromApi.join(', ');
 
     const pageTitle = placeholder ? 'Biblioteca Brotero — Livro' : `${livro.titulo} — Biblioteca Brotero`;
 
@@ -52,6 +60,21 @@ export default function LibraryBook({ livro }: LibraryBookProps) {
                         <BookRecommendationsByAuthor
                             recommendations={bookApi.recommendations}
                             authorsSummary={authorsLabel}
+                        />
+                    ) : null}
+
+                    {bookApi?.category_recommendations?.length ? (
+                        <BookRecommendationsByCategory
+                            recommendations={bookApi.category_recommendations}
+                            categoriesSummary={categoriesLabel}
+                        />
+                    ) : null}
+
+                    {bookApi?.fallback_recommendations?.length ? (
+                        <BookRecommendationsRow
+                            title="Mais livros no catálogo"
+                            recommendations={bookApi.fallback_recommendations}
+                            ariaLabel="Outros livros no catálogo"
                         />
                     ) : null}
                 </BibliotecaMainRow>

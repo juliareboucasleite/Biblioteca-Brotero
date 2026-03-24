@@ -38,4 +38,8 @@ export type BookApi = {
         dimensions?: string | null;
     } | null;
     recommendations?: BookRecommendationApi[] | null;
+    /** Livros que partilham categoria(s) com o atual (API `/books/{id}`). */
+    category_recommendations?: BookRecommendationApi[] | null;
+    /** Outros livros recentes no catálogo (exclui o atual e os já listados acima). */
+    fallback_recommendations?: BookRecommendationApi[] | null;
 };

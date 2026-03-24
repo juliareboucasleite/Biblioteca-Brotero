@@ -1,4 +1,4 @@
-import { Head, router } from '@inertiajs/react';
+import { Head, Link, router } from '@inertiajs/react';
 import type { ReactNode } from 'react';
 import { BroteroFooter } from '@/components/BroteroFooter';
 import { BroteroHeader } from '@/components/BroteroHeader';
@@ -29,18 +29,18 @@ export function BibliotecaContaLayout({ title, secao, children }: BibliotecaCont
                         className="flex flex-wrap items-center gap-[8px] mb-[20px] pb-[12px] border-b border-(--brotero-borda)"
                         aria-label="Área do leitor"
                     >
-                        <a href="/biblioteca/conta/pedidos" className={active('pedidos')}>
+                        <Link href="/biblioteca/conta/pedidos" className={active('pedidos')} preserveScroll>
                             Pedidos ativos
-                        </a>
-                        <a href="/biblioteca/conta/historico" className={active('historico')}>
+                        </Link>
+                        <Link href="/biblioteca/conta/historico" className={active('historico')} preserveScroll>
                             Histórico
-                        </a>
-                        <a href="/biblioteca/conta/favoritos" className={active('favoritos')}>
+                        </Link>
+                        <Link href="/biblioteca/conta/favoritos" className={active('favoritos')} preserveScroll>
                             Favoritos
-                        </a>
-                        <a href="/biblioteca/conta/perfil" className={active('perfil')}>
+                        </Link>
+                        <Link href="/biblioteca/conta/perfil" className={active('perfil')} preserveScroll>
                             Perfil
-                        </a>
+                        </Link>
                         <button
                             type="button"
                             className={cn(linkBase, 'border-0 bg-transparent cursor-pointer font-inherit')}

@@ -1,5 +1,4 @@
-import { OPCOES_LINGUA, OPCOES_TIPO_DOCUMENTO } from '@/constants/biblioteca-filtros';
-import { LISTA_ESCOLAS } from '@/constants/escolas';
+import { OPCOES_LINGUA } from '@/constants/biblioteca-filtros';
 
 const inputSelectClass =
     'w-full p-[6px_10px] text-[13px] border border-(--brotero-borda) rounded-(--raio) bg-(--brotero-branco) text-(--brotero-texto) focus:outline-none focus:outline-2 focus:outline-(--brotero-primaria) focus:outline-offset-0';
@@ -92,27 +91,6 @@ export function BibliotecaFiltrosAvancados({
                             <option key={o.value || 'all'} value={o.value}>
                                 {o.label}
                             </option>
-                        ))}
-                    </select>
-                </div>
-                <div className="min-w-[150px] flex-1 max-w-[200px]">
-                    <label htmlFor="filtro-tipo" className={labelClass}>
-                        Tipo de documento
-                    </label>
-                    <select id="filtro-tipo" name="tipo-documento" className={inputSelectClass}>
-                        {OPCOES_TIPO_DOCUMENTO.map((label) => (
-                            <option key={label}>{label}</option>
-                        ))}
-                    </select>
-                </div>
-                <div className="min-w-[150px] flex-1 max-w-[200px]">
-                    <label htmlFor="filtro-escola" className={labelClass}>
-                        Base das escolas
-                    </label>
-                    <select id="filtro-escola" name="escola" className={inputSelectClass}>
-                        <option>Todas as escolas</option>
-                        {LISTA_ESCOLAS.map((escola) => (
-                            <option key={escola}>{escola}</option>
                         ))}
                     </select>
                 </div>

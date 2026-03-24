@@ -1,8 +1,8 @@
 import { Head } from '@inertiajs/react';
 import { BibliotecaFiltrosAvancados } from '@/components/biblioteca/BibliotecaFiltrosAvancados';
+import type { AutorFiltroOption } from '@/components/biblioteca/BibliotecaFiltrosAvancados';
 import { BibliotecaMainRow } from '@/components/biblioteca/BibliotecaMainRow';
 import { BibliotecaPageShell } from '@/components/biblioteca/BibliotecaPageShell';
-import type { AutorFiltroOption } from '@/components/biblioteca/BibliotecaFiltrosAvancados';
 import { BookSectionHeader } from '@/components/biblioteca/BookSectionHeader';
 import { CardLivro } from '@/components/CardLivro';
 import CategorySidebar from '@/components/CategorySidebar';

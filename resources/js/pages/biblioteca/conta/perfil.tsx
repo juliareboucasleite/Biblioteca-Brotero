@@ -13,7 +13,7 @@ export default function BibliotecaContaPerfil({ perfil }: Props) {
     return (
         <BibliotecaContaLayout title="O meu perfil" secao="perfil">
             <h2 className="m-0 mb-[16px] text-[1.15rem] font-bold text-(--brotero-texto)">Perfil do leitor</h2>
-            <div className="p-[20px] bg-(--brotero-branco) border border-(--brotero-borda) rounded-(--raio) max-w-[480px]">
+            <div className="p-[20px] bg-(--brotero-branco) border border-(--brotero-borda) rounded-(--raio) max-w-[580px]">
                 <dl className="m-0 grid gap-[12px]">
                     <div>
                         <dt className="text-[12px] font-bold text-(--brotero-texto-cinza) uppercase tracking-wide">
@@ -43,7 +43,7 @@ export default function BibliotecaContaPerfil({ perfil }: Props) {
                     </div>
                 </dl>
                 <p className="mt-[20px] mb-0 text-[13px] text-(--brotero-texto-cinza)">
-                    Para atualizar estes dados ou repor a senha de acesso, contacte a biblioteca.
+                    Para atualizar estes dados ou repor a senha de acesso, contacte a biblioteca brotero.
                 </p>
             </div>
         </BibliotecaContaLayout>

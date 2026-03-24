@@ -2,13 +2,14 @@ import type { ReactNode } from 'react';
 import { cn } from '@/lib/utils';
 
 type BibliotecaMainRowProps = {
-    sidebar: ReactNode;
+    /** Sidebar opcional (ex.: categorias no catálogo; omitir na ficha do livro). */
+    sidebar?: ReactNode;
     children: ReactNode;
     className?: string;
 };
 
 /**
- * Linha principal: sidebar de categorias + coluna de conteúdo (max-width Brotero).
+ * Linha principal: sidebar opcional + coluna de conteúdo (max-width Brotero).
  */
 export function BibliotecaMainRow({ sidebar, children, className }: BibliotecaMainRowProps) {
     return (

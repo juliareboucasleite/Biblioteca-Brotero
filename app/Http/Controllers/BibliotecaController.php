@@ -11,11 +11,6 @@ use App\Models\Book;
 use App\Models\Category;
 use App\Services\PatronRankingService;
 
-/**
- * Catálogo e página de detalhe do livro (Biblioteca Brotero)
- * Quando a base de dados estiver disponível, substituir $livros e $livro
- * por dados do Eloquent (ex.: Livro::all(), Livro::find($id)).
- */
 class BibliotecaController extends Controller
 {
     /**
@@ -85,10 +80,7 @@ class BibliotecaController extends Controller
             ->values()
             ->all();
     }
-    /**
-     * Listagem do catálogo (index da biblioteca)
-     * Futuro: Livro::query()->when($filtros)->paginate().
-     */
+
     public function index(Request $request, PatronRankingService $rankingService): Response
     {
         $livrosQuery = Book::query()
@@ -194,16 +186,8 @@ class BibliotecaController extends Controller
             'capa' => $request->query('capa'),
         ];
 
-        $categorias = Category::query()
-            ->orderBy('name')
-            ->get(['id', 'name'])
-            ->map(fn (Category $c) => ['id' => (string) $c->id, 'name' => (string) $c->name])
-            ->values()
-            ->all();
-
         return Inertia::render('library-book', [
             'livro' => $livro,
-            'categorias' => $categorias,
         ]);
     }
 
@@ -216,23 +200,11 @@ class BibliotecaController extends Controller
 
         $livro = $this->mapearLivroParaFrontend($book);
 
-        $categorias = Category::query()
-            ->orderBy('name')
-            ->get(['id', 'name'])
-            ->map(fn (Category $c) => ['id' => (string) $c->id, 'name' => (string) $c->name])
-            ->values()
-            ->all();
-
         return Inertia::render('library-book', [
             'livro' => $livro,
-            'categorias' => $categorias,
         ]);
     }
 
-    /**
-     * Dados estáticos até existir base de dados
-     * Depois: return Livro::novos()->limit(12)->get(); entre outros
-     */
     private function livrosEmDestaque(): array
     {
         return [

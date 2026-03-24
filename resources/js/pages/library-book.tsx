@@ -6,16 +6,14 @@ import { BookCover } from '@/components/biblioteca/BookCover';
 import { BookDetailContent } from '@/components/biblioteca/BookDetailContent';
 import { BookRecommendationsByAuthor } from '@/components/biblioteca/BookRecommendationsByAuthor';
 import { BookRequestAside } from '@/components/biblioteca/BookRequestAside';
-import CategorySidebar from '@/components/CategorySidebar';
 import { useBookDetailApi } from '@/hooks/useBookDetailApi';
-import type { Category, LivroCatalogo } from '@/types';
+import type { LivroCatalogo } from '@/types';
 
 type LibraryBookProps = {
     livro: LivroCatalogo;
-    categorias: Category[];
 };
 
-export default function LibraryBook({ livro, categorias }: LibraryBookProps) {
+export default function LibraryBook({ livro }: LibraryBookProps) {
     const placeholder = isLivroPlaceholder(livro.titulo);
     const bookApi = useBookDetailApi(livro.id, !placeholder);
 
@@ -30,10 +28,7 @@ export default function LibraryBook({ livro, categorias }: LibraryBookProps) {
             <Head title={pageTitle} />
 
             <BibliotecaPageShell>
-                <BibliotecaMainRow
-                    className="pt-[24px] pb-[48px]"
-                    sidebar={<CategorySidebar categorias={categorias} todosLivros />}
-                >
+                <BibliotecaMainRow className="pt-[24px] pb-[48px]">
                     <p className="m-0 mb-[24px]">
                         <a
                             href="/biblioteca/livros"

@@ -16,6 +16,14 @@ use Illuminate\Support\Facades\Route;
 
 // Home da aplicação: redireciona sempre para a Biblioteca (React)
 Route::redirect('/', '/biblioteca')->name('home');
+
+// Destino pós-login Fortify (`config/fortify.php` → /dashboard): catálogo público
+Route::get('/dashboard', function () {
+    return redirect()->route('biblioteca.index');
+})
+    ->middleware(['auth'])
+    ->name('dashboard');
+
 Route::get('/books', [BookController::class, 'index']);
 Route::get('/books/search', [BookController::class, 'search']);
 Route::get('/ranking', [PatronRankingController::class, 'index'])->name('ranking');

@@ -1,7 +1,7 @@
 <?php
 
-test('returns a successful response', function () {
+test('a raiz redirecciona para o catálogo da biblioteca', function () {
     $response = $this->get(route('home'));
 
-    $response->assertOk();
+    $response->assertRedirect('/biblioteca');
 });

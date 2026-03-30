@@ -277,7 +277,7 @@ Artisan::command('catalog:normalize-entities {--dry-run : Mostrar estatísticas 
     if ($dry) {
         $this->comment('Execute sem --dry-run para aplicar.');
     }
-})->purpose('Fundir autores/categorias duplicados e corrigir maiúsculas (chave = nome em minúsculas)');
+})->purpose('Fundir autores/categorias duplicados e corrigir maiúsculas (autores: chave canónica + erros próximos Levenshtein≤1 em chaves ≥8 caracteres)');
 
 Artisan::command('book-requests:normalize-school-locations', function () {
     $n = 0;

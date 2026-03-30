@@ -93,6 +93,14 @@ export default function BibliotecaContaPedidos({ pedidos }: Props) {
                         {p.school_location ? ` · ${p.school_location}` : ''}
                         {!isPending && p.cacifo_code ? ` · Código ${p.cacifo_code}` : ''}
                     </p>
+                    {p.patron_visible_note ? (
+                        <p className="m-0 mt-[8px] border-l-2 border-(--brotero-primaria) pl-[10px] text-[13px] text-(--brotero-texto)">
+                            <span className="font-semibold text-(--brotero-texto-cinza)">
+                                Mensagem da biblioteca:{' '}
+                            </span>
+                            {p.patron_visible_note}
+                        </p>
+                    ) : null}
                     {isPending ? (
                         <p className="m-0 text-[13px] text-(--brotero-texto-cinza)">
                             A biblioteca irá validar o pedido. Assim que for aprovado, verá aqui o prazo de levantamento,

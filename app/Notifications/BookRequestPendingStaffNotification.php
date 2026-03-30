@@ -3,6 +3,7 @@
 namespace App\Notifications;
 
 use App\Models\BookRequest;
+use App\Support\SchoolLocationNormalizer;
 use Illuminate\Notifications\Messages\MailMessage;
 use Illuminate\Notifications\Notification;
 
@@ -32,8 +33,9 @@ class BookRequestPendingStaffNotification extends Notification
             'Tipo: '.($this->bookRequest->request_type === 'escola' ? 'Retirada na escola' : 'Cacifo'),
         ];
 
-        if ($this->bookRequest->request_type === 'escola' && $this->bookRequest->school_location) {
-            $lines[] = 'Local: '.$this->bookRequest->school_location;
+        $school = SchoolLocationNormalizer::fix($this->bookRequest->school_location);
+        if ($this->bookRequest->request_type === 'escola' && $school !== null && $school !== '') {
+            $lines[] = 'Local: '.$school;
         }
 
         $message = (new MailMessage)

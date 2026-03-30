@@ -20,6 +20,7 @@ class StaffPatronController extends Controller
             'birth_date' => ['required', 'date'],
             'name' => ['nullable', 'string', 'max:255'],
             'email' => ['nullable', 'email', 'max:255'],
+            'is_librarian' => ['sometimes', 'boolean'],
         ]);
 
         LibraryPatron::query()->create([
@@ -28,6 +29,7 @@ class StaffPatronController extends Controller
             'name' => $data['name'] ?? null,
             'email' => $data['email'] ?? null,
             'points' => 0,
+            'is_librarian' => (bool) ($data['is_librarian'] ?? false),
         ]);
 
         return back()->with('success', 'Leitor cadastrado. Pode aprovar o pedido associado a este cartão.');

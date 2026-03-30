@@ -8,6 +8,8 @@ use Illuminate\Database\Eloquent\Model;
  * Requisição de livro.
  *
  * status: pending | created | rejected | expired | returned | cancelled
+ *
+ * @property string|null $patron_visible_note Nota da biblioteca visível ao aluno (balcão)
  */
 class BookRequest extends Model
 {
@@ -23,6 +25,7 @@ class BookRequest extends Model
         'return_deadline',
         'status',
         'staff_rejection_reason',
+        'patron_visible_note',
         'staff_reviewed_at',
         'returned_at',
         'fine_amount',

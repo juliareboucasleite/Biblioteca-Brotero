@@ -76,6 +76,14 @@ export default function BibliotecaContaHistorico({ historico }: Props) {
                                 Pedido: {formatDt(p.created_at)}
                                 {p.returned_at ? ` · Devolvido: ${formatDt(p.returned_at)}` : ''}
                             </p>
+                            {p.patron_visible_note ? (
+                                <p className="m-0 mt-[8px] border-l-2 border-(--brotero-primaria) pl-[10px] text-[13px] text-(--brotero-texto)">
+                                    <span className="font-semibold text-(--brotero-texto-cinza)">
+                                        Mensagem da biblioteca:{' '}
+                                    </span>
+                                    {p.patron_visible_note}
+                                </p>
+                            ) : null}
                             {p.status === 'rejected' && p.staff_rejection_reason ? (
                                 <p className="m-0 mt-[8px] border-l-2 border-red-200 pl-[10px] text-[13px] text-(--brotero-texto)">
                                     <span className="font-semibold text-(--brotero-texto-cinza)">Motivo: </span>

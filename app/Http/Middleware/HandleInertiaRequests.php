@@ -2,6 +2,7 @@
 
 namespace App\Http\Middleware;
 
+use App\Http\Controllers\Biblioteca\LibraryPatronAuthController;
 use App\Models\LibraryPatron;
 use App\Support\StaffBibliotecaAccess;
 use Illuminate\Http\Request;
@@ -47,7 +48,7 @@ class HandleInertiaRequests extends Middleware
             'name' => config('app.name'),
             'auth' => [
                 'user' => $staffUser,
-                'patron' => $this->patronForFrontend($request->user('patron')),
+                'patron' => $this->patronForFrontend($request, $request->user('patron')),
             ],
             'staffBiblioteca' => [
                 'canAccessPedidos' => $canStaffPedidos,
@@ -63,12 +64,21 @@ class HandleInertiaRequests extends Middleware
     }
 
     /**
-     * @return array{id: int, name: string|null, card_number: string, points: int}|null
+     * @return array{id: int, name: string|null, card_number: string, points: int, portal_mode: string, is_librarian: bool}|null
      */
-    private function patronForFrontend(?LibraryPatron $patron): ?array
+    private function patronForFrontend(Request $request, ?LibraryPatron $patron): ?array
     {
         if ($patron === null) {
             return null;
+        }
+
+        $mode = (string) $request->session()->get(
+            LibraryPatronAuthController::SESSION_PORTAL_MODE_KEY,
+            'comunidade',
+        );
+
+        if ($mode !== 'bibliotecaria' && $mode !== 'comunidade') {
+            $mode = 'comunidade';
         }
 
         return [
@@ -76,6 +86,8 @@ class HandleInertiaRequests extends Middleware
             'name' => $patron->name,
             'card_number' => $patron->card_number,
             'points' => (int) ($patron->points ?? 0),
+            'portal_mode' => $mode,
+            'is_librarian' => $patron->isLibrarian(),
         ];
     }
 

@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Models\BookRequest;
 use App\Models\LibraryPatron;
 use App\Services\BookRequestApprovalService;
+use App\Support\SchoolLocationNormalizer;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
@@ -33,7 +34,7 @@ class StaffPedidosController extends Controller
                     'isbn' => $r->isbn,
                     'card_number' => $r->card_number,
                     'request_type' => $r->request_type,
-                    'school_location' => $r->school_location,
+                    'school_location' => SchoolLocationNormalizer::fix($r->school_location),
                     'created_at' => $r->created_at?->toIso8601String(),
                     'patron_registered' => $patronExists,
                 ];

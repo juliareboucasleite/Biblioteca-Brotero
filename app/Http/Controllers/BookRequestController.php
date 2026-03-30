@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Book;
 use App\Models\BookRequest;
 use App\Notifications\BookRequestPendingStaffNotification;
+use App\Support\SchoolLocationNormalizer;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Notification;
@@ -31,8 +32,12 @@ class BookRequestController extends Controller
 
         $requestType = $payload['request_type'];
 
-        $schoolLocation = $requestType === 'escola' ? (string) ($payload['school_location'] ?? '') : null;
-        if ($requestType === 'escola' && trim($schoolLocation) === '') {
+        $schoolLocation = null;
+        if ($requestType === 'escola') {
+            $raw = trim((string) ($payload['school_location'] ?? ''));
+            $schoolLocation = SchoolLocationNormalizer::fix($raw) ?? $raw;
+        }
+        if ($requestType === 'escola' && ($schoolLocation === null || trim($schoolLocation) === '')) {
             return response()->json([
                 'ok' => false,
                 'error' => 'Escolha a biblioteca/escola para retirada.',
@@ -45,7 +50,7 @@ class BookRequestController extends Controller
             'book_title' => (string) ($book->title ?? ''),
             'isbn' => $book->isbn,
             'card_number' => (string) $payload['card_number'],
-            'school_location' => $schoolLocation,
+            'school_location' => $schoolLocation !== null && trim($schoolLocation) !== '' ? $schoolLocation : null,
             'cacifo_code' => null,
             'pickup_deadline' => null,
             'return_deadline' => null,

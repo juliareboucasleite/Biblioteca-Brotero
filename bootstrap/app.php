@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Middleware\EnsurePatronLibrarianDeskMode;
 use App\Http\Middleware\EnsureStaffBibliotecaAccess;
 use App\Http\Middleware\HandleAppearance;
 use App\Http\Middleware\HandleInertiaRequests;
@@ -24,6 +25,7 @@ return Application::configure(basePath: dirname(__DIR__))
 
         $middleware->alias([
             'staff.biblioteca' => EnsureStaffBibliotecaAccess::class,
+            'patron.librarian.desk' => EnsurePatronLibrarianDeskMode::class,
         ]);
 
         $middleware->web(append: [

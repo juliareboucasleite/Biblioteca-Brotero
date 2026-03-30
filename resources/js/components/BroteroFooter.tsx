@@ -41,9 +41,11 @@ export function BroteroFooter() {
                             Licença Creative Commons Attribution-ShareAlike 4.0 International
                         </a>
                     </p>
-                    <p className="my-[4px]">Biblioteca Escolar da Escola Secundária Avelar Brotero, Coimbra</p>
                     <p className="my-[4px]">
-                        Atualização: Setembro de 2025 –{' '}
+                        {'Biblioteca Escolar da Escola Secund\u00E1ria Avelar Brotero, Coimbra'}
+                    </p>
+                    <p className="my-[4px]">
+                        {'Atualiza\u00E7\u00E3o: Setembro de 2025 –'}{' '}
                         <a className="text-[#5d7a8c] hover:text-[#e8ecf0] hover:underline" href={EMAIL}>
                             biblioteca@esab.pt
                         </a>

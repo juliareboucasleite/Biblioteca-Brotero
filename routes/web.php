@@ -3,6 +3,8 @@
 use App\Http\Controllers\Biblioteca\BibliotecaContaController;
 use App\Http\Controllers\Biblioteca\LibraryPatronAuthController;
 use App\Http\Controllers\Biblioteca\PatronFavoriteController;
+use App\Http\Controllers\Biblioteca\PatronLibrarianBookController;
+use App\Http\Controllers\Biblioteca\PatronLibrarianDeskController;
 use App\Http\Controllers\Biblioteca\PatronRankingController;
 use App\Http\Controllers\BibliotecaController;
 use App\Http\Controllers\BookController;
@@ -39,6 +41,9 @@ Route::middleware('guest:patron')->group(function (): void {
     Route::get('/biblioteca/entrar', [LibraryPatronAuthController::class, 'create'])
         ->name('biblioteca.login');
     Route::post('/biblioteca/entrar', [LibraryPatronAuthController::class, 'store']);
+    Route::get('/biblioteca/entrar/modo', [LibraryPatronAuthController::class, 'choosePortalMode'])
+        ->name('biblioteca.login.portal');
+    Route::post('/biblioteca/entrar/modo', [LibraryPatronAuthController::class, 'completePortalMode']);
 });
 
 Route::post('/biblioteca/sair', [LibraryPatronAuthController::class, 'destroy'])
@@ -74,4 +79,35 @@ Route::middleware('auth:patron')
 
         Route::post('/favoritos/{book}', [PatronFavoriteController::class, 'store'])->name('favoritos.store');
         Route::delete('/favoritos/{book}', [PatronFavoriteController::class, 'destroy'])->name('favoritos.destroy');
+    });
+
+Route::middleware(['auth:patron', 'patron.librarian.desk'])
+    ->prefix('biblioteca/conta/balcao')
+    ->name('biblioteca.conta.balcao.')
+    ->group(function (): void {
+        Route::get('/', [PatronLibrarianDeskController::class, 'index'])->name('index');
+        Route::post('/pedidos/{bookRequest}/aprovar', [PatronLibrarianDeskController::class, 'approve'])->name(
+            'approve',
+        );
+        Route::post('/pedidos/{bookRequest}/recusar', [PatronLibrarianDeskController::class, 'reject'])->name(
+            'reject',
+        );
+        Route::post('/pedidos/{bookRequest}/cancelar', [PatronLibrarianDeskController::class, 'cancel'])->name(
+            'cancel',
+        );
+        Route::post('/pedidos/{bookRequest}/nota', [PatronLibrarianDeskController::class, 'updateNote'])->name(
+            'note',
+        );
+        Route::post('/pedidos/{bookRequest}/multa', [PatronLibrarianDeskController::class, 'updateFine'])->name(
+            'fine',
+        );
+        Route::post(
+            '/pedidos/{bookRequest}/recalcular-multa',
+            [PatronLibrarianDeskController::class, 'recalcFine'],
+        )->name('recalc-fine');
+        Route::post('/pedidos/{bookRequest}/devolver', [PatronLibrarianDeskController::class, 'markReturned'])->name(
+            'return',
+        );
+        Route::get('/livros/novo', [PatronLibrarianBookController::class, 'create'])->name('livros.create');
+        Route::post('/livros', [PatronLibrarianBookController::class, 'store'])->name('livros.store');
     });

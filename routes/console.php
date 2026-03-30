@@ -9,6 +9,8 @@ use App\Services\BookReturnService;
 use App\Services\GoogleBooksService;
 use App\Support\BookCatalogLanguage;
 use App\Support\BookSynopsisPatches;
+use App\Support\CatalogTaxonomyNormalizer;
+use App\Support\SchoolLocationNormalizer;
 use Illuminate\Foundation\Inspiring;
 use Illuminate\Support\Facades\Artisan;
 
@@ -242,3 +244,53 @@ Artisan::command('books:mark-returned {book_request : ID do pedido em book_reque
     $returns->markReturned($req);
     $this->info("Pedido #{$req->id} marcado como devolvido.");
 })->purpose('Marcar requisição como devolvida (staff) e notificar favoritos');
+
+Artisan::command('catalog:normalize-entities {--dry-run : Mostrar estatísticas sem alterar a base de dados}', function () {
+    $dry = (bool) $this->option('dry-run');
+
+    if ($dry) {
+        $this->warn('Modo dry-run: nenhuma alteração será gravada.');
+    }
+
+    $a = CatalogTaxonomyNormalizer::mergeAuthors($dry);
+    $this->info('Autores:');
+    $this->table(
+        ['Métrica', 'Valor'],
+        [
+            ['Registos duplicados removidos', (string) $a['duplicate_records_removed']],
+            ['Ligações livro↔autor ajustadas', (string) $a['pivot_links_touched']],
+            ['Nomes normalizados', (string) $a['display_names_updated']],
+        ],
+    );
+
+    $c = CatalogTaxonomyNormalizer::mergeCategories($dry);
+    $this->info('Categorias:');
+    $this->table(
+        ['Métrica', 'Valor'],
+        [
+            ['Registos duplicados removidos', (string) $c['duplicate_records_removed']],
+            ['Ligações livro↔categoria ajustadas', (string) $c['pivot_links_touched']],
+            ['Nomes normalizados', (string) $c['display_names_updated']],
+        ],
+    );
+
+    if ($dry) {
+        $this->comment('Execute sem --dry-run para aplicar.');
+    }
+})->purpose('Fundir autores/categorias duplicados e corrigir maiúsculas (chave = nome em minúsculas)');
+
+Artisan::command('book-requests:normalize-school-locations', function () {
+    $n = 0;
+
+    foreach (BookRequest::query()->whereNotNull('school_location')->cursor() as $req) {
+        $before = (string) $req->school_location;
+        $after = SchoolLocationNormalizer::fix($before);
+
+        if ($after !== null && $after !== $before) {
+            $req->forceFill(['school_location' => $after])->save();
+            $n++;
+        }
+    }
+
+    $this->info("Registos de pedidos atualizados (campo escola): {$n}.");
+})->purpose('Corrigir caracteres incorrectos em book_requests.school_location (ex.: ? em vez de acentos)');

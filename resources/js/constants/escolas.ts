@@ -35,5 +35,6 @@ export const LISTA_ESCOLAS = [
     'Escola Básica e Secundária João Garcia Bacelar',
     'Escola Básica de Ceira',
     'Escola Básica Eugénio de Castro',
-    'Escola Secundária Avelar Brotero',
+    // \u00E1 garante «á» correcto mesmo com encoding estranho no ficheiro / bundler.
+    'Escola Secund\u00E1ria Avelar Brotero',
 ] as const;

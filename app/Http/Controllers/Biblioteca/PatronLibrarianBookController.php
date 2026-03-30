@@ -1,0 +1,114 @@
+<?php
+
+namespace App\Http\Controllers\Biblioteca;
+
+use App\Http\Controllers\Controller;
+use App\Models\Author;
+use App\Models\Book;
+use App\Models\Category;
+use Illuminate\Http\RedirectResponse;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Storage;
+use Illuminate\Validation\Rule;
+use Inertia\Inertia;
+use Inertia\Response;
+
+class PatronLibrarianBookController extends Controller
+{
+    public function create(Request $request): Response
+    {
+        return Inertia::render('biblioteca/conta/livro-novo');
+    }
+
+    public function store(Request $request): RedirectResponse
+    {
+        $publishedRaw = $request->input('published_year');
+        $pagesRaw = $request->input('pages');
+
+        $request->merge([
+            'isbn' => trim((string) $request->input('isbn', '')) !== '' ? trim((string) $request->input('isbn')) : null,
+            'published_year' => $publishedRaw === '' || $publishedRaw === null ? null : (int) $publishedRaw,
+            'pages' => $pagesRaw === '' || $pagesRaw === null ? null : (int) $pagesRaw,
+            'language' => trim((string) $request->input('language', '')) !== '' ? trim((string) $request->input('language')) : null,
+        ]);
+
+        $data = $request->validate([
+            'title' => ['required', 'string', 'max:500'],
+            'description' => ['nullable', 'string', 'max:65535'],
+            'isbn' => ['nullable', 'string', 'max:32', Rule::unique('books', 'isbn')],
+            'published_year' => ['nullable', 'integer', 'min:1000', 'max:2100'],
+            'pages' => ['nullable', 'integer', 'min:1', 'max:50000'],
+            'language' => ['nullable', 'string', 'max:32'],
+            'publisher' => ['nullable', 'string', 'max:255'],
+            'authors_input' => ['nullable', 'string', 'max:2000'],
+            'categories_input' => ['nullable', 'string', 'max:2000'],
+            'cover' => ['nullable', 'image', 'max:5120'],
+        ]);
+
+        $coverUrl = null;
+        if ($request->hasFile('cover')) {
+            $path = $request->file('cover')->store('book-covers', 'public');
+            $coverUrl = Storage::disk('public')->url($path);
+        }
+
+        $authors = $this->splitNames($data['authors_input'] ?? null);
+        $categories = $this->splitNames($data['categories_input'] ?? null);
+
+        $book = DB::transaction(function () use ($data, $coverUrl, $authors, $categories): Book {
+            $book = Book::query()->create([
+                'title' => $data['title'],
+                'description' => $data['description'] ?? null,
+                'isbn' => $data['isbn'] ?? null,
+                'published_year' => $data['published_year'] ?? null,
+                'pages' => $data['pages'] ?? null,
+                'language' => $data['language'] ?? null,
+                'cover_image' => $coverUrl,
+            ]);
+
+            foreach ($authors as $name) {
+                $author = Author::query()->firstOrCreate(['name' => $name]);
+                $book->authors()->syncWithoutDetaching([$author->id]);
+            }
+
+            foreach ($categories as $name) {
+                $category = Category::query()->firstOrCreate(['name' => $name]);
+                $book->categories()->syncWithoutDetaching([$category->id]);
+            }
+
+            if (! empty($data['publisher'])) {
+                $book->details()->create([
+                    'publisher' => $data['publisher'],
+                ]);
+            }
+
+            return $book;
+        });
+
+        return redirect()
+            ->route('biblioteca.livro.show', $book)
+            ->with('success', 'Livro adicionado ao catálogo.');
+    }
+
+    /**
+     * @return list<string>
+     */
+    private function splitNames(?string $raw): array
+    {
+        if ($raw === null || trim($raw) === '') {
+            return [];
+        }
+
+        $parts = preg_split('/[\n,;|]+/u', $raw, -1, PREG_SPLIT_NO_EMPTY);
+        $out = [];
+
+        foreach ($parts as $p) {
+            $t = trim((string) $p);
+            if ($t !== '') {
+                $out[] = $t;
+            }
+        }
+
+        return array_values(array_unique($out));
+    }
+}

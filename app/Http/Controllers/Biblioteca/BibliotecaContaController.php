@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Models\Book;
 use App\Models\BookRequest;
 use App\Models\LibraryPatron;
+use App\Support\SchoolLocationNormalizer;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -33,7 +34,7 @@ class BibliotecaContaController extends Controller
             'request_type' => $r->request_type,
             'status' => $r->status,
             'isbn' => $r->isbn,
-            'school_location' => $r->school_location,
+            'school_location' => SchoolLocationNormalizer::fix($r->school_location),
             'cacifo_code' => $r->cacifo_code,
             'pickup_deadline' => $r->pickup_deadline?->toIso8601String(),
             'return_deadline' => $r->return_deadline?->toIso8601String(),
@@ -41,6 +42,7 @@ class BibliotecaContaController extends Controller
             'created_at' => $r->created_at?->toIso8601String(),
             'fine_amount' => $r->fine_amount !== null ? (string) $r->fine_amount : '0.00',
             'staff_rejection_reason' => $r->staff_rejection_reason,
+            'patron_visible_note' => $r->patron_visible_note,
         ];
     }
 
@@ -50,7 +52,7 @@ class BibliotecaContaController extends Controller
 
         $pedidos = BookRequest::query()
             ->where('card_number', $patron->card_number)
-            ->where('status', 'created')
+            ->whereIn('status', ['pending', 'created'])
             ->latest('id')
             ->limit(100)
             ->get()

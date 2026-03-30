@@ -15,4 +15,6 @@ export type PedidoLeitor = {
     fine_amount?: string;
     /** Motivo indicado pela biblioteca quando o pedido foi recusado. */
     staff_rejection_reason?: string | null;
+    /** Mensagem da biblioteca visível ao aluno (balcão / modo bibliotecário). */
+    patron_visible_note?: string | null;
 };

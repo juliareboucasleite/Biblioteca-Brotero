@@ -48,6 +48,7 @@ function PatronRegisterBlock({ pedidoId, cardNumber }: { pedidoId: number; cardN
         birth_date: '',
         name: '',
         email: '',
+        is_librarian: false,
     });
 
     return (
@@ -117,6 +118,17 @@ function PatronRegisterBlock({ pedidoId, cardNumber }: { pedidoId: number; cardN
                         <p className="text-destructive text-xs">{form.errors.email}</p>
                     ) : null}
                 </div>
+                <label className="flex cursor-pointer items-start gap-2 sm:col-span-2">
+                    <input
+                        type="checkbox"
+                        className="mt-1 size-4 accent-(--brotero-primaria)"
+                        checked={form.data.is_librarian}
+                        onChange={(e) => form.setData('is_librarian', e.target.checked)}
+                    />
+                    <span className="text-sm leading-snug text-(--brotero-texto)">
+                        Cartão de bibliotecária/o — ao entrar no quiosque, escolhe modo de sessão
+                    </span>
+                </label>
             </div>
             <div className="mt-3">
                 <Button type="button" size="sm" disabled={form.processing} onClick={() => form.post(staffPatrons.store.url(), { preserveScroll: true })}>

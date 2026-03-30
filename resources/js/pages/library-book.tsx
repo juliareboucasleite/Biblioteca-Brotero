@@ -1,4 +1,4 @@
-import { Head } from '@inertiajs/react';
+import { Head, usePage } from '@inertiajs/react';
 import { isLivroPlaceholder } from '@/components/biblioteca/biblioteca-constants';
 import { BibliotecaMainRow } from '@/components/biblioteca/BibliotecaMainRow';
 import { BibliotecaPageShell } from '@/components/biblioteca/BibliotecaPageShell';
@@ -16,6 +16,7 @@ type LibraryBookProps = {
 };
 
 export default function LibraryBook({ livro }: LibraryBookProps) {
+    const { flash } = usePage().props;
     const placeholder = isLivroPlaceholder(livro.titulo);
     const bookApi = useBookDetailApi(livro.id, !placeholder);
 
@@ -37,6 +38,14 @@ export default function LibraryBook({ livro }: LibraryBookProps) {
 
             <BibliotecaPageShell>
                 <BibliotecaMainRow className="pt-[24px] pb-[48px]">
+                    {flash?.success ? (
+                        <p
+                            className="m-0 mb-[16px] rounded-md border border-emerald-200 bg-emerald-50 px-[14px] py-[10px] text-[14px] text-emerald-900"
+                            role="status"
+                        >
+                            {flash.success}
+                        </p>
+                    ) : null}
                     <p className="m-0 mb-[24px]">
                         <a
                             href="/biblioteca/livros"

@@ -13,4 +13,6 @@ export type PedidoLeitor = {
     created_at: string | null;
     /** Multa acumulada em atraso (EUR), string decimal. */
     fine_amount?: string;
+    /** Motivo indicado pela biblioteca quando o pedido foi recusado. */
+    staff_rejection_reason?: string | null;
 };

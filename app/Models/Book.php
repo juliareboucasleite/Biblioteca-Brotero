@@ -3,17 +3,18 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 
 class Book extends Model
 {
-   protected $fillable = [
+    protected $fillable = [
         'title',
         'description',
         'isbn',
         'published_year',
         'pages',
         'cover_image',
-        'language'
+        'language',
     ];
 
     public function authors()
@@ -37,7 +38,7 @@ class Book extends Model
     }
 
     /**
-     * @return \Illuminate\Database\Eloquent\Relations\BelongsToMany<LibraryPatron, $this>
+     * @return BelongsToMany<LibraryPatron, $this>
      */
     public function favoritedByPatrons()
     {
@@ -51,9 +52,8 @@ class Book extends Model
     public function isAvailableForRequest(): bool
     {
         return ! $this->bookRequests()
-            ->where('status', 'created')
+            ->whereIn('status', ['pending', 'created'])
             ->whereNull('returned_at')
             ->exists();
     }
 }
-

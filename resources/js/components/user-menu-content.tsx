@@ -1,5 +1,5 @@
-import { Link, router } from '@inertiajs/react';
-import { LogOut } from 'lucide-react';
+import { Link, router, usePage } from '@inertiajs/react';
+import { BookMarked, LogOut } from 'lucide-react';
 import {
     DropdownMenuItem,
     DropdownMenuLabel,
@@ -15,6 +15,7 @@ type Props = {
 };
 
 export function UserMenuContent({ user }: Props) {
+    const { staffBiblioteca } = usePage().props;
     const cleanup = useMobileNavigation();
 
     const handleLogout = () => {
@@ -30,6 +31,17 @@ export function UserMenuContent({ user }: Props) {
                 </div>
             </DropdownMenuLabel>
             <DropdownMenuSeparator />
+            {staffBiblioteca?.canAccessPedidos && staffBiblioteca.pedidosUrl ? (
+                <DropdownMenuItem asChild>
+                    <Link
+                        className="block w-full cursor-pointer"
+                        href={staffBiblioteca.pedidosUrl}
+                    >
+                        <BookMarked className="mr-2" />
+                        Pedidos (biblioteca)
+                    </Link>
+                </DropdownMenuItem>
+            ) : null}
             {/* Item de settings removido para simplificar a app da biblioteca */}
             <DropdownMenuSeparator />
             <DropdownMenuItem asChild>

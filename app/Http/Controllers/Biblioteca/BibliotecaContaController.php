@@ -6,8 +6,8 @@ use App\Http\Controllers\Controller;
 use App\Models\Book;
 use App\Models\BookRequest;
 use App\Models\LibraryPatron;
-use Illuminate\Http\Request;
 use Illuminate\Http\RedirectResponse;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Inertia\Inertia;
 use Inertia\Response;
@@ -40,6 +40,7 @@ class BibliotecaContaController extends Controller
             'returned_at' => $r->returned_at?->toIso8601String(),
             'created_at' => $r->created_at?->toIso8601String(),
             'fine_amount' => $r->fine_amount !== null ? (string) $r->fine_amount : '0.00',
+            'staff_rejection_reason' => $r->staff_rejection_reason,
         ];
     }
 
@@ -73,7 +74,7 @@ class BibliotecaContaController extends Controller
             abort(403);
         }
 
-        if ($bookRequest->status !== 'created') {
+        if (! in_array($bookRequest->status, ['created', 'pending'], true)) {
             return back()->with('error', 'Este pedido já não pode ser cancelado.');
         }
 
@@ -88,7 +89,7 @@ class BibliotecaContaController extends Controller
 
         $historico = BookRequest::query()
             ->where('card_number', $patron->card_number)
-            ->whereIn('status', ['expired', 'returned', 'cancelled'])
+            ->whereIn('status', ['expired', 'returned', 'cancelled', 'rejected'])
             ->latest('id')
             ->limit(100)
             ->get()

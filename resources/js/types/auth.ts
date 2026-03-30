@@ -19,6 +19,12 @@ export type LibraryPatronAuth = {
     points?: number;
 };
 
+/** Utilizadores web com acesso ao painel /staff/pedidos (config `biblioteca.staff_user_emails`). */
+export type StaffBibliotecaShared = {
+    canAccessPedidos: boolean;
+    pedidosUrl: string | null;
+};
+
 export type Auth = {
     user: User | null;
     patron: LibraryPatronAuth | null;

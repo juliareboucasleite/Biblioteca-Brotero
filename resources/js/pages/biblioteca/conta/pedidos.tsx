@@ -1,14 +1,39 @@
 import { Link, router, usePage } from '@inertiajs/react';
-import { useState } from 'react';
+import { useMemo, useState } from 'react';
 import { BibliotecaContaLayout } from '@/components/biblioteca/BibliotecaContaLayout';
-import { Dialog, DialogContent, DialogDescription, DialogFooter,DialogHeader, DialogTitle,} from '@/components/ui/dialog';
+import {
+    Dialog,
+    DialogContent,
+    DialogDescription,
+    DialogFooter,
+    DialogHeader,
+    DialogTitle,
+} from '@/components/ui/dialog';
 import { Spinner } from '@/components/ui/spinner';
 import { formatDt, formatEur } from '@/lib/format';
+import { cn } from '@/lib/utils';
 import type { PedidoLeitor } from '@/types';
 
 type Props = {
     pedidos: PedidoLeitor[];
 };
+
+function EstadoPedidoBadge({ status }: { status: string }) {
+    const isPending = status === 'pending';
+
+    return (
+        <span
+            className={cn(
+                'inline-flex shrink-0 rounded-full px-[10px] py-[3px] text-[12px] font-semibold leading-tight',
+                isPending
+                    ? 'border border-amber-200 bg-amber-50 text-amber-950'
+                    : 'border border-emerald-200 bg-emerald-50 text-emerald-900',
+            )}
+        >
+            {isPending ? 'À aguardar aprovação' : 'Aprovado — em curso'}
+        </span>
+    );
+}
 
 export default function BibliotecaContaPedidos({ pedidos }: Props) {
     const { flash } = usePage().props;
@@ -16,6 +41,21 @@ export default function BibliotecaContaPedidos({ pedidos }: Props) {
     const [pendingId, setPendingId] = useState<number | null>(null);
 
     const isBusy = pendingId !== null;
+
+    const { pendentes, ativos } = useMemo(() => {
+        const p: PedidoLeitor[] = [];
+        const a: PedidoLeitor[] = [];
+
+        for (const item of pedidos) {
+            if (item.status === 'pending') {
+                p.push(item);
+            } else if (item.status === 'created') {
+                a.push(item);
+            }
+        }
+
+        return { pendentes: p, ativos: a };
+    }, [pedidos]);
 
     function handleConfirmCancel(): void {
         if (!confirmPedido) {
@@ -33,6 +73,55 @@ export default function BibliotecaContaPedidos({ pedidos }: Props) {
                 setConfirmPedido(null);
             },
         });
+    }
+
+    function renderPedidoCard(p: PedidoLeitor): JSX.Element {
+        const isPending = p.status === 'pending';
+
+        return (
+            <li
+                key={p.id}
+                className="flex flex-col gap-[12px] p-[16px] bg-(--brotero-branco) border border-(--brotero-borda) rounded-(--raio) sm:flex-row sm:items-center sm:gap-[16px]"
+            >
+                <div className="min-w-0 flex-1">
+                    <p className="m-0 mb-[8px] flex flex-wrap items-center gap-2 text-[16px] font-bold text-(--brotero-texto)">
+                        <span className="min-w-0">{p.book_title}</span>
+                        <EstadoPedidoBadge status={p.status} />
+                    </p>
+                    <p className="m-0 mb-[4px] text-[13px] text-(--brotero-texto-cinza)">
+                        Tipo: {p.request_type === 'escola' ? 'Retirada na escola' : 'Cacifo'}
+                        {p.school_location ? ` · ${p.school_location}` : ''}
+                        {!isPending && p.cacifo_code ? ` · Código ${p.cacifo_code}` : ''}
+                    </p>
+                    {isPending ? (
+                        <p className="m-0 text-[13px] text-(--brotero-texto-cinza)">
+                            A biblioteca irá validar o pedido. Assim que for aprovado, verá aqui o prazo de levantamento,
+                            a devolução e eventuais instruções do cacifo.
+                        </p>
+                    ) : (
+                        <>
+                            <p className="m-0 text-[13px] text-(--brotero-texto-cinza)">
+                                Levantar até: {formatDt(p.pickup_deadline)} · Devolução:{' '}
+                                {formatDt(p.return_deadline)}
+                            </p>
+                            <p className="m-0 mt-[8px] text-[13px] font-semibold text-(--brotero-texto)">
+                                Multa estimada: {formatEur(p.fine_amount)}
+                            </p>
+                        </>
+                    )}
+                </div>
+                <div className="flex shrink-0 justify-center sm:justify-end sm:self-center">
+                    <button
+                        type="button"
+                        className="px-[12px] py-[6px] text-[13px] font-semibold rounded-(--raio) border border-(--brotero-borda) bg-(--brotero-branco) text-(--brotero-texto) cursor-pointer hover:bg-(--brotero-laranja-hover) whitespace-nowrap disabled:cursor-not-allowed disabled:opacity-60"
+                        disabled={isBusy}
+                        onClick={() => setConfirmPedido(p)}
+                    >
+                        Cancelar pedido
+                    </button>
+                </div>
+            </li>
+        );
     }
 
     return (
@@ -53,8 +142,22 @@ export default function BibliotecaContaPedidos({ pedidos }: Props) {
                     {flash.error}
                 </p>
             ) : null}
+
+            <h2 className="m-0 mb-[16px] text-[1.15rem] font-bold text-(--brotero-texto)">
+                À aguardar aprovação
+            </h2>
+            {pendentes.length === 0 ? (
+                <p className="m-0 mb-[28px] rounded-(--raio) border border-dashed border-(--brotero-borda) bg-(--brotero-branco) p-[16px] text-(--brotero-texto-cinza)">
+                    Não tem pedidos pendentes de validação.
+                </p>
+            ) : (
+                <ul className="m-0 mb-[28px] flex list-none flex-col gap-[12px] p-0">
+                    {pendentes.map(renderPedidoCard)}
+                </ul>
+            )}
+
             <h2 className="m-0 mb-[16px] text-[1.15rem] font-bold text-(--brotero-texto)">Pedidos ativos</h2>
-            {pedidos.length === 0 ? (
+            {ativos.length === 0 ? (
                 <p className="m-0 p-[16px] bg-(--brotero-branco) border border-dashed border-(--brotero-borda) rounded-(--raio) text-(--brotero-texto-cinza)">
                     Não tem requisições em curso. Explore o{' '}
                     <Link href="/biblioteca" className="text-(--brotero-texto-link) hover:underline">
@@ -63,42 +166,7 @@ export default function BibliotecaContaPedidos({ pedidos }: Props) {
                     .
                 </p>
             ) : (
-                <ul className="m-0 p-0 list-none flex flex-col gap-[12px]">
-                    {pedidos.map((p) => (
-                        <li
-                            key={p.id}
-                            className="flex flex-col gap-[12px] p-[16px] bg-(--brotero-branco) border border-(--brotero-borda) rounded-(--raio) sm:flex-row sm:items-center sm:gap-[16px]"
-                        >
-                            <div className="min-w-0 flex-1">
-                                <p className="m-0 mb-[6px] text-[16px] font-bold text-(--brotero-texto)">
-                                    {p.book_title}
-                                </p>
-                                <p className="m-0 mb-[4px] text-[13px] text-(--brotero-texto-cinza)">
-                                    Tipo: {p.request_type === 'escola' ? 'Retirada na escola' : 'Cacifo'}
-                                    {p.school_location ? ` · ${p.school_location}` : ''}
-                                    {p.cacifo_code ? ` · Código ${p.cacifo_code}` : ''}
-                                </p>
-                                <p className="m-0 text-[13px] text-(--brotero-texto-cinza)">
-                                    Levantar até: {formatDt(p.pickup_deadline)} · Devolução:{' '}
-                                    {formatDt(p.return_deadline)}
-                                </p>
-                                <p className="m-0 mt-[8px] text-[13px] font-semibold text-(--brotero-texto)">
-                                    Multa estimada: {formatEur(p.fine_amount)}
-                                </p>
-                            </div>
-                            <div className="flex shrink-0 justify-center sm:justify-end sm:self-center">
-                                <button
-                                    type="button"
-                                    className="px-[12px] py-[6px] text-[13px] font-semibold rounded-(--raio) border border-(--brotero-borda) bg-(--brotero-branco) text-(--brotero-texto) cursor-pointer hover:bg-(--brotero-laranja-hover) whitespace-nowrap disabled:cursor-not-allowed disabled:opacity-60"
-                                    disabled={isBusy}
-                                    onClick={() => setConfirmPedido(p)}
-                                >
-                                    Cancelar pedido
-                                </button>
-                            </div>
-                        </li>
-                    ))}
-                </ul>
+                <ul className="m-0 p-0 list-none flex flex-col gap-[12px]">{ativos.map(renderPedidoCard)}</ul>
             )}
 
             <Dialog

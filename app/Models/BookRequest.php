@@ -7,7 +7,7 @@ use Illuminate\Database\Eloquent\Model;
 /**
  * Requisição de livro.
  *
- * status: created | expired | returned | cancelled
+ * status: pending | created | rejected | expired | returned | cancelled
  */
 class BookRequest extends Model
 {
@@ -22,6 +22,8 @@ class BookRequest extends Model
         'pickup_deadline',
         'return_deadline',
         'status',
+        'staff_rejection_reason',
+        'staff_reviewed_at',
         'returned_at',
         'fine_amount',
         'fine_applied_at',
@@ -43,6 +45,7 @@ class BookRequest extends Model
         return [
             'pickup_deadline' => 'datetime',
             'return_deadline' => 'datetime',
+            'staff_reviewed_at' => 'datetime',
             'returned_at' => 'datetime',
             'fine_applied_at' => 'datetime',
             'fine_amount' => 'decimal:2',
@@ -52,4 +55,3 @@ class BookRequest extends Model
         ];
     }
 }
-

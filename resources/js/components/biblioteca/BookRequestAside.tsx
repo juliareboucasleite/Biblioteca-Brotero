@@ -67,6 +67,7 @@ export function BookRequestAside({ livro, placeholder }: BookRequestAsideProps) 
                 ok?: boolean;
                 error?: string;
                 message?: string;
+                status?: string;
                 errors?: Record<string, unknown> | null;
             };
 
@@ -95,7 +96,12 @@ export function BookRequestAside({ livro, placeholder }: BookRequestAsideProps) 
                 return;
             }
 
-            setSuccessMessage(data.message ?? 'Pedido criado com sucesso.');
+            const fallbackPending =
+                data.status === 'pending'
+                    ? 'Pedido registado. Está pendente de aprovação pela biblioteca; consulte «Os meus pedidos» após entrar com o cartão.'
+                    : 'Pedido criado com sucesso.';
+
+            setSuccessMessage(data.message ?? fallbackPending);
         } catch {
             setSubmitError('Falha de rede ao requisitar. Tente novamente.');
         }

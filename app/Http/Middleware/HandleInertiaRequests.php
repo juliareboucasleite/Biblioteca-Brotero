@@ -3,6 +3,7 @@
 namespace App\Http\Middleware;
 
 use App\Models\LibraryPatron;
+use App\Support\StaffBibliotecaAccess;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Schema;
@@ -38,12 +39,19 @@ class HandleInertiaRequests extends Middleware
      */
     public function share(Request $request): array
     {
+        $staffUser = $request->user('web');
+        $canStaffPedidos = StaffBibliotecaAccess::canAccessStaffPanel($staffUser);
+
         return [
             ...parent::share($request),
             'name' => config('app.name'),
             'auth' => [
-                'user' => $request->user('web'),
+                'user' => $staffUser,
                 'patron' => $this->patronForFrontend($request->user('patron')),
+            ],
+            'staffBiblioteca' => [
+                'canAccessPedidos' => $canStaffPedidos,
+                'pedidosUrl' => $canStaffPedidos ? route('staff.pedidos.index') : null,
             ],
             'favoriteBookIds' => $this->favoriteBookIds($request),
             'sidebarOpen' => ! $request->hasCookie('sidebar_state') || $request->cookie('sidebar_state') === 'true',

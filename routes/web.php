@@ -5,9 +5,12 @@ use App\Http\Controllers\Biblioteca\LibraryPatronAuthController;
 use App\Http\Controllers\Biblioteca\PatronFavoriteController;
 use App\Http\Controllers\Biblioteca\PatronRankingController;
 use App\Http\Controllers\BibliotecaController;
-use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\BookController;
 use App\Http\Controllers\BookRequestController;
+use App\Http\Controllers\Staff\StaffPatronController;
+use App\Http\Controllers\Staff\StaffPedidosController;
+use Illuminate\Foundation\Http\Middleware\VerifyCsrfToken;
+use Illuminate\Support\Facades\Route;
 
 // Home da aplicação: redireciona sempre para a Biblioteca (React)
 Route::redirect('/', '/biblioteca')->name('home');
@@ -24,7 +27,7 @@ Route::get('/biblioteca/livro', [BibliotecaController::class, 'livro'])->name('b
 Route::post('/books/isbn', [BookController::class, 'storeFromIsbn']);
 Route::get('/books/{id}/details', [BookController::class, 'showDetails']);
 Route::post('/biblioteca/requisitar', [BookRequestController::class, 'store'])
-    ->withoutMiddleware([\Illuminate\Foundation\Http\Middleware\VerifyCsrfToken::class])
+    ->withoutMiddleware([VerifyCsrfToken::class])
     ->name('biblioteca.requisitar');
 
 /*
@@ -41,6 +44,20 @@ Route::middleware('guest:patron')->group(function (): void {
 Route::post('/biblioteca/sair', [LibraryPatronAuthController::class, 'destroy'])
     ->middleware('auth:patron')
     ->name('biblioteca.logout');
+
+Route::middleware(['auth', 'staff.biblioteca'])
+    ->prefix('staff')
+    ->name('staff.')
+    ->group(function (): void {
+        Route::get('/pedidos', [StaffPedidosController::class, 'index'])->name('pedidos.index');
+        Route::post('/pedidos/{bookRequest}/aprovar', [StaffPedidosController::class, 'approve'])->name(
+            'pedidos.approve',
+        );
+        Route::post('/pedidos/{bookRequest}/recusar', [StaffPedidosController::class, 'reject'])->name(
+            'pedidos.reject',
+        );
+        Route::post('/leitores', [StaffPatronController::class, 'store'])->name('patrons.store');
+    });
 
 Route::middleware('auth:patron')
     ->prefix('biblioteca/conta')

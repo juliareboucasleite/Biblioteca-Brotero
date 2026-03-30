@@ -7,16 +7,21 @@ type Props = {
     historico: PedidoLeitor[];
 };
 
+type HistoricoStatus = 'returned' | 'expired' | 'cancelled' | 'rejected';
+
 function estadoLabel(status: string): string {
-    switch (status) {
+    switch (status as HistoricoStatus) {
         case 'returned':
             return 'Devolvido';
         case 'expired':
             return 'Expirado / encerrado';
         case 'cancelled':
             return 'Cancelado por si';
-        default:
+        case 'rejected':
+            return 'Recusado pela biblioteca';
+        default: {
             return status;
+        }
     }
 }
 
@@ -30,7 +35,9 @@ function EstadoBadge({ status }: { status: string }) {
               ? 'bg-amber-50 text-amber-900 border border-amber-200'
               : status === 'cancelled'
                 ? 'bg-(--brotero-fundo) text-(--brotero-texto) border border-(--brotero-borda)'
-                : 'bg-neutral-100 text-neutral-800 border border-neutral-200';
+                : status === 'rejected'
+                  ? 'bg-red-50 text-red-900 border border-red-200'
+                  : 'bg-neutral-100 text-neutral-800 border border-neutral-200';
 
     return (
         <span
@@ -52,7 +59,7 @@ export default function BibliotecaContaHistorico({ historico }: Props) {
             </h2>
             {historico.length === 0 ? (
                 <p className="m-0 p-[16px] bg-(--brotero-branco) border border-dashed border-(--brotero-borda) rounded-(--raio) text-(--brotero-texto-cinza)">
-                    Ainda não há pedidos concluídos, cancelados ou expirados associados ao seu cartão.
+                    Ainda não há pedidos concluídos, cancelados, recusados ou expirados associados ao seu cartão.
                 </p>
             ) : (
                 <ul className="m-0 p-0 list-none flex flex-col gap-[12px]">
@@ -69,6 +76,12 @@ export default function BibliotecaContaHistorico({ historico }: Props) {
                                 Pedido: {formatDt(p.created_at)}
                                 {p.returned_at ? ` · Devolvido: ${formatDt(p.returned_at)}` : ''}
                             </p>
+                            {p.status === 'rejected' && p.staff_rejection_reason ? (
+                                <p className="m-0 mt-[8px] border-l-2 border-red-200 pl-[10px] text-[13px] text-(--brotero-texto)">
+                                    <span className="font-semibold text-(--brotero-texto-cinza)">Motivo: </span>
+                                    {p.staff_rejection_reason}
+                                </p>
+                            ) : null}
                         </li>
                     ))}
                 </ul>

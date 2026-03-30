@@ -1,39 +1,57 @@
 <?php
 
-use Illuminate\Foundation\Inspiring;
-use Illuminate\Support\Facades\Artisan;
 use App\Models\Author;
 use App\Models\Book;
-use App\Models\Category;
 use App\Models\BookRequest;
-use App\Services\BookReturnService;
+use App\Models\Category;
 use App\Services\BookFineCalculator;
+use App\Services\BookReturnService;
 use App\Services\GoogleBooksService;
+use App\Support\BookCatalogLanguage;
+use App\Support\BookSynopsisPatches;
+use Illuminate\Foundation\Inspiring;
+use Illuminate\Support\Facades\Artisan;
 
 Artisan::command('inspire', function () {
     $this->comment(Inspiring::quote());
 })->purpose('Display an inspiring quote');
 
-Artisan::command('books:enrich-google {--limit=50 : Máximo de livros a atualizar} {--force : Sobrescrever campos já preenchidos} {--use-title : Tentar enriquecer também por título quando não há ISBN}', function (GoogleBooksService $googleBooks) {
+Artisan::command('books:enrich-google {--limit=50 : Máximo de livros a atualizar} {--force : Sobrescrever campos já preenchidos} {--use-title : Tentar enriquecer também por título quando não há ISBN} {--only-corrupted : Só livros com "?" em título, descrição ou língua (importação UTF-8 falhada)} {--ids= : Apenas estes IDs de livros (separados por vírgula)}', function (GoogleBooksService $googleBooks) {
     $limit = (int) $this->option('limit');
     $force = (bool) $this->option('force');
     $useTitle = (bool) $this->option('use-title');
+    $onlyCorrupted = (bool) $this->option('only-corrupted');
+    $idList = array_values(array_filter(array_map(static function (string $v): int {
+        return (int) trim($v);
+    }, explode(',', (string) $this->option('ids'))), static fn (int $v): bool => $v > 0));
 
     $query = Book::query();
 
-    if (!$useTitle) {
-        $query->whereNotNull('isbn')
-            ->where('isbn', '!=', '');
-    }
+    if ($idList !== []) {
+        $query->whereIn('id', $idList);
+    } else {
+        if ($onlyCorrupted) {
+            $query->where(function ($q) {
+                $q->where('title', 'like', '%?%')
+                    ->orWhere('description', 'like', '%?%')
+                    ->orWhere('language', 'like', '%?%');
+            });
+        }
 
-    if (!$force) {
-        $query->where(function ($q) {
-            $q->whereNull('cover_image')
-                ->orWhereNull('description')
-                ->orWhereNull('language')
-                ->orWhereNull('pages')
-                ->orWhereNull('published_year');
-        });
+        if (! $useTitle) {
+            $query->whereNotNull('isbn')
+                ->where('isbn', '!=', '');
+        }
+
+        if (! $force && ! $onlyCorrupted) {
+            $query->where(function ($q) {
+                $q->whereNull('cover_image')
+                    ->orWhereNull('description')
+                    ->orWhereNull('language')
+                    ->orWhereNull('pages')
+                    ->orWhereNull('published_year');
+            });
+        }
     }
 
     $books = $query->orderByDesc('id')->limit($limit)->get();
@@ -47,19 +65,25 @@ Artisan::command('books:enrich-google {--limit=50 : Máximo de livros a atualiza
 
         if ($isbn !== '') {
             $data = $googleBooks->getByIsbn($isbn);
-        } elseif ($useTitle && !empty($book->title)) {
+        } elseif ($useTitle && ! empty($book->title)) {
             // Best-effort: procura por título.
-            $q = 'intitle:' . $book->title;
+            $q = 'intitle:'.$book->title;
             $data = $googleBooks->getByQuery($q);
         } else {
             $skipped++;
+
             continue;
         }
 
-        if (!$data) {
+        if ($data !== null && is_string($book->title) && trim($book->title) !== '') {
+            $data = $googleBooks->fillMissingDescription($data, $book->title, $isbn !== '' ? $isbn : null);
+        }
+
+        if (! $data) {
             $failed++;
             $label = $isbn !== '' ? "ISBN {$isbn}" : "Título \"{$book->title}\"";
             $this->warn("{$label}: não encontrado na Google Books");
+
             continue;
         }
 
@@ -75,20 +99,59 @@ Artisan::command('books:enrich-google {--limit=50 : Máximo de livros a atualiza
             }
         };
 
-        $setIf('title', 'title');
-        $setIf('description', 'description');
-        $setIf('published_year', 'published_year');
-        $setIf('pages', 'pages');
-        $setIf('cover_image', 'cover');
-        $setIf('language', 'language');
+        $setTextHealing = function (string $field, string $key) use (&$updates, $book, $data): void {
+            $newValue = $data[$key] ?? null;
+            if (! is_string($newValue) || $newValue === '') {
+                return;
+            }
+            if (str_contains($newValue, '?')) {
+                return;
+            }
+            $current = (string) ($book->{$field} ?? '');
+            if ($current === '' || str_contains($current, '?')) {
+                $updates[$field] = $newValue;
+            }
+        };
 
-        if (!empty($updates)) {
+        if ($onlyCorrupted) {
+            $setTextHealing('title', 'title');
+            $setTextHealing('description', 'description');
+            $rawLang = $data['language'] ?? null;
+            $mappedLang = BookCatalogLanguage::fromGoogleCode(is_string($rawLang) ? $rawLang : null)
+                ?? (is_string($rawLang) ? $rawLang : null);
+            if (is_string($mappedLang) && $mappedLang !== '') {
+                $currentLang = (string) ($book->language ?? '');
+                if ($currentLang === '' || str_contains($currentLang, '?')) {
+                    $updates['language'] = $mappedLang;
+                }
+            }
+            if ($force) {
+                $setIf('published_year', 'published_year');
+                $setIf('pages', 'pages');
+                $setIf('cover_image', 'cover');
+            }
+        } else {
+            $setIf('title', 'title');
+            $setIf('description', 'description');
+            $setIf('published_year', 'published_year');
+            $setIf('pages', 'pages');
+            $setIf('cover_image', 'cover');
+            $rawLang = $data['language'] ?? null;
+            $mappedLang = BookCatalogLanguage::fromGoogleCode(is_string($rawLang) ? $rawLang : null)
+                ?? (is_string($rawLang) ? $rawLang : null);
+            if ($mappedLang !== null && $mappedLang !== '') {
+                $data = array_merge($data, ['language' => $mappedLang]);
+            }
+            $setIf('language', 'language');
+        }
+
+        if (! empty($updates)) {
             $book->fill($updates)->save();
         }
 
-        if (!empty($data['authors'])) {
+        if (! empty($data['authors'])) {
             foreach ($data['authors'] as $authorName) {
-                if (!is_string($authorName) || trim($authorName) === '') {
+                if (! is_string($authorName) || trim($authorName) === '') {
                     continue;
                 }
                 $author = Author::firstOrCreate(['name' => trim($authorName)]);
@@ -96,9 +159,9 @@ Artisan::command('books:enrich-google {--limit=50 : Máximo de livros a atualiza
             }
         }
 
-        if (!empty($data['categories'])) {
+        if (! empty($data['categories'])) {
             foreach ($data['categories'] as $categoryName) {
-                if (!is_string($categoryName) || trim($categoryName) === '') {
+                if (! is_string($categoryName) || trim($categoryName) === '') {
                     continue;
                 }
                 $category = Category::firstOrCreate(['name' => trim($categoryName)]);
@@ -106,7 +169,7 @@ Artisan::command('books:enrich-google {--limit=50 : Máximo de livros a atualiza
             }
         }
 
-        if (!empty($data['publisher']) && (is_string($data['publisher']))) {
+        if (! empty($data['publisher']) && (is_string($data['publisher']))) {
             $publisher = trim($data['publisher']);
             if ($publisher !== '') {
                 $book->details()->updateOrCreate(
@@ -116,7 +179,7 @@ Artisan::command('books:enrich-google {--limit=50 : Máximo de livros a atualiza
             }
         }
 
-        if (!empty($updates) || !empty($data['authors']) || !empty($data['categories']) || !empty($data['publisher'])) {
+        if (! empty($updates) || ! empty($data['authors']) || ! empty($data['categories']) || ! empty($data['publisher'])) {
             $updated++;
         } else {
             $skipped++;
@@ -125,6 +188,18 @@ Artisan::command('books:enrich-google {--limit=50 : Máximo de livros a atualiza
 
     $this->info("Concluído. Atualizados: {$updated}, sem alterações: {$skipped}, falhas: {$failed}.");
 })->purpose('Enriquecer livros com dados da Google Books (por ISBN)');
+
+Artisan::command('books:apply-synopsis-patches', function () {
+    $patches = BookSynopsisPatches::all();
+    $n = 0;
+    foreach ($patches as $id => $text) {
+        $updated = Book::query()->whereKey($id)->update(['description' => $text]);
+        if ($updated > 0) {
+            $n++;
+        }
+    }
+    $this->info("Sinopses aplicadas: {$n} livro(s).");
+})->purpose('Aplicar sinopses UTF-8 manuais (quando a Google Books não tem texto fiável)');
 
 Artisan::command('book-requests:expire', function () {
     $now = now();

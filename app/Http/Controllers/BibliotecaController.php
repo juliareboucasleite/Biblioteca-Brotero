@@ -2,14 +2,15 @@
 
 namespace App\Http\Controllers;
 
-use Illuminate\Http\Request;
-use Illuminate\Support\Collection;
-use Inertia\Inertia;
-use Inertia\Response;
 use App\Models\Author;
 use App\Models\Book;
 use App\Models\Category;
 use App\Services\PatronRankingService;
+use App\Support\CategoryLabel;
+use Illuminate\Http\Request;
+use Illuminate\Support\Collection;
+use Inertia\Inertia;
+use Inertia\Response;
 
 class BibliotecaController extends Controller
 {
@@ -115,7 +116,11 @@ class BibliotecaController extends Controller
         $categorias = Category::query()
             ->orderBy('name')
             ->get(['id', 'name'])
-            ->map(fn (Category $c) => ['id' => (string) $c->id, 'name' => (string) $c->name])
+            ->map(fn (Category $c) => [
+                'id' => (string) $c->id,
+                'name' => CategoryLabel::toPortuguese((string) $c->name),
+            ])
+            ->sortBy('name', SORT_NATURAL | SORT_FLAG_CASE)
             ->values()
             ->all();
 
@@ -156,7 +161,11 @@ class BibliotecaController extends Controller
         $categorias = Category::query()
             ->orderBy('name')
             ->get(['id', 'name'])
-            ->map(fn (Category $c) => ['id' => (string) $c->id, 'name' => (string) $c->name])
+            ->map(fn (Category $c) => [
+                'id' => (string) $c->id,
+                'name' => CategoryLabel::toPortuguese((string) $c->name),
+            ])
+            ->sortBy('name', SORT_NATURAL | SORT_FLAG_CASE)
             ->values()
             ->all();
 

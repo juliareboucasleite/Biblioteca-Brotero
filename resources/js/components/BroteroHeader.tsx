@@ -14,7 +14,7 @@ export function BroteroHeader() {
           : null;
 
     return (
-        <header className="bg-(--brotero-nav) text-white py-[10px] min-h-[60px] mb-[30px]">
+        <header className="bg-(--brotero-nav) text-white py-[10px] min-h-[60px] mb-2">
             <div className="w-full max-w-(--max-largura) mx-auto px-[10px]">
                 <div className="flex items-center gap-[30px] flex-wrap max-[768px]:flex-col max-[768px]:items-stretch">
                     <a

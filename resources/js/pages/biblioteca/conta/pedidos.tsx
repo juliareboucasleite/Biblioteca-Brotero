@@ -1,14 +1,7 @@
 import { Link, router, usePage } from '@inertiajs/react';
 import { useState } from 'react';
 import { BibliotecaContaLayout } from '@/components/biblioteca/BibliotecaContaLayout';
-import {
-    Dialog,
-    DialogContent,
-    DialogDescription,
-    DialogFooter,
-    DialogHeader,
-    DialogTitle,
-} from '@/components/ui/dialog';
+import { Dialog, DialogContent, DialogDescription, DialogFooter,DialogHeader, DialogTitle,} from '@/components/ui/dialog';
 import { Spinner } from '@/components/ui/spinner';
 import { formatDt, formatEur } from '@/lib/format';
 import type { PedidoLeitor } from '@/types';

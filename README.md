@@ -37,32 +37,65 @@ php artisan serve
 
 Configure variáveis em `.env` (base de dados, `APP_URL`, opções em `config/biblioteca.php` quando aplicável).
 
-## Capturas de ecrã (prints)
+## Capturas de ecrã
 
-Coloque os ficheiros de imagem na pasta **`docs/images/`** (PNG, JPG ou WebP). No `README`, use caminhos relativos à raiz do repositório.
+Imagens em [`docs/images/`](docs/images/). Para acrescentar mais prints, guarde-os nessa pasta e replique o bloco `###` + `![...](docs/images/ficheiro.png)` abaixo.
 
-Exemplos de nomes sugeridos (crie os ficheiros à medida que for guardando os prints):
+### Catálogo e descoberta
 
-| Ficheiro sugerido        | Sugestão de conteúdo        |
-|--------------------------|-----------------------------|
-| `catalogo.png`           | Página inicial do catálogo |
-| `livro-detalhe.png`      | Ficha de um livro          |
-| `todos-livros.png`       | Listagem com índice A–Z    |
-| `quiosque-login.png`     | Entrada com cartão         |
-| `conta-pedidos.png`      | Os meus pedidos            |
-| `balcao.png`             | Balcão — pedidos           |
+**Página inicial** — pesquisa, categorias, novidades, recomendações e «os mais pedidos».
 
-Depois de adicionar imagens, descomente ou copie blocos como:
+![Página inicial do catálogo](docs/images/Pagina-Inicial.png)
 
-```markdown
-### Catálogo
+**Ranking de leitores** — gamificação por pontos.
 
-![Catálogo](docs/images/catalogo.png)
+![Ranking de leitores](docs/images/Ranking-leitores.png)
 
-### Ficha do livro
+**Todos os livros** — listagem completa com índice alfabético.
 
-![Detalhe do livro](docs/images/livro-detalhe.png)
-```
+![Todos os livros](docs/images/Todos-os-livros.png)
+
+### Conta do leitor
+
+**Pedidos activos** — requisições em curso e prazos.
+
+![Pedidos activos](docs/images/Pedidos-ativos.png)
+
+**Histórico** — pedidos concluídos ou recusados.
+
+![Histórico](docs/images/Historico.png)
+
+**Favoritos** — livros marcados com o coração.
+
+![Favoritos](docs/images/Favoritos-onde-aparece-livros-marcados.png)
+
+**Perfil** — dados do cartão (ex.: utilizadora bibliotecária no quiosque).
+
+![Perfil do utilizador](docs/images/Perfil-usuario-bibliotecario.png)
+
+### Requisitar um livro
+
+**Informação na ficha do livro** — zona de requisição e escolha de local.
+
+![Informação ao requisitar](docs/images/Informacao-ao.requisitar.png)
+
+**Modo aluno** — fluxo de requisição no catálogo.
+
+![Requisição como aluno](docs/images/modo-aluno-requisisitando.png)
+
+**Após pedir (cacifo)** — confirmação do tipo de levantamento.
+
+![Após pedir cacifo](docs/images/apos-pedir-um-cacifo.png)
+
+### Modo bibliotecário (balcão)
+
+**Adicionar livros** — entrada manual no catálogo.
+
+![Adicionar livros](docs/images/Modo-Bibliotecario-Adicionar-livros.png)
+
+**Balcão** — gestão de pedidos de todos os cartões.
+
+![Livros e pedidos no balcão](docs/images/Os-livros-do-balcao.png)
 
 ## Licença
 

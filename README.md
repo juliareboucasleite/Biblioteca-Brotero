@@ -2,24 +2,11 @@
 
 Este projeto é uma aplicação web para o catálogo e requisições da **Biblioteca Escolar**, desenvolvido no âmbito de estágio. Futuramente, caso a Escola Secundária Brotero tenha interesse em adquiri-lo oficialmente, pode entrar em contacto para mais informações.
 
-## Stack
+Este projeto foi desenvolvido utilizando Laravel 12 e PHP 8.2 ou superior no backend. O frontend utiliza React 19 em conjunto com Inertia.js e Tailwind CSS, proporcionando uma experiência moderna ao utilizador. Para autenticação, são usados o Fortify para os utilizadores web e o guard `patron`, que permite acesso pelo quiosque através do número do cartão e a data de nascimento.
 
-- **Backend:** Laravel 12, PHP 8.2+
-- **Frontend:** React 19, Inertia.js, Tailwind CSS
-- **Auth:** Fortify (utilizadores web), guard `patron` (cartão + data de nascimento no quiosque)
+Entre as principais funcionalidades, destaca-se o catálogo público disponível na rota `/biblioteca`, onde é possível consultar livros e aplicar filtros. Os utilizadores têm acesso à sua conta, onde gerem pedidos, histórico, favoritos e perfil. Existe também um modo bibliotecário no quiosque, que facilita a gestão de requisições, a adição de novos livros e a edição de registos. Para o staff, está disponível um painel de aprovação de pedidos e envio de e-mails configuráveis.
 
-## Funcionalidades (visão geral)
-
-- Catálogo público (`/biblioteca`), página de livro e filtros
-- Conta do leitor: pedidos, histórico, favoritos, perfil
-- Modo **bibliotecário** no quiosque: balcão de requisições, novos livros, edição de fichas
-- Painel **staff** (e-mails configuráveis) para aprovar pedidos
-
-## Requisitos
-
-- PHP 8.2+, Composer
-- Node.js + npm (build dos assets)
-- Base de dados suportada pelo Laravel (MySQL, SQLite, etc.)
+Para executar a aplicação, é necessário ter PHP 8.2 ou superior com Composer para as dependências, Node.js com npm para compilar os assets, e uma base de dados compatível com Laravel, como MySQL ou SQLite.
 
 ## Arranque rápido
 

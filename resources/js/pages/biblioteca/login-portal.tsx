@@ -1,11 +1,16 @@
 import { Form, Head, Link } from '@inertiajs/react';
 import { BroteroFooter } from '@/components/BroteroFooter';
 import { BroteroHeader } from '@/components/BroteroHeader';
-import { Button } from '@/components/ui/button';
 
 type Props = {
     greeting_name?: string | null;
 };
+
+const sessaoBtnPrimaryClass =
+    'w-full rounded-(--raio) border-0 bg-(--brotero-primaria) px-[18px] py-[16px] text-left text-[15px] font-semibold leading-snug text-white shadow-[0_1px_3px_rgba(0,0,0,0.12)] transition-opacity hover:opacity-92 focus:outline-none focus-visible:ring-2 focus-visible:ring-(--brotero-primaria) focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50';
+
+const sessaoBtnSecondaryClass =
+    'w-full rounded-(--raio) border-2 border-(--brotero-primaria) bg-(--brotero-branco) px-[18px] py-[16px] text-left text-[15px] font-semibold leading-snug text-(--brotero-texto) shadow-[0_1px_2px_rgba(0,0,0,0.06)] transition-colors hover:bg-(--brotero-fundo) focus:outline-none focus-visible:ring-2 focus-visible:ring-(--brotero-primaria)/50 focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50';
 
 export default function BibliotecaLoginPortal({ greeting_name }: Props) {
     const label =
@@ -20,47 +25,53 @@ export default function BibliotecaLoginPortal({ greeting_name }: Props) {
             <div className="min-h-screen flex flex-col bg-(--brotero-fundo) text-(--brotero-texto)">
                 <BroteroHeader />
 
-                <main className="mx-auto w-full max-w-[480px] flex-1 px-[10px] pt-[24px] pb-[40px]">
-                    <h1 className="m-0 mb-[12px] text-[1.35rem] font-bold text-(--brotero-texto)">
-                        Entrada — biblioteca
-                    </h1>
-                    <p className="m-0 mb-[28px] text-[14px] text-(--brotero-texto-cinza)">{label}</p>
+                <main className="mx-auto w-full max-w-[520px] flex-1 px-[10px] pt-[28px] pb-[48px]">
+                    <div className="rounded-(--raio) border border-(--brotero-borda) bg-(--brotero-branco) px-[22px] py-[26px] shadow-[0_2px_8px_rgba(0,0,0,0.06)]">
+                        <h1 className="m-0 mb-[10px] text-[1.4rem] font-bold tracking-tight text-(--brotero-texto)">
+                            Entrada — biblioteca
+                        </h1>
+                        <p className="m-0 mb-[26px] text-[15px] leading-relaxed text-(--brotero-texto-cinza)">
+                            {label}
+                        </p>
 
-                    <div className="flex flex-col gap-[14px]">
-                        <Form method="post" action="/biblioteca/entrar/modo" className="m-0">
-                            {({ processing }) => (
-                                <>
-                                    <input type="hidden" name="portal_mode" value="bibliotecaria" />
-                                    <Button
-                                        type="submit"
-                                        className="h-auto min-h-[52px] w-full whitespace-normal bg-(--brotero-primaria) px-[16px] py-[14px] text-[15px] font-semibold leading-snug hover:opacity-90"
-                                        disabled={processing}
-                                    >
-                                        Bibliotecária / Bibliotecário
-                                    </Button>
-                                </>
-                            )}
-                        </Form>
+                        <div className="flex flex-col gap-[16px]">
+                            <Form method="post" action="/biblioteca/entrar/modo" className="m-0">
+                                {({ processing }) => (
+                                    <>
+                                        <input type="hidden" name="portal_mode" value="bibliotecaria" />
+                                        <button type="submit" disabled={processing} className={sessaoBtnPrimaryClass}>
+                                            <span className="block">Bibliotecária / Bibliotecário</span>
+                                            <span className="mt-[6px] block text-[13px] font-normal leading-snug text-white/90">
+                                                Gerir balcão, aprovar pedidos e registar livros.
+                                            </span>
+                                        </button>
+                                    </>
+                                )}
+                            </Form>
 
-                        <Form method="post" action="/biblioteca/entrar/modo" className="m-0">
-                            {({ processing }) => (
-                                <>
-                                    <input type="hidden" name="portal_mode" value="comunidade" />
-                                    <Button
-                                        type="submit"
-                                        variant="outline"
-                                        className="h-auto min-h-[52px] w-full whitespace-normal border-(--brotero-borda) px-[16px] py-[14px] text-[15px] font-semibold leading-snug text-(--brotero-texto)"
-                                        disabled={processing}
-                                    >
-                                        Aluno / Professor / Funcionário
-                                    </Button>
-                                </>
-                            )}
-                        </Form>
+                            <Form method="post" action="/biblioteca/entrar/modo" className="m-0">
+                                {({ processing }) => (
+                                    <>
+                                        <input type="hidden" name="portal_mode" value="comunidade" />
+                                        <button type="submit" disabled={processing} className={sessaoBtnSecondaryClass}>
+                                            <span className="block text-(--brotero-texto)">
+                                                Aluno / Professor / Funcionário
+                                            </span>
+                                            <span className="mt-[6px] block text-[13px] font-normal leading-snug text-(--brotero-texto-cinza)">
+                                                Requisitar livros, favoritos e histórico na comunidade.
+                                            </span>
+                                        </button>
+                                    </>
+                                )}
+                            </Form>
+                        </div>
                     </div>
 
-                    <p className="mt-[28px] text-[13px] text-(--brotero-texto-cinza)">
-                        <Link href="/biblioteca/entrar" className="text-(--brotero-texto-link) hover:underline">
+                    <p className="m-0 mt-[22px] text-center text-[13px] text-(--brotero-texto-cinza) sm:text-left">
+                        <Link
+                            href="/biblioteca/entrar"
+                            className="text-(--brotero-texto-link) font-medium hover:text-(--brotero-texto-link-hover) hover:underline"
+                        >
                             ← Voltar ao início de sessão
                         </Link>
                     </p>

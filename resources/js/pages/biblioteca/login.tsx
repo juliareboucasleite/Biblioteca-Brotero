@@ -3,7 +3,6 @@ import { BroteroFooter } from '@/components/BroteroFooter';
 import { BroteroHeader } from '@/components/BroteroHeader';
 import InputError from '@/components/input-error';
 import PasswordInput from '@/components/password-input';
-import { Button } from '@/components/ui/button';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -70,13 +69,13 @@ export default function BibliotecaLogin({ status }: Props) {
                                     </Label>
                                 </div>
 
-                                <Button
+                                <button
                                     type="submit"
-                                    className="w-full bg-(--brotero-primaria) hover:opacity-90"
                                     disabled={processing}
+                                    className="w-full cursor-pointer rounded-(--raio) border-0 bg-(--brotero-primaria) px-4 py-3.5 text-[15px] font-semibold text-white shadow-[0_1px_3px_rgba(0,0,0,0.14)] transition-opacity hover:opacity-92 focus:outline-none focus-visible:ring-2 focus-visible:ring-(--brotero-primaria) focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-55"
                                 >
                                     {processing ? 'A entrar…' : 'Entrar'}
-                                </Button>
+                                </button>
                             </>
                         )}
                     </Form>

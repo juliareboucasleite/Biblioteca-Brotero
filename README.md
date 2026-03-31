@@ -39,7 +39,7 @@ Configure variáveis em `.env` (base de dados, `APP_URL`, opções em `config/bi
 
 ## Capturas de ecrã
 
-Imagens em [`docs/images/`](docs/images/). Para acrescentar mais prints, guarde-os nessa pasta e replique o bloco `###` + `![...](docs/images/ficheiro.png)` abaixo.
+Imagens em [`docs/images/`](docs/images/).
 
 ### Catálogo e descoberta
 

@@ -97,6 +97,10 @@ Imagens em [`docs/images/`](docs/images/). Para acrescentar mais prints, guarde-
 
 ![Livros e pedidos no balcão](docs/images/Os-livros-do-balcao.png)
 
+**Aprovação no balcão** — pedidos *pendentes* (Aprovar / Recusar / Cancelar) e requisições *activas* (multa, devolução, nota ao aluno).
+
+![Aprovação de pedidos no balcão](docs/images/aprovacao-pedido.png)
+
 ## Licença
 
 MIT (conforme indicado no projeto base Laravel).

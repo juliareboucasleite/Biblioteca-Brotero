@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Carbon;
 
 /**
  * Requisição de livro.
@@ -10,6 +11,7 @@ use Illuminate\Database\Eloquent\Model;
  * status: pending | created | rejected | expired | returned | cancelled
  *
  * @property string|null $patron_visible_note Nota da biblioteca visível ao aluno (balcão)
+ * @property Carbon|null $hidden_from_librarian_desk_at Oculto manualmente no balcão
  */
 class BookRequest extends Model
 {
@@ -28,6 +30,7 @@ class BookRequest extends Model
         'patron_visible_note',
         'staff_reviewed_at',
         'returned_at',
+        'hidden_from_librarian_desk_at',
         'fine_amount',
         'fine_applied_at',
         'notified_due_soon_at',
@@ -50,6 +53,7 @@ class BookRequest extends Model
             'return_deadline' => 'datetime',
             'staff_reviewed_at' => 'datetime',
             'returned_at' => 'datetime',
+            'hidden_from_librarian_desk_at' => 'datetime',
             'fine_applied_at' => 'datetime',
             'fine_amount' => 'decimal:2',
             'notified_due_soon_at' => 'datetime',

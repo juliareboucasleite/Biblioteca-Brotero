@@ -116,6 +116,9 @@ Route::middleware(['auth:patron', 'patron.librarian.desk'])
         Route::post('/pedidos/{bookRequest}/devolver', [PatronLibrarianDeskController::class, 'markReturned'])->name(
             'return',
         );
+        Route::post('/pedidos/{bookRequest}/ocultar', [PatronLibrarianDeskController::class, 'hideFromDesk'])->name(
+            'hide',
+        );
         Route::get('/livros/novo', [PatronLibrarianBookController::class, 'create'])->name('livros.create');
         Route::post('/livros', [PatronLibrarianBookController::class, 'store'])->name('livros.store');
         Route::get('/livros/{book}/editar', [PatronLibrarianBookController::class, 'edit'])->name('livros.edit');

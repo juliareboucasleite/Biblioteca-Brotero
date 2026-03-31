@@ -13,6 +13,16 @@ import { Spinner } from '@/components/ui/spinner';
 import { formatDt, formatEur } from '@/lib/format';
 import { cn } from '@/lib/utils';
 
+/** Campos e botões dos modais — evita `bg-background` / `muted-foreground` do tema a ficarem ilegíveis no Brotero. */
+const balcaoModalFieldClass =
+    'w-full rounded-(--raio) border border-(--brotero-borda) bg-(--brotero-branco) px-3 py-2.5 text-[14px] leading-normal text-(--brotero-texto) placeholder:text-(--brotero-texto-cinza) shadow-none focus:border-(--brotero-primaria) focus:outline-none focus:ring-2 focus:ring-(--brotero-primaria)/35';
+
+const balcaoModalBtnSecondaryClass =
+    'rounded-md border border-(--brotero-borda) bg-(--brotero-branco) px-3 py-2 text-sm font-semibold text-(--brotero-texto) hover:bg-(--brotero-fundo)';
+
+const balcaoDialogContentClass =
+    'border-(--brotero-borda) bg-(--brotero-branco) text-(--brotero-texto) sm:max-w-md [&>button.absolute]:text-(--brotero-texto) [&>label]:text-(--brotero-texto)';
+
 type DeskPedido = {
     id: number;
     book_id: number | null;
@@ -36,6 +46,11 @@ type DeskPedido = {
 type Props = {
     pedidos: DeskPedido[];
 };
+
+/** Pedidos pendentes ou activos não podem ser ocultados do balcão. */
+function podeOcultarDoBalcao(status: string): boolean {
+    return status !== 'pending' && status !== 'created';
+}
 
 function estadoLabel(status: string): string {
     switch (status) {
@@ -85,6 +100,9 @@ export default function BibliotecaContaBalcao({ pedidos }: Props) {
     const [rejectId, setRejectId] = useState<number | null>(null);
     const [noteRow, setNoteRow] = useState<DeskPedido | null>(null);
     const [fineRow, setFineRow] = useState<DeskPedido | null>(null);
+    const [hideRow, setHideRow] = useState<DeskPedido | null>(null);
+    const [cancelRow, setCancelRow] = useState<DeskPedido | null>(null);
+    const [returnRow, setReturnRow] = useState<DeskPedido | null>(null);
 
     const rejectForm = useForm({ reason: '' });
     const noteForm = useForm({ patron_visible_note: '' });
@@ -165,8 +183,59 @@ export default function BibliotecaContaBalcao({ pedidos }: Props) {
         });
     }
 
+    function submitHide(): void {
+        if (hideRow === null) {
+            return;
+        }
+
+        setBusyId(hideRow.id);
+        router.post(baseUrl(hideRow.id, 'ocultar'), {}, {
+            preserveScroll: true,
+            onFinish: () => {
+                setBusyId(null);
+                setHideRow(null);
+            },
+        });
+    }
+
+    function submitCancel(): void {
+        if (cancelRow === null) {
+            return;
+        }
+
+        setBusyId(cancelRow.id);
+        router.post(baseUrl(cancelRow.id, 'cancelar'), {}, {
+            preserveScroll: true,
+            onFinish: () => {
+                setBusyId(null);
+                setCancelRow(null);
+            },
+        });
+    }
+
+    function submitReturn(): void {
+        if (returnRow === null) {
+            return;
+        }
+
+        setBusyId(returnRow.id);
+        router.post(baseUrl(returnRow.id, 'devolver'), {}, {
+            preserveScroll: true,
+            onFinish: () => {
+                setBusyId(null);
+                setReturnRow(null);
+            },
+        });
+    }
+
     const rejectOpen = rejectId !== null;
     const rejectBusy = rejectForm.processing;
+    const hideOpen = hideRow !== null;
+    const hideBusy = hideRow !== null && busyId === hideRow.id;
+    const cancelOpen = cancelRow !== null;
+    const cancelBusy = cancelRow !== null && busyId === cancelRow.id;
+    const returnOpen = returnRow !== null;
+    const returnBusy = returnRow !== null && busyId === returnRow.id;
 
     return (
         <BibliotecaContaLayout title="Balcão — todos os pedidos" secao="balcao">
@@ -189,6 +258,9 @@ export default function BibliotecaContaBalcao({ pedidos }: Props) {
 
             <p className="m-0 mb-[16px] text-[14px] text-(--brotero-texto-cinza)">
                 Gerir requisições de todos os cartões. As notas são visíveis ao aluno em «Os meus pedidos» e no histórico.
+                Requisições <strong>devolvidas</strong> deixam de aparecer aqui automaticamente ao fim de{' '}
+                <strong>30 dias</strong> após a data de devolução. Em pedidos concluídos pode usar{' '}
+                <strong>Ocultar</strong> para os retirar da lista de imediato (permanecem no histórico do aluno).
             </p>
 
             {pedidos.length === 0 ? (
@@ -237,6 +309,9 @@ export default function BibliotecaContaBalcao({ pedidos }: Props) {
                                         {formatDt(p.return_deadline)}
                                     </>
                                 ) : null}
+                                {p.status === 'returned' && p.returned_at ? (
+                                    <> · Devolvido: {formatDt(p.returned_at)}</>
+                                ) : null}
                             </p>
                             <p className="m-0 mb-[10px] text-[13px] font-semibold text-(--brotero-texto)">
                                 Multa: {formatEur(p.fine_amount)}
@@ -279,11 +354,7 @@ export default function BibliotecaContaBalcao({ pedidos }: Props) {
                                         type="button"
                                         disabled={busy}
                                         className="rounded-(--raio) border border-red-200 bg-red-50 px-[10px] py-[6px] text-[12px] font-semibold text-red-900 disabled:opacity-50"
-                                        onClick={() => {
-                                            if (confirm('Cancelar este pedido? O livro volta ao catálogo se estiver ativo.')) {
-                                                postAction(p.id, 'cancelar');
-                                            }
-                                        }}
+                                        onClick={() => setCancelRow(p)}
                                     >
                                         Cancelar
                                     </button>
@@ -310,11 +381,7 @@ export default function BibliotecaContaBalcao({ pedidos }: Props) {
                                             type="button"
                                             disabled={busy}
                                             className="rounded-(--raio) border border-emerald-700 bg-emerald-700 px-[10px] py-[6px] text-[12px] font-semibold text-white disabled:opacity-50"
-                                            onClick={() => {
-                                                if (confirm('Marcar livro como devolvido?')) {
-                                                    postAction(p.id, 'devolver');
-                                                }
-                                            }}
+                                            onClick={() => setReturnRow(p)}
                                         >
                                             Devolvido
                                         </button>
@@ -328,6 +395,17 @@ export default function BibliotecaContaBalcao({ pedidos }: Props) {
                                 >
                                     Nota ao aluno
                                 </button>
+                                {podeOcultarDoBalcao(p.status) ? (
+                                    <button
+                                        type="button"
+                                        disabled={busy}
+                                        className="rounded-(--raio) border border-(--brotero-borda) bg-(--brotero-fundo) px-[10px] py-[6px] text-[12px] font-semibold text-(--brotero-texto-cinza) disabled:opacity-50"
+                                        title="Retira este pedido da lista do balcão (o aluno continua a ver no histórico)"
+                                        onClick={() => setHideRow(p)}
+                                    >
+                                        Ocultar
+                                    </button>
+                                ) : null}
                             </div>
                         </div>
                     );
@@ -342,23 +420,25 @@ export default function BibliotecaContaBalcao({ pedidos }: Props) {
                     }
                 }}
             >
-                <DialogContent className="border-(--brotero-borda) bg-(--brotero-branco) sm:max-w-md">
+                <DialogContent className={balcaoDialogContentClass}>
                     <DialogHeader>
-                        <DialogTitle>Recusar pedido</DialogTitle>
-                        <DialogDescription>Motivo opcional — pode aparecer no histórico do aluno.</DialogDescription>
+                        <DialogTitle className="text-xl font-bold text-(--brotero-texto)">Recusar pedido</DialogTitle>
+                        <DialogDescription className="text-[14px] leading-relaxed text-(--brotero-texto-cinza)">
+                            Motivo opcional — pode aparecer no histórico do aluno.
+                        </DialogDescription>
                     </DialogHeader>
                     <textarea
-                        className="border-input bg-background min-h-[96px] w-full rounded-md border px-3 py-2 text-sm"
+                        className={`${balcaoModalFieldClass} min-h-[96px]`}
                         value={rejectForm.data.reason}
                         onChange={(e) => rejectForm.setData('reason', e.target.value)}
                     />
                     {rejectForm.errors.reason ? (
-                        <p className="text-destructive text-xs">{rejectForm.errors.reason}</p>
+                        <p className="m-0 text-[13px] font-medium text-red-700">{rejectForm.errors.reason}</p>
                     ) : null}
                     <DialogFooter className="gap-2">
                         <button
                             type="button"
-                            className="rounded-md border px-3 py-2 text-sm"
+                            className={balcaoModalBtnSecondaryClass}
                             disabled={rejectBusy}
                             onClick={() => setRejectId(null)}
                         >
@@ -391,25 +471,27 @@ export default function BibliotecaContaBalcao({ pedidos }: Props) {
                     }
                 }}
             >
-                <DialogContent className="border-(--brotero-borda) bg-(--brotero-branco) sm:max-w-md">
+                <DialogContent className={balcaoDialogContentClass}>
                     <DialogHeader>
-                        <DialogTitle>Nota visível ao aluno</DialogTitle>
-                        <DialogDescription>
+                        <DialogTitle className="text-xl font-bold text-(--brotero-texto)">Nota visível ao aluno</DialogTitle>
+                        <DialogDescription className="text-[14px] leading-relaxed text-(--brotero-texto-cinza)">
                             Aparece em «Os meus pedidos» e no histórico. Deixe vazio para apagar.
                         </DialogDescription>
                     </DialogHeader>
                     <textarea
-                        className="border-input bg-background min-h-[120px] w-full rounded-md border px-3 py-2 text-sm"
+                        className={`${balcaoModalFieldClass} min-h-[128px]`}
                         value={noteForm.data.patron_visible_note}
                         onChange={(e) => noteForm.setData('patron_visible_note', e.target.value)}
                     />
                     {noteForm.errors.patron_visible_note ? (
-                        <p className="text-destructive text-xs">{noteForm.errors.patron_visible_note}</p>
+                        <p className="m-0 text-[13px] font-medium text-red-700">
+                            {noteForm.errors.patron_visible_note}
+                        </p>
                     ) : null}
                     <DialogFooter className="gap-2">
                         <button
                             type="button"
-                            className="rounded-md border px-3 py-2 text-sm"
+                            className={balcaoModalBtnSecondaryClass}
                             disabled={noteForm.processing}
                             onClick={() => setNoteRow(null)}
                         >
@@ -435,27 +517,27 @@ export default function BibliotecaContaBalcao({ pedidos }: Props) {
                     }
                 }}
             >
-                <DialogContent className="border-(--brotero-borda) bg-(--brotero-branco) sm:max-w-md">
+                <DialogContent className={balcaoDialogContentClass}>
                     <DialogHeader>
-                        <DialogTitle>Multa manual (EUR)</DialogTitle>
-                        <DialogDescription>
+                        <DialogTitle className="text-xl font-bold text-(--brotero-texto)">Multa manual (EUR)</DialogTitle>
+                        <DialogDescription className="text-[14px] leading-relaxed text-(--brotero-texto-cinza)">
                             Só em requisições ativas. Use «Recalc. multa» para 0,50 € por dia de atraso.
                         </DialogDescription>
                     </DialogHeader>
                     <input
                         type="text"
                         inputMode="decimal"
-                        className="border-input bg-background w-full rounded-md border px-3 py-2 text-sm"
+                        className={balcaoModalFieldClass}
                         value={fineForm.data.fine_amount}
                         onChange={(e) => fineForm.setData('fine_amount', e.target.value)}
                     />
                     {fineForm.errors.fine_amount ? (
-                        <p className="text-destructive text-xs">{fineForm.errors.fine_amount}</p>
+                        <p className="m-0 text-[13px] font-medium text-red-700">{fineForm.errors.fine_amount}</p>
                     ) : null}
                     <DialogFooter className="gap-2">
                         <button
                             type="button"
-                            className="rounded-md border px-3 py-2 text-sm"
+                            className={balcaoModalBtnSecondaryClass}
                             disabled={fineForm.processing}
                             onClick={() => setFineRow(null)}
                         >
@@ -468,6 +550,164 @@ export default function BibliotecaContaBalcao({ pedidos }: Props) {
                             onClick={submitFine}
                         >
                             {fineForm.processing ? 'A guardar…' : 'Guardar'}
+                        </button>
+                    </DialogFooter>
+                </DialogContent>
+            </Dialog>
+
+            <Dialog
+                open={hideOpen}
+                onOpenChange={(open) => {
+                    if (!open && !hideBusy) {
+                        setHideRow(null);
+                    }
+                }}
+            >
+                <DialogContent className={balcaoDialogContentClass}>
+                    <DialogHeader>
+                        <DialogTitle className="text-xl font-bold text-(--brotero-texto)">Ocultar do balcão</DialogTitle>
+                        <DialogDescription className="text-[14px] leading-relaxed text-(--brotero-texto-cinza)">
+                            Este pedido deixa de aparecer nesta lista. O aluno mantém o registo em «Histórico» e em «Os meus
+                            pedidos» quando aplicável.
+                        </DialogDescription>
+                    </DialogHeader>
+                    {hideRow ? (
+                        <p className="m-0 rounded-md border border-(--brotero-borda) bg-(--brotero-fundo) px-3 py-2 text-sm text-(--brotero-texto)">
+                            <span className="font-semibold">{hideRow.book_title}</span>
+                            <span className="text-(--brotero-texto-cinza)">
+                                {' '}
+                                · #{hideRow.id} · Cartão {hideRow.card_number}
+                            </span>
+                        </p>
+                    ) : null}
+                    <DialogFooter className="gap-2">
+                        <button
+                            type="button"
+                            className={balcaoModalBtnSecondaryClass}
+                            disabled={hideBusy}
+                            onClick={() => setHideRow(null)}
+                        >
+                            Cancelar
+                        </button>
+                        <button
+                            type="button"
+                            className="rounded-md bg-(--brotero-texto-cinza) px-3 py-2 text-sm font-semibold text-white hover:opacity-90 disabled:opacity-50"
+                            disabled={hideBusy}
+                            onClick={submitHide}
+                        >
+                            {hideBusy ? (
+                                <span className="inline-flex items-center gap-2">
+                                    <Spinner className="size-4" aria-hidden />
+                                    A ocultar…
+                                </span>
+                            ) : (
+                                'Ocultar'
+                            )}
+                        </button>
+                    </DialogFooter>
+                </DialogContent>
+            </Dialog>
+
+            <Dialog
+                open={cancelOpen}
+                onOpenChange={(open) => {
+                    if (!open && !cancelBusy) {
+                        setCancelRow(null);
+                    }
+                }}
+            >
+                <DialogContent className={balcaoDialogContentClass}>
+                    <DialogHeader>
+                        <DialogTitle className="text-xl font-bold text-(--brotero-texto)">Cancelar pedido</DialogTitle>
+                        <DialogDescription className="text-[14px] leading-relaxed text-(--brotero-texto-cinza)">
+                            O livro volta ao catálogo se a requisição estiver activa. Esta acção não pode ser desfeita aqui.
+                        </DialogDescription>
+                    </DialogHeader>
+                    {cancelRow ? (
+                        <p className="m-0 rounded-md border border-(--brotero-borda) bg-(--brotero-fundo) px-3 py-2 text-sm text-(--brotero-texto)">
+                            <span className="font-semibold">{cancelRow.book_title}</span>
+                            <span className="text-(--brotero-texto-cinza)">
+                                {' '}
+                                · #{cancelRow.id} · Cartão {cancelRow.card_number}
+                            </span>
+                        </p>
+                    ) : null}
+                    <DialogFooter className="gap-2">
+                        <button
+                            type="button"
+                            className={balcaoModalBtnSecondaryClass}
+                            disabled={cancelBusy}
+                            onClick={() => setCancelRow(null)}
+                        >
+                            Não
+                        </button>
+                        <button
+                            type="button"
+                            className="rounded-md border border-red-300 bg-red-600 px-3 py-2 text-sm font-semibold text-white hover:bg-red-700 disabled:opacity-50"
+                            disabled={cancelBusy}
+                            onClick={submitCancel}
+                        >
+                            {cancelBusy ? (
+                                <span className="inline-flex items-center gap-2">
+                                    <Spinner className="size-4" aria-hidden />
+                                    A cancelar…
+                                </span>
+                            ) : (
+                                'Sim, cancelar pedido'
+                            )}
+                        </button>
+                    </DialogFooter>
+                </DialogContent>
+            </Dialog>
+
+            <Dialog
+                open={returnOpen}
+                onOpenChange={(open) => {
+                    if (!open && !returnBusy) {
+                        setReturnRow(null);
+                    }
+                }}
+            >
+                <DialogContent className={balcaoDialogContentClass}>
+                    <DialogHeader>
+                        <DialogTitle className="text-xl font-bold text-(--brotero-texto)">Marcar como devolvido</DialogTitle>
+                        <DialogDescription className="text-[14px] leading-relaxed text-(--brotero-texto-cinza)">
+                            Confirma que o exemplar foi entregue na biblioteca? O registo ficará como devolvido e o livro pode
+                            voltar a ser requisitado.
+                        </DialogDescription>
+                    </DialogHeader>
+                    {returnRow ? (
+                        <p className="m-0 rounded-md border border-(--brotero-borda) bg-(--brotero-fundo) px-3 py-2 text-sm text-(--brotero-texto)">
+                            <span className="font-semibold">{returnRow.book_title}</span>
+                            <span className="text-(--brotero-texto-cinza)">
+                                {' '}
+                                · #{returnRow.id} · Cartão {returnRow.card_number}
+                            </span>
+                        </p>
+                    ) : null}
+                    <DialogFooter className="gap-2">
+                        <button
+                            type="button"
+                            className={balcaoModalBtnSecondaryClass}
+                            disabled={returnBusy}
+                            onClick={() => setReturnRow(null)}
+                        >
+                            Voltar
+                        </button>
+                        <button
+                            type="button"
+                            className="rounded-md border border-emerald-800 bg-emerald-700 px-3 py-2 text-sm font-semibold text-white hover:bg-emerald-800 disabled:opacity-50"
+                            disabled={returnBusy}
+                            onClick={submitReturn}
+                        >
+                            {returnBusy ? (
+                                <span className="inline-flex items-center gap-2">
+                                    <Spinner className="size-4" aria-hidden />
+                                    A registar…
+                                </span>
+                            ) : (
+                                'Confirmar devolução'
+                            )}
                         </button>
                     </DialogFooter>
                 </DialogContent>

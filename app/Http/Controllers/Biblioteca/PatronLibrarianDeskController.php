@@ -16,10 +16,21 @@ use Inertia\Response;
 
 class PatronLibrarianDeskController extends Controller
 {
+    /** Devoluções com `returned_at` mais antigo que isto deixam de aparecer no balcão (automaticamente). */
+    private const DESK_RETURNED_VISIBLE_DAYS = 30;
+
     public function index(Request $request): Response
     {
+        $cutoff = now()->subDays(self::DESK_RETURNED_VISIBLE_DAYS);
+
         $pedidos = BookRequest::query()
             ->with(['book:id,title'])
+            ->whereNull('hidden_from_librarian_desk_at')
+            ->where(function ($q) use ($cutoff): void {
+                $q->where('status', '!=', 'returned')
+                    ->orWhereNull('returned_at')
+                    ->orWhere('returned_at', '>=', $cutoff);
+            })
             ->latest('id')
             ->limit(350)
             ->get()
@@ -148,6 +159,21 @@ class PatronLibrarianDeskController extends Controller
         $returns->markReturned($bookRequest, null);
 
         return back()->with('success', 'Marcado como devolvido.');
+    }
+
+    public function hideFromDesk(Request $request, BookRequest $bookRequest): RedirectResponse
+    {
+        if (in_array($bookRequest->status, ['pending', 'created'], true)) {
+            return back()->with('error', 'Só pode ocultar pedidos já concluídos (não pendentes nem activos).');
+        }
+
+        if ($bookRequest->hidden_from_librarian_desk_at !== null) {
+            return back()->with('error', 'Este pedido já está oculto do balcão.');
+        }
+
+        $bookRequest->forceFill(['hidden_from_librarian_desk_at' => now()])->save();
+
+        return back()->with('success', 'Pedido ocultado do balcão.');
     }
 
     /**

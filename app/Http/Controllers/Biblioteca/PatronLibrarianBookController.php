@@ -90,6 +90,101 @@ class PatronLibrarianBookController extends Controller
             ->with('success', 'Livro adicionado ao catálogo.');
     }
 
+    public function edit(Book $book): Response
+    {
+        $book->load(['authors', 'categories', 'details']);
+
+        return Inertia::render('biblioteca/conta/livro-edit', [
+            'book' => [
+                'id' => $book->id,
+                'title' => $book->title,
+                'description' => $book->description ?? '',
+                'isbn' => $book->isbn ?? '',
+                'published_year' => $book->published_year !== null ? (string) $book->published_year : '',
+                'pages' => $book->pages !== null ? (string) $book->pages : '',
+                'language' => $book->language ?? 'pt',
+                'publisher' => $book->details?->publisher ?? '',
+                'authors_input' => $book->authors->pluck('name')->implode("\n"),
+                'categories_input' => $book->categories->pluck('name')->implode(', '),
+                'cover_image' => $book->cover_image,
+            ],
+        ]);
+    }
+
+    public function update(Request $request, Book $book): RedirectResponse
+    {
+        $publishedRaw = $request->input('published_year');
+        $pagesRaw = $request->input('pages');
+
+        $request->merge([
+            'isbn' => trim((string) $request->input('isbn', '')) !== '' ? trim((string) $request->input('isbn')) : null,
+            'published_year' => $publishedRaw === '' || $publishedRaw === null ? null : (int) $publishedRaw,
+            'pages' => $pagesRaw === '' || $pagesRaw === null ? null : (int) $pagesRaw,
+            'language' => trim((string) $request->input('language', '')) !== '' ? trim((string) $request->input('language')) : null,
+        ]);
+
+        $data = $request->validate([
+            'title' => ['required', 'string', 'max:500'],
+            'description' => ['nullable', 'string', 'max:65535'],
+            'isbn' => ['nullable', 'string', 'max:32', Rule::unique('books', 'isbn')->ignore($book->id)],
+            'published_year' => ['nullable', 'integer', 'min:1000', 'max:2100'],
+            'pages' => ['nullable', 'integer', 'min:1', 'max:50000'],
+            'language' => ['nullable', 'string', 'max:32'],
+            'publisher' => ['nullable', 'string', 'max:255'],
+            'authors_input' => ['nullable', 'string', 'max:2000'],
+            'categories_input' => ['nullable', 'string', 'max:2000'],
+            'cover' => ['nullable', 'image', 'max:5120'],
+        ]);
+
+        $authors = $this->splitNames($data['authors_input'] ?? null);
+        $categories = $this->splitNames($data['categories_input'] ?? null);
+
+        DB::transaction(function () use ($request, $book, $data, $authors, $categories): void {
+            $attrs = [
+                'title' => $data['title'],
+                'description' => $data['description'] ?? null,
+                'isbn' => $data['isbn'] ?? null,
+                'published_year' => $data['published_year'] ?? null,
+                'pages' => $data['pages'] ?? null,
+                'language' => $data['language'] ?? null,
+            ];
+
+            if ($request->hasFile('cover')) {
+                $path = $request->file('cover')->store('book-covers', 'public');
+                $attrs['cover_image'] = Storage::disk('public')->url($path);
+            }
+
+            $book->update($attrs);
+
+            $authorIds = [];
+            foreach ($authors as $name) {
+                $author = Author::query()->firstOrCreate(['name' => $name]);
+                $authorIds[] = $author->id;
+            }
+            $book->authors()->sync($authorIds);
+
+            $categoryIds = [];
+            foreach ($categories as $name) {
+                $category = Category::query()->firstOrCreate(['name' => $name]);
+                $categoryIds[] = $category->id;
+            }
+            $book->categories()->sync($categoryIds);
+
+            if (! empty($data['publisher'])) {
+                $book->details()->updateOrCreate(
+                    ['book_id' => $book->id],
+                    ['publisher' => $data['publisher']],
+                );
+            } else {
+                $book->details()->update(['publisher' => null]);
+            }
+        });
+
+        return redirect()
+            ->route('biblioteca.livro.show', $book)
+            ->with('success', 'Ficha do livro actualizada.');
+    }
+
     /**
      * @return list<string>
      */

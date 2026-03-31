@@ -118,4 +118,6 @@ Route::middleware(['auth:patron', 'patron.librarian.desk'])
         );
         Route::get('/livros/novo', [PatronLibrarianBookController::class, 'create'])->name('livros.create');
         Route::post('/livros', [PatronLibrarianBookController::class, 'store'])->name('livros.store');
+        Route::get('/livros/{book}/editar', [PatronLibrarianBookController::class, 'edit'])->name('livros.edit');
+        Route::put('/livros/{book}', [PatronLibrarianBookController::class, 'update'])->name('livros.update');
     });

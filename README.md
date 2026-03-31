@@ -1,6 +1,6 @@
 # Biblioteca Brotero
 
-Aplicação web do catálogo e requisições da **Biblioteca Escolar** (fluxo de leitores por cartão, balcão de bibliotecários e painel de staff).
+Este projeto é uma aplicação web para o catálogo e requisições da **Biblioteca Escolar**, desenvolvido no âmbito de estágio. Futuramente, caso a Escola Secundária Brotero tenha interesse em adquiri-lo oficialmente, pode entrar em contacto para mais informações.
 
 ## Stack
 

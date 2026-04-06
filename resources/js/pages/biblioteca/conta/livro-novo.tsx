@@ -106,7 +106,7 @@ export default function BibliotecaContaLivroNovo() {
                     </div>
                     <div className="grid gap-[6px]">
                         <label htmlFor="ln-lang" className="text-[13px] font-semibold text-(--brotero-texto)">
-                            Idioma (ex.: pt, en)
+                            Idioma (ex.: português, inglês)
                         </label>
                         <input
                             id="ln-lang"

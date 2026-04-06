@@ -53,18 +53,12 @@ export default function BibliotecaContaLivroEdit({ book }: Props) {
             {flash?.success ? (
                 <p
                     className="m-0 mb-[12px] rounded-(--raio) border border-emerald-200 bg-emerald-50 px-[14px] py-[10px] text-[13px] text-emerald-900"
-                    role="status"
-                >
-                    {flash.success}
-                </p>
+                    role="status"> {flash.success} </p>
             ) : null}
             {flash?.error ? (
                 <p
                     className="m-0 mb-[12px] rounded-(--raio) border border-red-200 bg-red-50 px-[14px] py-[10px] text-[13px] text-red-900"
-                    role="alert"
-                >
-                    {flash.error}
-                </p>
+                    role="alert"> {flash.error} </p>
             ) : null}
 
             <p className="m-0 mb-[20px] text-[14px] text-(--brotero-texto-cinza)">
@@ -89,9 +83,7 @@ export default function BibliotecaContaLivroEdit({ book }: Props) {
                 onSubmit={submit}
             >
                 <div className="grid gap-[6px]">
-                    <label htmlFor="le-title" className="text-[13px] font-semibold text-(--brotero-texto)">
-                        Título <span className="text-red-600">*</span>
-                    </label>
+                    <label htmlFor="le-title" className="text-[13px] font-semibold text-(--brotero-texto)"> Título <span className="text-red-600">*</span></label>
                     <input
                         id="le-title"
                         className="rounded-(--raio) border border-(--brotero-borda) bg-(--brotero-branco) px-[12px] py-[10px] text-[14px] text-(--brotero-texto)"
@@ -106,10 +98,7 @@ export default function BibliotecaContaLivroEdit({ book }: Props) {
                 </div>
 
                 <div className="grid gap-[6px]">
-                    <label htmlFor="le-desc" className="text-[13px] font-semibold text-(--brotero-texto)">
-                        Descrição / sinopse
-                    </label>
-                    <textarea
+                    <label htmlFor="le-desc" className="text-[13px] font-semibold text-(--brotero-texto)"> Descrição / sinopse</label><textarea
                         id="le-desc"
                         rows={6}
                         className="rounded-(--raio) border border-(--brotero-borda) bg-(--brotero-branco) px-[12px] py-[10px] text-[14px] text-(--brotero-texto)"
@@ -123,9 +112,7 @@ export default function BibliotecaContaLivroEdit({ book }: Props) {
 
                 <div className="grid gap-[6px] sm:grid-cols-2 sm:gap-[16px]">
                     <div className="grid gap-[6px]">
-                        <label htmlFor="le-isbn" className="text-[13px] font-semibold text-(--brotero-texto)">
-                            ISBN (opcional)
-                        </label>
+                        <label htmlFor="le-isbn" className="text-[13px] font-semibold text-(--brotero-texto)">ISBN (opcional)</label>
                         <input
                             id="le-isbn"
                             className="rounded-(--raio) border border-(--brotero-borda) bg-(--brotero-branco) px-[12px] py-[10px] text-[14px] text-(--brotero-texto)"
@@ -138,9 +125,7 @@ export default function BibliotecaContaLivroEdit({ book }: Props) {
                         ) : null}
                     </div>
                     <div className="grid gap-[6px]">
-                        <label htmlFor="le-lang" className="text-[13px] font-semibold text-(--brotero-texto)">
-                            Idioma (ex.: pt, en)
-                        </label>
+                        <label htmlFor="le-lang" className="text-[13px] font-semibold text-(--brotero-texto)"> Idioma (ex.: português, inglês)</label>
                         <input
                             id="le-lang"
                             className="rounded-(--raio) border border-(--brotero-borda) bg-(--brotero-branco) px-[12px] py-[10px] text-[14px] text-(--brotero-texto)"
@@ -156,9 +141,7 @@ export default function BibliotecaContaLivroEdit({ book }: Props) {
 
                 <div className="grid gap-[6px] sm:grid-cols-2 sm:gap-[16px]">
                     <div className="grid gap-[6px]">
-                        <label htmlFor="le-year" className="text-[13px] font-semibold text-(--brotero-texto)">
-                            Ano de edição
-                        </label>
+                        <label htmlFor="le-year" className="text-[13px] font-semibold text-(--brotero-texto)">Ano de edição</label>
                         <input
                             id="le-year"
                             type="number"
@@ -173,9 +156,7 @@ export default function BibliotecaContaLivroEdit({ book }: Props) {
                         ) : null}
                     </div>
                     <div className="grid gap-[6px]">
-                        <label htmlFor="le-pages" className="text-[13px] font-semibold text-(--brotero-texto)">
-                            Páginas
-                        </label>
+                        <label htmlFor="le-pages" className="text-[13px] font-semibold text-(--brotero-texto)">Páginas</label>
                         <input
                             id="le-pages"
                             type="number"
@@ -191,9 +172,7 @@ export default function BibliotecaContaLivroEdit({ book }: Props) {
                 </div>
 
                 <div className="grid gap-[6px]">
-                    <label htmlFor="le-pub" className="text-[13px] font-semibold text-(--brotero-texto)">
-                        Editora
-                    </label>
+                    <label htmlFor="le-pub" className="text-[13px] font-semibold text-(--brotero-texto)">Editora</label>
                     <input
                         id="le-pub"
                         className="rounded-(--raio) border border-(--brotero-borda) bg-(--brotero-branco) px-[12px] py-[10px] text-[14px] text-(--brotero-texto)"
@@ -207,9 +186,7 @@ export default function BibliotecaContaLivroEdit({ book }: Props) {
                 </div>
 
                 <div className="grid gap-[6px]">
-                    <label htmlFor="le-auth" className="text-[13px] font-semibold text-(--brotero-texto)">
-                        Autores (separar por vírgula ou nova linha)
-                    </label>
+                    <label htmlFor="le-auth" className="text-[13px] font-semibold text-(--brotero-texto)">Autores (separar por vírgula ou nova linha)</label>
                     <textarea
                         id="le-auth"
                         rows={2}
@@ -224,9 +201,7 @@ export default function BibliotecaContaLivroEdit({ book }: Props) {
                 </div>
 
                 <div className="grid gap-[6px]">
-                    <label htmlFor="le-cat" className="text-[13px] font-semibold text-(--brotero-texto)">
-                        Categorias (opcional, separar por vírgula)
-                    </label>
+                    <label htmlFor="le-cat" className="text-[13px] font-semibold text-(--brotero-texto)">Categorias (opcional, separar por vírgula)</label>
                     <textarea
                         id="le-cat"
                         rows={2}
@@ -241,9 +216,7 @@ export default function BibliotecaContaLivroEdit({ book }: Props) {
                 </div>
 
                 <div className="grid gap-[6px]">
-                    <label htmlFor="le-cover" className="text-[13px] font-semibold text-(--brotero-texto)">
-                        Substituir capa (opcional)
-                    </label>
+                    <label htmlFor="le-cover" className="text-[13px] font-semibold text-(--brotero-texto)">Substituir capa (opcional)</label>
                     <input
                         id="le-cover"
                         type="file"
@@ -261,21 +234,15 @@ export default function BibliotecaContaLivroEdit({ book }: Props) {
                         type="submit"
                         disabled={form.processing}
                         className="cursor-pointer rounded-(--raio) border-0 bg-(--brotero-primaria) px-[20px] py-[12px] text-[15px] font-semibold text-white hover:opacity-90 disabled:opacity-60"
-                    >
-                        {form.processing ? 'A guardar…' : 'Guardar alterações'}
-                    </button>
+                    >{form.processing ? 'A guardar…' : 'Guardar alterações'}</button>
                     <a
                         href={`/biblioteca/livro/${book.id}`}
                         className="inline-flex items-center rounded-(--raio) border border-(--brotero-borda) bg-(--brotero-branco) px-[20px] py-[12px] text-[15px] font-semibold text-(--brotero-texto) no-underline hover:bg-(--brotero-laranja-hover)"
-                    >
-                        Voltar à ficha
-                    </a>
+                    > Voltar à ficha </a>
                     <a
                         href="/biblioteca/conta/balcao"
                         className="inline-flex items-center rounded-(--raio) border border-(--brotero-borda) bg-(--brotero-branco) px-[20px] py-[12px] text-[15px] font-semibold text-(--brotero-texto) no-underline hover:bg-(--brotero-laranja-hover)"
-                    >
-                        Balcão
-                    </a>
+                    >Balcão</a>
                 </div>
             </form>
         </BibliotecaContaLayout>

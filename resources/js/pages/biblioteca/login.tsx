@@ -18,7 +18,6 @@ export default function BibliotecaLogin({ status }: Props) {
 
             <div className="min-h-screen flex flex-col bg-(--brotero-fundo) text-(--brotero-texto)">
                 <BroteroHeader />
-
                 <main className="w-full max-w-[420px] mx-auto px-[10px] flex-1 pt-[24px] pb-[40px]">
                     <h1 className="m-0 mb-[8px] text-[1.35rem] font-bold text-(--brotero-texto)">
                         Entrar na sua conta
@@ -87,12 +86,9 @@ export default function BibliotecaLogin({ status }: Props) {
                     ) : null}
 
                     <p className="mt-[24px] text-[13px] text-(--brotero-texto-cinza)">
-                        <a href="/biblioteca" className="text-(--brotero-texto-link) hover:underline">
-                            ← Voltar ao catálogo
-                        </a>
+                        <a href="/biblioteca" className="text-(--brotero-texto-link) hover:underline"> ← Voltar ao catálogo </a>
                     </p>
                 </main>
-
                 <BroteroFooter />
             </div>
         </>

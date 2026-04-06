@@ -1,6 +1,5 @@
 import { Form, Head, Link } from '@inertiajs/react';
-import { BroteroFooter } from '@/components/BroteroFooter';
-import { BroteroHeader } from '@/components/BroteroHeader';
+import { BibliotecaCatalogShell } from '@/components/biblioteca/BibliotecaCatalogShell';
 
 type Props = {
     greeting_name?: string | null;
@@ -22,12 +21,10 @@ export default function BibliotecaLoginPortal({ greeting_name }: Props) {
         <>
             <Head title="Modo de sessão — Leitor" />
 
-            <div className="min-h-screen flex flex-col bg-(--brotero-fundo) text-(--brotero-texto)">
-                <BroteroHeader />
-
-                <main className="mx-auto w-full max-w-[520px] flex-1 px-[10px] pt-[28px] pb-[48px]">
-                    <div className="rounded-(--raio) border border-(--brotero-borda) bg-(--brotero-branco) px-[22px] py-[26px] shadow-[0_2px_8px_rgba(0,0,0,0.06)]">
-                        <h1 className="m-0 mb-[10px] text-[1.4rem] font-bold tracking-tight text-(--brotero-texto)">
+            <BibliotecaCatalogShell>
+                <div className="mx-auto w-full max-w-[520px] pt-[4px] lg:pt-0">
+                    <div className="rounded-[18px] border border-(--brotero-borda-suave) bg-(--brotero-branco) px-[22px] py-[26px] shadow-[0_8px_28px_rgba(42,38,48,0.06)] sm:px-[26px] sm:py-[30px]">
+                        <h1 className="m-0 mb-[10px] text-[1.45rem] font-bold leading-tight tracking-tight text-(--brotero-texto)">
                             Entrada — biblioteca
                         </h1>
                         <p className="m-0 mb-[26px] text-[15px] leading-relaxed text-(--brotero-texto-cinza)">
@@ -67,18 +64,16 @@ export default function BibliotecaLoginPortal({ greeting_name }: Props) {
                         </div>
                     </div>
 
-                    <p className="m-0 mt-[22px] text-center text-[13px] text-(--brotero-texto-cinza) sm:text-left">
+                    <p className="m-0 mt-[22px] text-center text-[14px] text-(--brotero-texto-cinza) sm:text-left">
                         <Link
                             href="/biblioteca/entrar"
-                            className="text-(--brotero-texto-link) font-medium hover:text-(--brotero-texto-link-hover) hover:underline"
+                            className="font-semibold text-(--brotero-texto-link) hover:text-(--brotero-texto-link-hover) hover:underline"
                         >
                             ← Voltar ao início de sessão
                         </Link>
                     </p>
-                </main>
-
-                <BroteroFooter />
-            </div>
+                </div>
+            </BibliotecaCatalogShell>
         </>
     );
 }

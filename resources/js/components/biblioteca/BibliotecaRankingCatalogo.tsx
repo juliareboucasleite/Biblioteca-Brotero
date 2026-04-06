@@ -40,7 +40,7 @@ export function BibliotecaRankingCatalogo({ ranking }: BibliotecaRankingCatalogo
                     {ranking.map((r) => (
                         <li
                             key={`${r.posicao}-${r.cartao_mascarado}`}
-                            className="flex flex-wrap items-baseline justify-between gap-[10px] px-[14px] py-[10px] bg-(--brotero-branco) border border-(--brotero-borda) rounded-(--raio)"
+                            className="flex flex-wrap items-baseline justify-between gap-[10px] rounded-[14px] border border-(--brotero-borda-suave) bg-(--brotero-branco) px-[14px] py-[11px] shadow-[0_4px_16px_rgba(42,38,48,0.05)] transition-shadow hover:shadow-[0_6px_20px_rgba(42,38,48,0.08)] motion-reduce:transition-none"
                         >
                             <span className="text-[14px] font-bold text-(--brotero-texto)">
                                 {r.posicao}. {r.nome}

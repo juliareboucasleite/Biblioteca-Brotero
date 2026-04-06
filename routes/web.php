@@ -1,10 +1,15 @@
 <?php
 
 use App\Http\Controllers\Biblioteca\BibliotecaContaController;
+use App\Http\Controllers\Biblioteca\BookEbookReaderController;
+use App\Http\Controllers\Biblioteca\BookShareController;
 use App\Http\Controllers\Biblioteca\LibraryPatronAuthController;
+use App\Http\Controllers\Biblioteca\PatronChatController;
 use App\Http\Controllers\Biblioteca\PatronFavoriteController;
 use App\Http\Controllers\Biblioteca\PatronLibrarianBookController;
 use App\Http\Controllers\Biblioteca\PatronLibrarianDeskController;
+use App\Http\Controllers\Biblioteca\PatronPeerProfileController;
+use App\Http\Controllers\Biblioteca\PatronPeerSafetyController;
 use App\Http\Controllers\Biblioteca\PatronRankingController;
 use App\Http\Controllers\BibliotecaController;
 use App\Http\Controllers\BookController;
@@ -32,6 +37,7 @@ Route::get('/books/{id}', [BookController::class, 'show']);
 // Biblioteca Brotero: catálogo e página do livro (React + Inertia)
 Route::get('/biblioteca', [BibliotecaController::class, 'index'])->name('biblioteca.index');
 Route::get('/biblioteca/livros', [BibliotecaController::class, 'livros'])->name('biblioteca.livros');
+Route::get('/biblioteca/descobertas', [BookShareController::class, 'index'])->name('biblioteca.descobertas.index');
 Route::get('/biblioteca/livro/{book}', [BibliotecaController::class, 'livroShow'])->name('biblioteca.livro.show');
 Route::get('/biblioteca/livro', [BibliotecaController::class, 'livro'])->name('biblioteca.livro');
 Route::post('/books/isbn', [BookController::class, 'storeFromIsbn']);
@@ -57,6 +63,17 @@ Route::middleware('guest:patron')->group(function (): void {
 Route::post('/biblioteca/sair', [LibraryPatronAuthController::class, 'destroy'])
     ->middleware('auth:patron')
     ->name('biblioteca.logout');
+
+Route::middleware('auth:patron')->group(function (): void {
+    Route::get('/biblioteca/livro/{book}/ler', [BookEbookReaderController::class, 'show'])->name('biblioteca.livro.ler');
+    Route::get('/biblioteca/livro/{book}/ebook', [BookEbookReaderController::class, 'stream'])->name(
+        'biblioteca.livro.ebook',
+    );
+    Route::post('/biblioteca/descobertas', [BookShareController::class, 'store'])->name('biblioteca.descobertas.store');
+    Route::delete('/biblioteca/descobertas/{book_share}', [BookShareController::class, 'destroy'])->name(
+        'biblioteca.descobertas.destroy',
+    );
+});
 
 Route::middleware(['auth', 'staff.biblioteca'])
     ->prefix('staff')
@@ -84,6 +101,38 @@ Route::middleware('auth:patron')
         Route::get('/historico', [BibliotecaContaController::class, 'historico'])->name('historico');
         Route::get('/perfil', [BibliotecaContaController::class, 'perfil'])->name('perfil');
         Route::get('/favoritos', [BibliotecaContaController::class, 'favoritos'])->name('favoritos');
+
+        Route::get('/leitores/{library_patron}', [PatronPeerProfileController::class, 'show'])->name('leitor.perfil');
+        Route::post('/leitores/{library_patron}/denunciar', [PatronPeerSafetyController::class, 'report'])->name(
+            'leitor.denunciar',
+        );
+        Route::post('/leitores/{library_patron}/bloquear', [PatronPeerSafetyController::class, 'block'])->name(
+            'leitor.bloquear',
+        );
+
+        Route::get('/mensagens', [PatronChatController::class, 'index'])->name('mensagens.index');
+        Route::post('/mensagens/abrir', [PatronChatController::class, 'open'])->name('mensagens.open');
+        Route::get('/mensagens/{patron_conversation}/livros-pesquisa', [PatronChatController::class, 'searchBooksForShare'])->name(
+            'mensagens.livros-pesquisa',
+        );
+        Route::post('/mensagens/{patron_conversation}/partilhar-livro', [PatronChatController::class, 'shareBook'])->name(
+            'mensagens.partilhar-livro',
+        );
+        Route::get('/mensagens/{patron_conversation}', [PatronChatController::class, 'show'])->name(
+            'mensagens.show',
+        );
+        Route::post('/mensagens/{patron_conversation}', [PatronChatController::class, 'store'])->name(
+            'mensagens.store',
+        );
+        Route::post('/mensagens/{patron_conversation}/aceitar', [PatronChatController::class, 'accept'])->name(
+            'mensagens.accept',
+        );
+        Route::post('/mensagens/{patron_conversation}/recusar', [PatronChatController::class, 'decline'])->name(
+            'mensagens.decline',
+        );
+        Route::post('/mensagens/{patron_conversation}/cancelar-pedido', [PatronChatController::class, 'cancel'])->name(
+            'mensagens.cancel',
+        );
 
         Route::post('/favoritos/{book}', [PatronFavoriteController::class, 'store'])->name('favoritos.store');
         Route::delete('/favoritos/{book}', [PatronFavoriteController::class, 'destroy'])->name('favoritos.destroy');

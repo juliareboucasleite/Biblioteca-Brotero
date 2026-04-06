@@ -133,6 +133,8 @@ class BookController extends Controller
 
         $payload = $book->toArray();
         $payload['available'] = $book->isAvailableForRequest();
+        $payload['has_ebook'] = $book->hasEbook() && $book->ebookFormat() !== null;
+        $payload['ebook_format'] = $book->ebookFormat();
         $payload['recommendations'] = $recommendedByAuthor->map($mapBook)->values()->all();
         $payload['category_recommendations'] = $recommendedByCategory->map($mapBook)->values()->all();
         $payload['fallback_recommendations'] = $recommendedFallback->map($mapBook)->values()->all();

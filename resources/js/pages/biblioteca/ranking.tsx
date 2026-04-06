@@ -1,5 +1,5 @@
-import { Head } from '@inertiajs/react';
-import { BibliotecaPageShell } from '@/components/biblioteca/BibliotecaPageShell';
+import { Head, Link } from '@inertiajs/react';
+import { BibliotecaCatalogShell } from '@/components/biblioteca/BibliotecaCatalogShell';
 
 type Entrada = {
     posicao: number;
@@ -16,34 +16,40 @@ export default function BibliotecaRanking({ ranking }: Props) {
     return (
         <>
             <Head title="Ranking — Biblioteca Brotero" />
-            <BibliotecaPageShell>
-                <main className="w-full max-w-[720px] mx-auto px-[10px] pt-[24px] pb-[48px] flex-1">
-                    <h1 className="m-0 mb-[8px] text-[1.75rem] font-bold text-(--brotero-texto)">
+            <BibliotecaCatalogShell>
+                <header className="mb-[22px] pt-[4px] lg:pt-0">
+                    <h1 className="m-0 mb-[8px] text-[1.6rem] font-bold leading-tight text-(--brotero-texto)">
                         Ranking de leitores
                     </h1>
-                    <p className="m-0 mb-[24px] text-[15px] text-(--brotero-texto-cinza)">
+                    <p className="m-0 max-w-[54ch] text-[15px] leading-snug text-(--brotero-texto-cinza)">
                         Pontos por requisitar (+10) e por devolver no prazo (+20). Só aparecem leitores com
                         pontos &gt; 0.
                     </p>
+                </header>
+
+                <div className="mx-auto w-full max-w-[720px]">
                     {ranking.length === 0 ? (
-                        <p className="m-0 p-[16px] border border-dashed border-(--brotero-borda) rounded-(--raio) text-(--brotero-texto-cinza)">
+                        <p
+                            className="m-0 rounded-[14px] border border-dashed border-(--brotero-borda) bg-(--brotero-branco) p-[18px] text-[15px] text-(--brotero-texto-cinza)"
+                            role="status"
+                        >
                             Ainda não há pontos registados. Requisite um livro ou devolva dentro do prazo para
                             começar a acumular.
                         </p>
                     ) : (
-                        <ol className="m-0 p-0 list-none flex flex-col gap-[10px]">
+                        <ol className="m-0 flex list-none flex-col gap-[12px] p-0">
                             {ranking.map((r) => (
                                 <li
                                     key={`${r.posicao}-${r.cartao_mascarado}`}
-                                    className="flex flex-wrap items-baseline justify-between gap-[12px] p-[14px_16px] bg-(--brotero-branco) border border-(--brotero-borda) rounded-(--raio)"
+                                    className="flex flex-wrap items-baseline justify-between gap-[12px] rounded-[18px] border border-(--brotero-borda-suave) bg-(--brotero-branco) p-[14px_18px] shadow-[0_8px_28px_rgba(42,38,48,0.06)]"
                                 >
                                     <span className="text-[15px] font-bold text-(--brotero-texto)">
                                         {r.posicao}. {r.nome}
                                     </span>
-                                    <span className="text-[14px] text-(--brotero-texto-cinza) font-mono">
+                                    <span className="font-mono text-[14px] text-(--brotero-texto-cinza)">
                                         {r.cartao_mascarado}
                                     </span>
-                                    <span className="text-[16px] font-semibold text-(--brotero-primaria) ml-auto">
+                                    <span className="ml-auto text-[16px] font-semibold text-(--brotero-primaria)">
                                         {r.pontos} pts
                                     </span>
                                 </li>
@@ -51,12 +57,15 @@ export default function BibliotecaRanking({ ranking }: Props) {
                         </ol>
                     )}
                     <p className="mt-[24px] mb-0 text-[14px]">
-                        <a href="/biblioteca" className="text-(--brotero-texto-link) hover:underline">
+                        <Link
+                            href="/biblioteca"
+                            className="font-semibold text-(--brotero-texto-link) no-underline hover:text-(--brotero-texto-link-hover) hover:underline"
+                        >
                             ← Voltar ao catálogo
-                        </a>
+                        </Link>
                     </p>
-                </main>
-            </BibliotecaPageShell>
+                </div>
+            </BibliotecaCatalogShell>
         </>
     );
 }

@@ -4,7 +4,9 @@ namespace App\Http\Controllers;
 
 use App\Models\Author;
 use App\Models\Book;
+use App\Models\BookShare;
 use App\Models\Category;
+use App\Models\LibraryPatron;
 use App\Services\PatronRankingService;
 use App\Support\CategoryLabel;
 use Illuminate\Http\Request;
@@ -203,14 +205,32 @@ class BibliotecaController extends Controller
     /**
      * Ficha completa do livro por ID (slug de rota).
      */
-    public function livroShow(Book $book): Response
+    public function livroShow(Request $request, Book $book): Response
     {
         $book->loadMissing(['authors']);
 
         $livro = $this->mapearLivroParaFrontend($book);
 
+        $patronShare = null;
+        $patron = $request->user('patron');
+
+        if ($patron instanceof LibraryPatron) {
+            $row = BookShare::query()
+                ->where('library_patron_id', $patron->id)
+                ->where('book_id', $book->id)
+                ->first();
+
+            if ($row !== null) {
+                $patronShare = [
+                    'id' => $row->id,
+                    'message' => $row->message,
+                ];
+            }
+        }
+
         return Inertia::render('library-book', [
             'livro' => $livro,
+            'patron_share' => $patronShare,
         ]);
     }
 
@@ -297,6 +317,7 @@ class BibliotecaController extends Controller
             'autor' => $book->authors?->pluck('name')->filter()->implode(', ') ?: 'Autor desconhecido',
             'desc' => (string) ($book->description ?? ''),
             'capa' => $book->cover_image ? (string) $book->cover_image : null,
+            'tem_ebook' => $book->hasEbook() && $book->ebookFormat() !== null,
         ];
     }
 

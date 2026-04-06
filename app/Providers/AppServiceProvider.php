@@ -3,7 +3,6 @@
 namespace App\Providers;
 
 use Carbon\CarbonImmutable;
-use Illuminate\Auth\Middleware\Authenticate;
 use Illuminate\Auth\Middleware\RedirectIfAuthenticated;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -48,20 +47,6 @@ class AppServiceProvider extends ServiceProvider
             }
 
             return '/biblioteca';
-        });
-
-        Authenticate::redirectUsing(function (Request $request): ?string {
-            $path = ltrim($request->path(), '/');
-
-            if (str_starts_with($path, 'biblioteca/conta')) {
-                return route('biblioteca.login');
-            }
-
-            if (Route::has('login')) {
-                return route('login');
-            }
-
-            return '/login';
         });
 
         DB::prohibitDestructiveCommands(

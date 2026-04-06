@@ -1,21 +1,34 @@
 import { Head, Link, router, usePage } from '@inertiajs/react';
 import type { ReactNode } from 'react';
-import { BroteroFooter } from '@/components/BroteroFooter';
-import { BroteroHeader } from '@/components/BroteroHeader';
+import { BibliotecaCatalogShell } from '@/components/biblioteca/BibliotecaCatalogShell';
 import { cn } from '@/lib/utils';
 
-type ContaSecao = 'balcao' | 'livro-novo' | 'pedidos' | 'historico' | 'favoritos' | 'perfil';
+type ContaSecao =
+    | 'balcao'
+    | 'livro-novo'
+    | 'pedidos'
+    | 'historico'
+    | 'favoritos'
+    | 'mensagens'
+    | 'perfil';
 
 type BibliotecaContaLayoutProps = {
     title: string;
     secao: ContaSecao;
     children: ReactNode;
+    /** Faz o conteúdo crescer até à altura útil da coluna (ex.: conversa em ecrã grande). */
+    ocuparAlturaConteudo?: boolean;
 };
 
 const linkBase =
     'text-[14px] px-[12px] py-[8px] rounded-(--raio) no-underline text-(--brotero-texto-link) hover:text-(--brotero-texto-link-hover) hover:underline';
 
-export function BibliotecaContaLayout({ title, secao, children }: BibliotecaContaLayoutProps) {
+export function BibliotecaContaLayout({
+    title,
+    secao,
+    children,
+    ocuparAlturaConteudo = false,
+}: BibliotecaContaLayoutProps) {
     const patron = usePage().props.auth?.patron;
     const modoBiblioteca =
         patron?.is_librarian === true && patron?.portal_mode === 'bibliotecaria';
@@ -26,11 +39,18 @@ export function BibliotecaContaLayout({ title, secao, children }: BibliotecaCont
     return (
         <>
             <Head title={title} />
-            <div className="min-h-screen flex flex-col bg-(--brotero-fundo) text-(--brotero-texto)">
-                <BroteroHeader />
-                <div className="w-full max-w-(--max-largura) mx-auto px-[10px] flex-1 pb-[32px]">
+            <BibliotecaCatalogShell>
+                <div
+                    className={cn(
+                        'w-full pb-[8px]',
+                        ocuparAlturaConteudo && 'flex min-h-0 flex-1 flex-col',
+                    )}
+                >
                     <nav
-                        className="flex flex-wrap items-center gap-[8px] mb-[20px] pb-[12px] border-b border-(--brotero-borda)"
+                        className={cn(
+                            'mb-[20px] flex flex-wrap items-center gap-[8px] border-b border-(--brotero-borda-suave) pb-[12px]',
+                            ocuparAlturaConteudo && 'shrink-0',
+                        )}
                         aria-label="Área do leitor"
                     >
                         {modoBiblioteca ? (
@@ -64,21 +84,27 @@ export function BibliotecaContaLayout({ title, secao, children }: BibliotecaCont
                         <Link href="/biblioteca/conta/favoritos" className={active('favoritos')} preserveScroll>
                             Favoritos
                         </Link>
+                        <Link href="/biblioteca/conta/mensagens" className={active('mensagens')} preserveScroll>
+                            Mensagens
+                        </Link>
                         <Link href="/biblioteca/conta/perfil" className={active('perfil')} preserveScroll>
                             Perfil
                         </Link>
                         <button
                             type="button"
-                            className={cn(linkBase, 'border-0 bg-transparent cursor-pointer font-inherit')}
+                            className={cn(linkBase, 'cursor-pointer border-0 bg-transparent font-inherit')}
                             onClick={() => router.post('/biblioteca/sair')}
                         >
                             Sair
                         </button>
                     </nav>
-                    {children}
+                    {ocuparAlturaConteudo ? (
+                        <div className="flex min-h-0 flex-1 flex-col">{children}</div>
+                    ) : (
+                        children
+                    )}
                 </div>
-                <BroteroFooter />
-            </div>
+            </BibliotecaCatalogShell>
         </>
     );
 }

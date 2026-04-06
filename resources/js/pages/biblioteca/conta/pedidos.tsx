@@ -1,4 +1,5 @@
 import { Link, router, usePage } from '@inertiajs/react';
+import type { ReactElement } from 'react';
 import { useMemo, useState } from 'react';
 import { BibliotecaContaLayout } from '@/components/biblioteca/BibliotecaContaLayout';
 import {
@@ -75,7 +76,7 @@ export default function BibliotecaContaPedidos({ pedidos }: Props) {
         });
     }
 
-    function renderPedidoCard(p: PedidoLeitor): JSX.Element {
+    function renderPedidoCard(p: PedidoLeitor): ReactElement {
         const isPending = p.status === 'pending';
 
         return (

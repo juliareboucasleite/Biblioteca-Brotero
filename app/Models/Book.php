@@ -4,9 +4,16 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class Book extends Model
 {
+    /** @var list<string> */
+    protected $hidden = [
+        'ebook_path',
+        'ebook_disk',
+    ];
+
     protected $fillable = [
         'title',
         'description',
@@ -15,7 +22,32 @@ class Book extends Model
         'pages',
         'cover_image',
         'language',
+        'ebook_disk',
+        'ebook_path',
+        'ebook_mime',
     ];
+
+    public function hasEbook(): bool
+    {
+        $path = $this->ebook_path;
+
+        return is_string($path) && $path !== '';
+    }
+
+    public function ebookFormat(): ?string
+    {
+        if (! $this->hasEbook()) {
+            return null;
+        }
+
+        $mime = (string) ($this->ebook_mime ?? '');
+
+        return match ($mime) {
+            'application/pdf', 'application/x-pdf' => 'pdf',
+            'application/epub+zip', 'application/epub', 'application/x-epub+zip' => 'epub',
+            default => null,
+        };
+    }
 
     public function authors()
     {
@@ -35,6 +67,14 @@ class Book extends Model
     public function bookRequests()
     {
         return $this->hasMany(BookRequest::class);
+    }
+
+    /**
+     * @return HasMany<BookShare, $this>
+     */
+    public function bookShares(): HasMany
+    {
+        return $this->hasMany(BookShare::class);
     }
 
     /**

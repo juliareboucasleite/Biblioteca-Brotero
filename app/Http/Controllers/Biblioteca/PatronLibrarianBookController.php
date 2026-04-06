@@ -44,6 +44,7 @@ class PatronLibrarianBookController extends Controller
             'authors_input' => ['nullable', 'string', 'max:2000'],
             'categories_input' => ['nullable', 'string', 'max:2000'],
             'cover' => ['nullable', 'image', 'max:5120'],
+            'ebook' => ['nullable', 'file', 'max:51200', 'mimes:pdf,epub'],
         ]);
 
         $coverUrl = null;
@@ -85,6 +86,10 @@ class PatronLibrarianBookController extends Controller
             return $book;
         });
 
+        if ($request->hasFile('ebook')) {
+            $this->attachEbook($request, $book);
+        }
+
         return redirect()
             ->route('biblioteca.livro.show', $book)
             ->with('success', 'Livro adicionado ao catálogo.');
@@ -107,6 +112,7 @@ class PatronLibrarianBookController extends Controller
                 'authors_input' => $book->authors->pluck('name')->implode("\n"),
                 'categories_input' => $book->categories->pluck('name')->implode(', '),
                 'cover_image' => $book->cover_image,
+                'has_ebook' => $book->hasEbook() && $book->ebookFormat() !== null,
             ],
         ]);
     }
@@ -134,6 +140,8 @@ class PatronLibrarianBookController extends Controller
             'authors_input' => ['nullable', 'string', 'max:2000'],
             'categories_input' => ['nullable', 'string', 'max:2000'],
             'cover' => ['nullable', 'image', 'max:5120'],
+            'ebook' => ['nullable', 'file', 'max:51200', 'mimes:pdf,epub'],
+            'remove_ebook' => ['nullable', 'boolean'],
         ]);
 
         $authors = $this->splitNames($data['authors_input'] ?? null);
@@ -178,11 +186,56 @@ class PatronLibrarianBookController extends Controller
             } else {
                 $book->details()->update(['publisher' => null]);
             }
+
+            if ($request->boolean('remove_ebook')) {
+                $this->deleteStoredEbook($book);
+                $book->forceFill([
+                    'ebook_disk' => null,
+                    'ebook_path' => null,
+                    'ebook_mime' => null,
+                ])->save();
+            } elseif ($request->hasFile('ebook')) {
+                $this->attachEbook($request, $book);
+            }
         });
 
         return redirect()
             ->route('biblioteca.livro.show', $book)
             ->with('success', 'Ficha do livro actualizada.');
+    }
+
+    private function attachEbook(Request $request, Book $book): void
+    {
+        $file = $request->file('ebook');
+
+        if ($file === null || ! $file->isValid()) {
+            return;
+        }
+
+        $this->deleteStoredEbook($book);
+
+        $path = $file->store('ebooks', 'local');
+        $mime = $file->getClientMimeType() ?: $file->getMimeType() ?: 'application/octet-stream';
+
+        $book->forceFill([
+            'ebook_disk' => 'local',
+            'ebook_path' => $path,
+            'ebook_mime' => $mime,
+        ])->save();
+    }
+
+    private function deleteStoredEbook(Book $book): void
+    {
+        if (! $book->hasEbook()) {
+            return;
+        }
+
+        $disk = Storage::disk($book->ebook_disk ?: 'local');
+        $path = (string) $book->ebook_path;
+
+        if ($path !== '' && $disk->exists($path)) {
+            $disk->delete($path);
+        }
     }
 
     /**

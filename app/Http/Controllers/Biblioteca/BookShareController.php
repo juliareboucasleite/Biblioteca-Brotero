@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Biblioteca;
 use App\Http\Controllers\Controller;
 use App\Models\BookShare;
 use App\Models\LibraryPatron;
+use App\Models\PatronBlock;
 use App\Support\PatronLabel;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -15,12 +16,14 @@ class BookShareController extends Controller
 {
     public function index(Request $request): Response
     {
+        $viewer = $request->user('patron');
+
         $paginator = BookShare::query()
             ->with(['book.authors', 'libraryPatron'])
             ->latest()
             ->paginate(15);
 
-        $paginator->through(fn (BookShare $share): array => $this->sharePayload($share));
+        $paginator->through(fn (BookShare $share): array => $this->sharePayload($share, $viewer));
 
         return Inertia::render('biblioteca/descobertas', [
             'descobertas' => $paginator,
@@ -70,16 +73,23 @@ class BookShareController extends Controller
     }
 
     /**
-     * @return array{id: string, patron_id: int, message: string|null, created_at: string, patron_label: string, livro: array<string, mixed>}
+     * @return array{id: string, patron_id: int, pode_contactar: bool, message: string|null, created_at: string, patron_label: string, livro: array<string, mixed>}
      */
-    private function sharePayload(BookShare $share): array
+    private function sharePayload(BookShare $share, ?LibraryPatron $viewer): array
     {
         $book = $share->book;
         $book->loadMissing(['authors']);
 
+        $authorPatron = $share->libraryPatron;
+        $podeContactar = $viewer instanceof LibraryPatron
+            && $authorPatron instanceof LibraryPatron
+            && $viewer->id !== (int) $share->library_patron_id
+            && ! PatronBlock::interactionBlocked($viewer, $authorPatron);
+
         return [
             'id' => (string) $share->id,
             'patron_id' => (int) $share->library_patron_id,
+            'pode_contactar' => $podeContactar,
             'message' => $share->message,
             'created_at' => $share->created_at?->toIso8601String() ?? '',
             'patron_label' => PatronLabel::format($share->libraryPatron),

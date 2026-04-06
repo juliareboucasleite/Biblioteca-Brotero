@@ -1,6 +1,5 @@
-import { Form, Head, Link, usePage } from '@inertiajs/react';
+import { Form, Head, Link } from '@inertiajs/react';
 import { BibliotecaCatalogShell } from '@/components/biblioteca/BibliotecaCatalogShell';
-import type { Auth } from '@/types/auth';
 import type { DescobertaEntrada } from '@/types/biblioteca';
 
 type PaginatorLink = {
@@ -44,8 +43,6 @@ function formatData(iso: string): string {
 }
 
 export default function BibliotecaDescobertas({ descobertas }: Props) {
-    const { auth } = usePage<{ auth: Auth }>().props;
-    const patron = auth.patron;
     const items = descobertas.data ?? [];
 
     return (
@@ -79,19 +76,19 @@ export default function BibliotecaDescobertas({ descobertas }: Props) {
                                     <div className="flex flex-col gap-[12px] p-[16px_18px] sm:flex-row sm:items-stretch sm:gap-[16px]">
                                         <Link
                                             href={`/biblioteca/livro/${encodeURIComponent(item.livro.id)}`}
-                                            className="group relative mx-auto shrink-0 overflow-hidden rounded-[12px] bg-linear-to-br from-[#e8e8e8] to-[#d0d0d0] sm:mx-0"
+                                            className="group relative mx-auto flex aspect-2/3 w-[min(104px,28vw)] shrink-0 items-center justify-center overflow-hidden rounded-[12px] bg-linear-to-br from-[#e8e8e8] to-[#d0d0d0] sm:mx-0 sm:w-[118px]"
                                             aria-label={`Ver ficha: ${item.livro.titulo}`}
                                         >
                                             {item.livro.capa ? (
                                                 <img
                                                     src={item.livro.capa}
                                                     alt=""
-                                                    className="block size-[100px] object-cover transition-transform group-hover:scale-[1.03] sm:size-[110px]"
+                                                    className="h-full w-full object-contain object-center transition-transform group-hover:scale-[1.02]"
                                                     loading="lazy"
                                                     referrerPolicy="no-referrer"
                                                 />
                                             ) : (
-                                                <span className="flex size-[100px] items-center justify-center p-[8px] text-center text-[11px] font-semibold text-(--brotero-texto-cinza) sm:size-[110px]">
+                                                <span className="flex h-full w-full items-center justify-center p-[8px] text-center text-[11px] font-semibold text-(--brotero-texto-cinza)">
                                                     Sem capa
                                                 </span>
                                             )}
@@ -121,12 +118,11 @@ export default function BibliotecaDescobertas({ descobertas }: Props) {
                                                 </p>
                                             ) : null}
                                             <div className="mt-[12px] flex flex-wrap items-center gap-x-[14px] gap-y-[6px]">
-                                                {patron && patron.id !== item.patron_id ? (
+                                                {item.pode_contactar ? (
                                                     <Form
                                                         action="/biblioteca/conta/mensagens/abrir"
                                                         method="post"
                                                         className="inline"
-                                                        preserveScroll
                                                     >
                                                         <input
                                                             type="hidden"

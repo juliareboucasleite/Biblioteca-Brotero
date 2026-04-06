@@ -67,7 +67,6 @@ export function BookPatronShareSection({
                         action="/biblioteca/descobertas"
                         method="post"
                         className="flex flex-col gap-[12px]"
-                        preserveScroll
                     >
                         {({ processing, errors }) => (
                             <>

@@ -27,7 +27,7 @@ export function BibliotecaCatalogShell({
                 </div>
                 <div
                     id="conteudo-catalogo"
-                    className="mx-auto w-full max-w-(--max-largura) min-h-0 min-w-0 flex-1 scroll-mt-4 px-[12px] pb-[28px] sm:px-[16px] lg:pt-5 lg:pb-[40px] lg:pr-5"
+                    className="mx-auto flex w-full max-w-(--max-largura) min-h-0 min-w-0 flex-1 flex-col scroll-mt-4 px-[12px] pb-[28px] sm:px-[16px] lg:pt-5 lg:pb-[40px] lg:pr-5"
                     tabIndex={-1}
                 >
                     {children}

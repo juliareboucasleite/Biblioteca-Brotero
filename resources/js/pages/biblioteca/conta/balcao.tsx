@@ -1,3 +1,4 @@
+import type { RequestPayload } from '@inertiajs/core';
 import { router, useForm, usePage } from '@inertiajs/react';
 import { useState } from 'react';
 import { BibliotecaContaLayout } from '@/components/biblioteca/BibliotecaContaLayout';
@@ -112,7 +113,7 @@ export default function BibliotecaContaBalcao({ pedidos }: Props) {
         return `/biblioteca/conta/balcao/pedidos/${id}/${action}`;
     }
 
-    function postAction(id: number, action: string, data?: Record<string, unknown>): void {
+    function postAction(id: number, action: string, data?: RequestPayload): void {
         setBusyId(id);
         router.post(baseUrl(id, action), data ?? {}, {
             preserveScroll: true,

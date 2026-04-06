@@ -16,12 +16,19 @@ type BibliotecaContaLayoutProps = {
     title: string;
     secao: ContaSecao;
     children: ReactNode;
+    /** Faz o conteúdo crescer até à altura útil da coluna (ex.: conversa em ecrã grande). */
+    ocuparAlturaConteudo?: boolean;
 };
 
 const linkBase =
     'text-[14px] px-[12px] py-[8px] rounded-(--raio) no-underline text-(--brotero-texto-link) hover:text-(--brotero-texto-link-hover) hover:underline';
 
-export function BibliotecaContaLayout({ title, secao, children }: BibliotecaContaLayoutProps) {
+export function BibliotecaContaLayout({
+    title,
+    secao,
+    children,
+    ocuparAlturaConteudo = false,
+}: BibliotecaContaLayoutProps) {
     const patron = usePage().props.auth?.patron;
     const modoBiblioteca =
         patron?.is_librarian === true && patron?.portal_mode === 'bibliotecaria';
@@ -33,9 +40,17 @@ export function BibliotecaContaLayout({ title, secao, children }: BibliotecaCont
         <>
             <Head title={title} />
             <BibliotecaCatalogShell>
-                <div className="w-full pb-[8px]">
+                <div
+                    className={cn(
+                        'w-full pb-[8px]',
+                        ocuparAlturaConteudo && 'flex min-h-0 flex-1 flex-col',
+                    )}
+                >
                     <nav
-                        className="mb-[20px] flex flex-wrap items-center gap-[8px] border-b border-(--brotero-borda-suave) pb-[12px]"
+                        className={cn(
+                            'mb-[20px] flex flex-wrap items-center gap-[8px] border-b border-(--brotero-borda-suave) pb-[12px]',
+                            ocuparAlturaConteudo && 'shrink-0',
+                        )}
                         aria-label="Área do leitor"
                     >
                         {modoBiblioteca ? (
@@ -83,7 +98,11 @@ export function BibliotecaContaLayout({ title, secao, children }: BibliotecaCont
                             Sair
                         </button>
                     </nav>
-                    {children}
+                    {ocuparAlturaConteudo ? (
+                        <div className="flex min-h-0 flex-1 flex-col">{children}</div>
+                    ) : (
+                        children
+                    )}
                 </div>
             </BibliotecaCatalogShell>
         </>

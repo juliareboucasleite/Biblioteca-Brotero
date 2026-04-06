@@ -1,5 +1,4 @@
 import { usePage } from '@inertiajs/react';
-import type { ComponentType } from 'react';
 import {
     BookMarked,
     Heart,
@@ -10,14 +9,17 @@ import {
     Sparkles,
     User,
 } from 'lucide-react';
+import type { ComponentType } from 'react';
 import { cn } from '@/lib/utils';
 import type { Auth } from '@/types/auth';
 
 function normalizePath(url: string): string {
     const path = url.split('?')[0]?.split('#')[0] ?? '/';
+
     if (path === '' || path === '/') {
         return '/';
     }
+
     return path.endsWith('/') && path.length > 1 ? path.slice(0, -1) : path;
 }
 

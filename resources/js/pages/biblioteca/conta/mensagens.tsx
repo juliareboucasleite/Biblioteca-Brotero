@@ -51,8 +51,9 @@ export default function BibliotecaContaMensagens({ conversas }: Props) {
             ) : null}
 
             <p className="m-0 mb-[18px] max-w-[56ch] text-[15px] leading-snug text-(--brotero-texto-cinza)">
-                Converse em privado com outros leitores. Nas Descobertas, use «Mensagem privada» para abrir
-                uma conversa com quem partilhou um livro.
+                Converse em privado com outros leitores só depois de <strong>ambos aceitarem</strong> o
+                pedido — assim evitamos mensagens de quem não quer falar consigo. Nas Descobertas, use «Mensagem
+                privada» para enviar um pedido a quem partilhou um livro.
             </p>
 
             {conversas.length === 0 ? (
@@ -85,13 +86,20 @@ export default function BibliotecaContaMensagens({ conversas }: Props) {
                                 </div>
                                 <div className="flex items-center justify-between gap-[10px]">
                                     <span className="line-clamp-2 min-w-0 text-[13px] text-(--brotero-texto-cinza)">
-                                        {c.ultima_mensagem ?? 'Sem mensagens ainda — diga olá.'}
+                                        {c.resumo ?? ''}
                                     </span>
-                                    {c.nao_lidas > 0 ? (
-                                        <span className="inline-flex shrink-0 rounded-full bg-(--brotero-primaria) px-[8px] py-[2px] text-[11px] font-bold text-white">
-                                            {c.nao_lidas > 99 ? '99+' : c.nao_lidas}
-                                        </span>
-                                    ) : null}
+                                    <span className="flex shrink-0 items-center gap-[6px]">
+                                        {c.precisa_acao ? (
+                                            <span className="rounded-full bg-amber-100 px-[8px] py-[3px] text-[10px] font-bold uppercase tracking-wide text-amber-950">
+                                                Pedido
+                                            </span>
+                                        ) : null}
+                                        {c.nao_lidas > 0 ? (
+                                            <span className="inline-flex rounded-full bg-(--brotero-primaria) px-[8px] py-[2px] text-[11px] font-bold text-white">
+                                                {c.nao_lidas > 99 ? '99+' : c.nao_lidas}
+                                            </span>
+                                        ) : null}
+                                    </span>
                                 </div>
                             </Link>
                         </li>

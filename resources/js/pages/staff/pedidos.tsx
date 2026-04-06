@@ -1,6 +1,5 @@
 import { Head, router, useForm, usePage } from '@inertiajs/react';
 import { useState } from 'react';
-import AppLayout from '@/layouts/app-layout';
 import { Button } from '@/components/ui/button';
 import {
     Dialog,
@@ -11,6 +10,7 @@ import {
     DialogTitle,
 } from '@/components/ui/dialog';
 import { Spinner } from '@/components/ui/spinner';
+import AppLayout from '@/layouts/app-layout';
 import { formatDt } from '@/lib/format';
 import staffPatrons from '@/routes/staff/patrons';
 import staffPedidos from '@/routes/staff/pedidos';

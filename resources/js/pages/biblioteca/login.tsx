@@ -1,6 +1,5 @@
 import { Form, Head } from '@inertiajs/react';
-import { BroteroFooter } from '@/components/BroteroFooter';
-import { BroteroHeader } from '@/components/BroteroHeader';
+import { BibliotecaCatalogShell } from '@/components/biblioteca/BibliotecaCatalogShell';
 import InputError from '@/components/input-error';
 import PasswordInput from '@/components/password-input';
 import { Checkbox } from '@/components/ui/checkbox';
@@ -16,17 +15,19 @@ export default function BibliotecaLogin({ status }: Props) {
         <>
             <Head title="Entrar — Leitor" />
 
-            <div className="min-h-screen flex flex-col bg-(--brotero-fundo) text-(--brotero-texto)">
-                <BroteroHeader />
-                <main className="w-full max-w-[420px] mx-auto px-[10px] flex-1 pt-[24px] pb-[40px]">
-                    <h1 className="m-0 mb-[8px] text-[1.35rem] font-bold text-(--brotero-texto)">
-                        Entrar na sua conta
-                    </h1>
-                    <p className="m-0 mb-[24px] text-[14px] text-(--brotero-texto-cinza)">
-                        Introduza o número do cartão da biblioteca e a senha. Formato corrido, só algarismos:{' '}
-                        <strong>DDMMAA</strong> (6) ou <strong>DDMMAAAA</strong> (8), sem barras nem hífens.
-                    </p>
+            <BibliotecaCatalogShell>
+                <div className="mx-auto w-full max-w-[440px] pt-[4px] lg:pt-0">
+                    <header className="mb-[20px]">
+                        <h1 className="m-0 mb-[8px] text-[1.5rem] font-bold leading-tight text-(--brotero-texto)">
+                            Entrar na sua conta
+                        </h1>
+                        <p className="m-0 text-[15px] leading-snug text-(--brotero-texto-cinza)">
+                            Introduza o número do cartão da biblioteca e a senha. Formato corrido, só algarismos:{' '}
+                            <strong>DDMMAA</strong> (6) ou <strong>DDMMAAAA</strong> (8), sem barras nem hífens.
+                        </p>
+                    </header>
 
+                    <div className="rounded-[18px] border border-(--brotero-borda-suave) bg-(--brotero-branco) p-[20px_22px] shadow-[0_8px_28px_rgba(42,38,48,0.06)] sm:p-[24px_26px]">
                     <Form method="post" action="/biblioteca/entrar" className="flex flex-col gap-[18px]">
                         {({ processing, errors }) => (
                             <>
@@ -80,17 +81,22 @@ export default function BibliotecaLogin({ status }: Props) {
                     </Form>
 
                     {status ? (
-                        <p className="mt-[16px] text-[14px] text-green-700 bg-green-50 border border-green-200 rounded-(--raio) p-[12px]">
+                        <p className="mt-[16px] rounded-(--raio) border border-green-200 bg-green-50 p-[12px] text-[14px] text-green-800">
                             {status}
                         </p>
                     ) : null}
+                    </div>
 
-                    <p className="mt-[24px] text-[13px] text-(--brotero-texto-cinza)">
-                        <a href="/biblioteca" className="text-(--brotero-texto-link) hover:underline"> ← Voltar ao catálogo </a>
+                    <p className="mt-[22px] text-[14px] text-(--brotero-texto-cinza)">
+                        <a
+                            href="/biblioteca"
+                            className="font-semibold text-(--brotero-texto-link) no-underline hover:underline"
+                        >
+                            ← Voltar ao catálogo
+                        </a>
                     </p>
-                </main>
-                <BroteroFooter />
-            </div>
+                </div>
+            </BibliotecaCatalogShell>
         </>
     );
 }

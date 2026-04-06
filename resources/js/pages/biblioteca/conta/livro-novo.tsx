@@ -16,6 +16,7 @@ export default function BibliotecaContaLivroNovo() {
         authors_input: '',
         categories_input: '',
         cover: null as File | null,
+        ebook: null as File | null,
     });
 
     function submit(e: FormEvent): void {
@@ -220,6 +221,25 @@ export default function BibliotecaContaLivroNovo() {
                     />
                     {form.errors.cover ? (
                         <p className="m-0 text-[12px] text-red-600">{form.errors.cover}</p>
+                    ) : null}
+                </div>
+
+                <div className="grid gap-[6px]">
+                    <label htmlFor="ln-ebook" className="text-[13px] font-semibold text-(--brotero-texto)">
+                        E-book opcional (PDF ou EPUB, máx. 50&nbsp;MB)
+                    </label>
+                    <p className="m-0 text-[13px] text-(--brotero-texto-cinza)">
+                        Ficheiro privado: só leitores com sessão podem abrir no browser. Respeite direitos de autor.
+                    </p>
+                    <input
+                        id="ln-ebook"
+                        type="file"
+                        accept=".pdf,.epub,application/pdf,application/epub+zip"
+                        className="text-[14px] text-(--brotero-texto)"
+                        onChange={(e) => form.setData('ebook', e.target.files?.[0] ?? null)}
+                    />
+                    {form.errors.ebook ? (
+                        <p className="m-0 text-[12px] text-red-600">{form.errors.ebook}</p>
                     ) : null}
                 </div>
 

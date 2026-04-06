@@ -19,3 +19,23 @@
     --max-largura: 1220px;
 }
 
+/**
+ * Tema mais suave para o catálogo (páginas Inertia `library` / `library-all`).
+ * Mantém o resto do site com as variáveis `:root` acima.
+ */
+.biblioteca-catalog-shell {
+    --brotero-fundo: #f0ece7;
+    --brotero-branco: #fffdf9;
+    --brotero-texto: #2a2630;
+    --brotero-texto-cinza: #6b6570;
+    --brotero-borda: #e6dfd6;
+    --brotero-borda-suave: #efe8e0;
+    --brotero-primaria: #5d7a8c;
+    --brotero-primaria-escuro: #466274;
+    --brotero-primaria-claro: #7a96a8;
+    --brotero-texto-link: #4a6674;
+    --brotero-texto-link-hover: #35505f;
+    --brotero-nav: #4d6b7a;
+    --raio: 14px;
+    --max-largura: 1280px;
+}

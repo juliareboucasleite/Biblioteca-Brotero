@@ -14,6 +14,7 @@ type BookEditPayload = {
     authors_input: string;
     categories_input: string;
     cover_image: string | null;
+    has_ebook: boolean;
 };
 
 type Props = {
@@ -36,6 +37,8 @@ export default function BibliotecaContaLivroEdit({ book }: Props) {
         authors_input: book.authors_input,
         categories_input: book.categories_input,
         cover: null as File | null,
+        ebook: null as File | null,
+        remove_ebook: false,
     });
 
     function submit(e: FormEvent): void {
@@ -63,7 +66,8 @@ export default function BibliotecaContaLivroEdit({ book }: Props) {
 
             <p className="m-0 mb-[20px] text-[14px] text-(--brotero-texto-cinza)">
                 Alterações reflectem-se de imediato no catálogo. Deixe «Capa» em branco para manter a imagem actual.
-                Capa nova: JPEG, PNG ou WebP (máx. 5&nbsp;MB).
+                Capa nova: JPEG, PNG ou WebP (máx. 5&nbsp;MB). E-book privado: PDF ou EPUB (máx. 50&nbsp;MB) — só
+                leitores autenticados abrem no site.
             </p>
 
             {book.cover_image ? (
@@ -227,6 +231,36 @@ export default function BibliotecaContaLivroEdit({ book }: Props) {
                     {form.errors.cover ? (
                         <p className="m-0 text-[12px] text-red-600">{form.errors.cover}</p>
                     ) : null}
+                </div>
+
+                <div className="grid gap-[6px]">
+                    <span className="text-[13px] font-semibold text-(--brotero-texto)">E-book (PDF ou EPUB)</span>
+                    {book.has_ebook ? (
+                        <p className="m-0 text-[13px] text-(--brotero-texto-cinza)">
+                            Já existe um ficheiro. Envie outro para substituir ou marque «Remover e-book».
+                        </p>
+                    ) : null}
+                    <label htmlFor="le-ebook" className="text-[13px] font-medium text-(--brotero-texto)">
+                        Novo ficheiro (opcional)
+                    </label>
+                    <input
+                        id="le-ebook"
+                        type="file"
+                        accept=".pdf,.epub,application/pdf,application/epub+zip"
+                        className="text-[14px] text-(--brotero-texto)"
+                        onChange={(e) => form.setData('ebook', e.target.files?.[0] ?? null)}
+                    />
+                    {form.errors.ebook ? (
+                        <p className="m-0 text-[12px] text-red-600">{form.errors.ebook}</p>
+                    ) : null}
+                    <label className="flex cursor-pointer items-center gap-[8px] text-[14px] text-(--brotero-texto)">
+                        <input
+                            type="checkbox"
+                            checked={form.data.remove_ebook}
+                            onChange={(e) => form.setData('remove_ebook', e.target.checked)}
+                        />
+                        Remover e-book do catálogo (apaga o ficheiro)
+                    </label>
                 </div>
 
                 <div className="flex flex-wrap gap-[12px] pt-[8px]">

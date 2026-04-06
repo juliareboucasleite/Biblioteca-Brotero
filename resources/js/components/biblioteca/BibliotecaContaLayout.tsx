@@ -1,10 +1,16 @@
 import { Head, Link, router, usePage } from '@inertiajs/react';
 import type { ReactNode } from 'react';
-import { BroteroFooter } from '@/components/BroteroFooter';
-import { BroteroHeader } from '@/components/BroteroHeader';
+import { BibliotecaCatalogShell } from '@/components/biblioteca/BibliotecaCatalogShell';
 import { cn } from '@/lib/utils';
 
-type ContaSecao = 'balcao' | 'livro-novo' | 'pedidos' | 'historico' | 'favoritos' | 'perfil';
+type ContaSecao =
+    | 'balcao'
+    | 'livro-novo'
+    | 'pedidos'
+    | 'historico'
+    | 'favoritos'
+    | 'mensagens'
+    | 'perfil';
 
 type BibliotecaContaLayoutProps = {
     title: string;
@@ -26,11 +32,10 @@ export function BibliotecaContaLayout({ title, secao, children }: BibliotecaCont
     return (
         <>
             <Head title={title} />
-            <div className="min-h-screen flex flex-col bg-(--brotero-fundo) text-(--brotero-texto)">
-                <BroteroHeader />
-                <div className="w-full max-w-(--max-largura) mx-auto px-[10px] flex-1 pb-[32px]">
+            <BibliotecaCatalogShell>
+                <div className="w-full pb-[8px]">
                     <nav
-                        className="flex flex-wrap items-center gap-[8px] mb-[20px] pb-[12px] border-b border-(--brotero-borda)"
+                        className="mb-[20px] flex flex-wrap items-center gap-[8px] border-b border-(--brotero-borda-suave) pb-[12px]"
                         aria-label="Área do leitor"
                     >
                         {modoBiblioteca ? (
@@ -64,12 +69,15 @@ export function BibliotecaContaLayout({ title, secao, children }: BibliotecaCont
                         <Link href="/biblioteca/conta/favoritos" className={active('favoritos')} preserveScroll>
                             Favoritos
                         </Link>
+                        <Link href="/biblioteca/conta/mensagens" className={active('mensagens')} preserveScroll>
+                            Mensagens
+                        </Link>
                         <Link href="/biblioteca/conta/perfil" className={active('perfil')} preserveScroll>
                             Perfil
                         </Link>
                         <button
                             type="button"
-                            className={cn(linkBase, 'border-0 bg-transparent cursor-pointer font-inherit')}
+                            className={cn(linkBase, 'cursor-pointer border-0 bg-transparent font-inherit')}
                             onClick={() => router.post('/biblioteca/sair')}
                         >
                             Sair
@@ -77,8 +85,7 @@ export function BibliotecaContaLayout({ title, secao, children }: BibliotecaCont
                     </nav>
                     {children}
                 </div>
-                <BroteroFooter />
-            </div>
+            </BibliotecaCatalogShell>
         </>
     );
 }

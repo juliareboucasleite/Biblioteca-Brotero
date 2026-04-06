@@ -1,9 +1,9 @@
-import clsx from 'clsx';
 import { router, usePage } from '@inertiajs/react';
+import clsx from 'clsx';
 import { useCallback, useState } from 'react';
 import type { MouseEvent } from 'react';
-import type { Auth } from '@/types/auth';
 import type { LivroCatalogo } from '@/types';
+import type { Auth } from '@/types/auth';
 
 type CardLivroProps = {
     livro: LivroCatalogo;
@@ -82,6 +82,11 @@ export function CardLivro({ livro, className }: CardLivroProps) {
                         take it
                     </span>
                 </a>
+                {livro.tem_ebook ? (
+                    <span className="pointer-events-none absolute top-[8px] left-[8px] z-10 rounded-full bg-violet-600/92 px-[7px] py-[3px] text-[9px] font-bold uppercase tracking-[0.06em] text-white shadow-sm">
+                        E-book
+                    </span>
+                ) : null}
                 <button
                     type="button"
                     className={clsx(

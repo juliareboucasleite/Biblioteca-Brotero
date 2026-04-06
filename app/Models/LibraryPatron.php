@@ -5,6 +5,7 @@ namespace App\Models;
 use Database\Factories\LibraryPatronFactory;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Illuminate\Support\Carbon;
@@ -81,6 +82,14 @@ class LibraryPatron extends Authenticatable
     {
         return $this->belongsToMany(Book::class, 'book_favorites', 'library_patron_id', 'book_id')
             ->withTimestamps();
+    }
+
+    /**
+     * @return HasMany<BookShare, $this>
+     */
+    public function bookShares(): HasMany
+    {
+        return $this->hasMany(BookShare::class, 'library_patron_id');
     }
 
     /** Canal opcional de e-mail: só se o leitor tiver email na base. */

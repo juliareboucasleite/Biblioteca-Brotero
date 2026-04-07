@@ -12,7 +12,7 @@ export function BookCover({ coverSrc, titulo, placeholder }: BookCoverProps) {
     const [capaAmpliadaAberta, setCapaAmpliadaAberta] = useState(false);
 
     const altCapa = `Capa do livro ${placeholder ? 'Livro' : titulo}`;
-    const altCapaAmpliada = `Capa ampliada — ${placeholder ? 'Livro' : titulo}`;
+    const altCapaAmpliada = `Capa ampliada: ${placeholder ? 'Livro' : titulo}`;
 
     return (
         <>

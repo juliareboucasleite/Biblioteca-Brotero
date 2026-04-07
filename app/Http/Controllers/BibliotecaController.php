@@ -29,6 +29,9 @@ class BibliotecaController extends Controller
 
         if ($categoriaId !== '') {
             $query->forCatalogCategory($categoriaId);
+            if (Book::categoryIdIsRecentBooksListing($categoriaId)) {
+                $query->reorder()->orderByDesc('created_at')->orderByDesc('id');
+            }
         }
 
         if ($authorId !== '') {

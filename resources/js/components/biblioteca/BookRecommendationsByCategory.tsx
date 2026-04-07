@@ -14,7 +14,7 @@ export function BookRecommendationsByCategory({
 }: BookRecommendationsByCategoryProps) {
     const trimmed = categoriesSummary.trim();
     const title = trimmed
-        ? `Mais livros na mesma categoria — ${trimmed}`
+        ? `Mais livros na mesma categoria · ${trimmed}`
         : 'Mais livros na mesma categoria';
 
     return (

@@ -39,7 +39,7 @@ class BookRequestPendingStaffNotification extends Notification
         }
 
         $message = (new MailMessage)
-            ->subject('Biblioteca — novo pedido pendente ('.$this->bookRequest->book_title.')')
+            ->subject('Biblioteca · novo pedido pendente ('.$this->bookRequest->book_title.')')
             ->line(implode(' · ', array_slice($lines, 0, 4)));
 
         foreach (array_slice($lines, 4) as $line) {

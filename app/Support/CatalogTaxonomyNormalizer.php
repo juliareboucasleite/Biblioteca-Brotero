@@ -13,7 +13,7 @@ use Illuminate\Support\Str;
  * Funde autores/categorias duplicados.
  *
  * Chave canónica (só para agrupar): minúsculas, transliteração ASCII (ex.: è→e),
- * remoção de espaços e pontuação — assim "S. L. X" e "S.L. X" ou "Vallès" e "Valles"
+ * remoção de espaços e pontuação; assim "S. L. X" e "S.L. X" ou "Vallès" e "Valles"
  * caem no mesmo grupo. O nome guardado usa {@see normalizeDisplayName} e a melhor
  * variante entre duplicados via {@see bestLabelAmong}.
  *

@@ -39,7 +39,7 @@ export default function LibraryBook({ livro, patron_share = null }: LibraryBookP
             .filter((x): x is string => Boolean(x)) ?? [];
     const categoriesLabel = categoriesFromApi.join(', ');
 
-    const pageTitle = placeholder ? 'Biblioteca Brotero — Livro' : `${livro.titulo} — Biblioteca Brotero`;
+    const pageTitle = placeholder ? 'Biblioteca Brotero · Livro' : `${livro.titulo} · Biblioteca Brotero`;
 
     return (
         <>

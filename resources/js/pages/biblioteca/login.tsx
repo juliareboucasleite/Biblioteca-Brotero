@@ -13,7 +13,7 @@ type Props = {
 export default function BibliotecaLogin({ status }: Props) {
     return (
         <>
-            <Head title="Entrar — Leitor" />
+            <Head title="Entrar · Leitor" />
 
             <BibliotecaCatalogShell>
                 <div className="mx-auto w-full max-w-[440px] pt-[4px] lg:pt-0">

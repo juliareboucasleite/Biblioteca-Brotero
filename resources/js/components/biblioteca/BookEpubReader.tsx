@@ -81,7 +81,7 @@ export function BookEpubReader({ src, title }: BookEpubReaderProps) {
     return (
         <div className="flex min-h-[75vh] w-full flex-col">
             <p className="m-0 mb-[10px] text-[13px] text-(--brotero-texto-cinza)">
-                <span className="font-semibold text-(--brotero-texto)">{title}</span> — livro digital (EPUB)
+                <span className="font-semibold text-(--brotero-texto)">{title}</span> · livro digital (EPUB)
             </p>
             <div
                 ref={hostRef}

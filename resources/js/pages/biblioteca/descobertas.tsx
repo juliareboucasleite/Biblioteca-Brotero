@@ -66,7 +66,8 @@ export default function BibliotecaDescobertas({ descobertas }: Props) {
                         className="m-0 rounded-[14px] border border-dashed border-(--brotero-borda) bg-(--brotero-branco) px-[18px] py-[22px] text-[15px] leading-relaxed text-(--brotero-texto-cinza)"
                         role="status"
                     >
-                        Ainda não há partilhas. Na ficha de um livro, usa «Recomendar à comunidade».
+                        Partilha o que estás a ler: na ficha do livro, usa «Recomendar à comunidade» para
+                        aparecer nesta linha do tempo.
                     </p>
                 ) : (
                     <ul className="m-0 flex list-none flex-col gap-[16px] p-0">

@@ -41,6 +41,11 @@ final class CategoryLabel
         'Mozambican fiction (Portuguese)' => 'Ficção moçambicana (português)',
         'Holocaust, Jewish (1939-1945)' => 'Holocausto judeu (1939–1945)',
         'English fiction' => 'Ficção inglesa',
+
+        // Variantes do mesmo conceito (alinhado com slug `livros-novos`).
+        'Livros novas' => 'Livros novos',
+        'Livros novos adicionados' => 'Livros novos',
+        'Novos livros adicionados' => 'Livros novos',
     ];
 
     public static function toPortuguese(string $name): string

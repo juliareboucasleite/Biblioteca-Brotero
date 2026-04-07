@@ -21,7 +21,7 @@ final class PatronPeerAccess
             ->exists();
     }
 
-    /** Conversa aceite — podem partilhar livros e ver perfil resumido. */
+    /** Conversa aceite: podem partilhar livros e ver perfil resumido. */
     public static function haveActiveConversationTogether(LibraryPatron $viewer, LibraryPatron $peer): bool
     {
         if ($viewer->is($peer)) {

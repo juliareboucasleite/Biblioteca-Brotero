@@ -7,19 +7,19 @@ import type { Category } from '@/types';
 
 const SCROLL_STEP_PX = 280;
 
-/** Categoria «e-book» (PDF online) na BD — mostrada logo a seguir a «Todas». */
+/** Categoria «e-book» (PDF online) na BD; mostrada logo a seguir a «Todas». */
 const CATEGORIA_EBOOK_ID = 64;
 
-/** Categoria «audiobook» na BD — ícone dedicado. */
+/** Categoria «audiobook» na BD: ícone dedicado. */
 const CATEGORIA_AUDIOBOOK_ID = 65;
 
-/** Categoria «livros novos» na BD — ícone dedicado. */
-const CATEGORIA_LIVROS_NOVOS_ID = 66;
+/** Categoria «livros novos» / entradas recentes; alinhado com `recent_books_category_id` na config. */
+const CATEGORIA_LIVROS_NOVOS_ID = 84;
 
-/** Categoria «bestsellers» na BD — ícone dedicado. */
+/** Categoria «bestsellers» na BD: ícone dedicado. */
 const CATEGORIA_BESTSELLERS_ID = 67;
 
-/** Categoria «manga» na BD — mesmo ícone que banda desenhada. */
+/** Categoria «manga» na BD: mesmo ícone que banda desenhada. */
 const CATEGORIA_MANGA_ID = 68;
 
 /** Alinhar com `config/biblioteca_canonical_categories.php` → `order` (índice = prioridade no carrossel). */
@@ -48,10 +48,10 @@ const ORDEM_SLUGS_CATALOGO = [
 ] as const;
 
 /**
- * - pilha: «Todas» — catálogo completo
+ * - pilha: «Todas»: catálogo completo
  * - livros-pdf: obras online em PDF (categoria e-book id 64 ou nome com pistas)
  * - livro-de-musica: categoria audiobook id 65
- * - new: categoria livros novos id 66
+ * - new: categoria livros novos / recentes (id em config, ex. 84)
  * - livro-bestsellers: categoria bestsellers id 67
  * - livro-de-banda-desenhada: manga id 68; também BD / comics / manga (nome)
  * - romance: nome da categoria (romance.png)
@@ -94,7 +94,7 @@ const ICON_POR_SLUG: Partial<Record<(typeof ORDEM_SLUGS_CATALOGO)[number], strin
     'infantil-juvenil': '/images/livro-rosa.png',
 };
 
-/** Livros físicos — variações de cor (ícones dedicados ficam fora desta lista). */
+/** Livros físicos: variações de cor (ícones dedicados ficam fora desta lista). */
 const ICON_LIVROS_COLORIDOS = [
     '/images/livro-roxo.png',
     '/images/livro-rosa.png',
@@ -115,7 +115,7 @@ function indiceCorPorCategoriaId(id: string | number): number {
     return Math.abs(h) % ICON_LIVROS_COLORIDOS.length;
 }
 
-/** Palavras no nome da categoria (normalizado) que indicam PDF/online — ajuste se os nomes na BD forem outros. */
+/** Palavras no nome da categoria (normalizado) que indicam PDF/online; ajuste se os nomes na BD forem outros. */
 const PDF_ONLINE_HINTS = [
     'pdf',
     'online',
@@ -127,7 +127,7 @@ const PDF_ONLINE_HINTS = [
     'em pdf',
 ] as const;
 
-/** Nome normalizado sugere «não ficção» — não usar ícone de ficção. */
+/** Nome normalizado sugere «não ficção»; não usar ícone de ficção. */
 function pareceNaoFiccao(n: string): boolean {
     return (
         n.includes('nao ficcao') ||
@@ -138,7 +138,7 @@ function pareceNaoFiccao(n: string): boolean {
     );
 }
 
-/** Categoria de ficção — nomes com «ficção» / «fiction» (exceto não-ficção). */
+/** Categoria de ficção: nomes com «ficção» / «fiction» (exceto não-ficção). */
 function pareceFiccao(n: string): boolean {
     if (pareceNaoFiccao(n)) {
         return false;
@@ -147,12 +147,12 @@ function pareceFiccao(n: string): boolean {
     return n.includes('ficcao') || n.includes('fiction');
 }
 
-/** Romance (género) — nome da categoria. */
+/** Romance (género): nome da categoria. */
 function pareceRomance(n: string): boolean {
     return n.includes('romance');
 }
 
-/** Fantasia / fantasy — nome da categoria (normalizado). */
+/** Fantasia / fantasy: nome da categoria (normalizado). */
 function pareceFantasia(n: string): boolean {
     return (
         n.includes('fantasia') ||
@@ -174,6 +174,16 @@ function pareceBandaDesenhada(n: string): boolean {
         n.includes('comics') ||
         n.includes('manga') ||
         /\bbd\b/.test(n)
+    );
+}
+
+/** Livros novos / novidades no catálogo (variantes de nome na BD). */
+function pareceLivrosNovos(n: string): boolean {
+    return (
+        /\blivros?\s+nov[oa]s\b/u.test(n) ||
+        (n.includes('novos adicionados') && n.includes('livro')) ||
+        n.includes('novos livros adicionados') ||
+        /\bnovos\s+livros\b/u.test(n)
     );
 }
 
@@ -227,6 +237,7 @@ function categoryDisplayName(c: CategoryLike): string {
 
 function iconSrcForCategory(c: CategoryLike): string {
     const slug = categorySlug(c);
+
     if (slug !== null && ICON_POR_SLUG[slug as keyof typeof ICON_POR_SLUG] !== undefined) {
         return ICON_POR_SLUG[slug as keyof typeof ICON_POR_SLUG] as string;
     }
@@ -276,6 +287,10 @@ function iconSrcForCategory(c: CategoryLike): string {
         }
     }
 
+    if (pareceLivrosNovos(n)) {
+        return ICON_LIVROS_NOVOS;
+    }
+
     const idx = indiceCorPorCategoriaId(c.id);
 
     return ICON_LIVROS_COLORIDOS[idx];
@@ -287,10 +302,12 @@ function iconSrcForCategory(c: CategoryLike): string {
  */
 function ordemCatalogoReferencia(c: CategoryLike): number {
     const slug = categorySlug(c);
+
     if (slug !== null) {
         const idx = ORDEM_SLUGS_CATALOGO.indexOf(
             slug as (typeof ORDEM_SLUGS_CATALOGO)[number],
         );
+
         if (idx >= 0) {
             return 10 + idx;
         }
@@ -304,6 +321,10 @@ function ordemCatalogoReferencia(c: CategoryLike): number {
     }
 
     if (id === String(CATEGORIA_LIVROS_NOVOS_ID)) {
+        return 20;
+    }
+
+    if (pareceLivrosNovos(n)) {
         return 20;
     }
 
@@ -517,7 +538,7 @@ export function BibliotecaCategoryChips({
                 onMouseDown={onMouseDown}
                 onClickCapture={onClickCapture}
                 onDragStart={(e) => e.preventDefault()}
-                aria-label="Categorias — ícone e nome; arrastar ou setas para ver mais"
+                aria-label="Categorias: ícone e nome; arrastar ou setas para ver mais"
             >
                 <div role="listitem" className="shrink-0">
                     <CategoriaIconSlot

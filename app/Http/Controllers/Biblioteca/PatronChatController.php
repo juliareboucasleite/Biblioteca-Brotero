@@ -432,11 +432,11 @@ class PatronChatController extends Controller
         if ($conversation->status === PatronConversation::STATUS_PENDING) {
             $resumo = $conversation->isInitiator($viewer)
                 ? 'À espera que a outra pessoa aceite o pedido.'
-                : 'Pediu conversar consigo — aceite ou recuse antes de haver mensagens.';
+                : 'Pediu conversar consigo: aceite ou recuse antes de haver mensagens.';
         } elseif ($ultima !== null) {
             $resumo = $this->truncate($ultima->body, 120);
         } else {
-            $resumo = 'Sem mensagens ainda — diga olá.';
+            $resumo = 'Sem mensagens ainda; diga olá.';
         }
 
         return [

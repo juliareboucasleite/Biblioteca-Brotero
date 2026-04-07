@@ -21,7 +21,7 @@ export default function BibliotecaContaPerfil({ perfil }: Props) {
                             Nome
                         </dt>
                         <dd className="m-0 text-[15px] text-(--brotero-texto)">
-                            {perfil.name?.trim() ? perfil.name : '—'}
+                            {perfil.name?.trim() ? perfil.name : '-'}
                         </dd>
                     </div>
                     <div>

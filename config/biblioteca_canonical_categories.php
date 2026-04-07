@@ -14,6 +14,13 @@ return [
      */
     'ebooks_category_id' => 64,
 
+    /**
+     * ID da categoria «Livros novos» / entradas recentes no catálogo.
+     * Ao filtrar por esta categoria, listam-se todos os livros ordenados por data de criação
+     * (não só os que têm a etiqueta na pivot).
+     */
+    'recent_books_category_id' => 84,
+
     'order' => [
         'e-books',
         'livros-novos',
@@ -104,5 +111,10 @@ return [
         'Antiques & Collectibles' => 'historia',
         'Authors' => 'biografia-autobiografia',
         'Holocaust, Jewish (1939-1945)' => 'historia',
+
+        // Duplicados operacionais (mesmo conceito que «Livros novos»).
+        'Livros novas' => 'livros-novos',
+        'Livros novos adicionados' => 'livros-novos',
+        'Novos livros adicionados' => 'livros-novos',
     ],
 ];

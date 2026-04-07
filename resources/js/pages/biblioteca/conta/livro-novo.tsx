@@ -94,12 +94,15 @@ export default function BibliotecaContaLivroNovo() {
                         <label htmlFor="ln-isbn" className="text-[13px] font-semibold text-(--brotero-texto)">
                             ISBN (opcional)
                         </label>
+                        <p className="m-0 text-[12px] text-(--brotero-texto-cinza)">
+                            Pode indicar ISBN-10 e ISBN-13, separados por vírgula (ex.: 8575226622, 9788575226629).
+                        </p>
                         <input
                             id="ln-isbn"
                             className="rounded-(--raio) border border-(--brotero-borda) bg-(--brotero-branco) px-[12px] py-[10px] text-[14px] text-(--brotero-texto)"
                             value={form.data.isbn}
                             onChange={(e) => form.setData('isbn', e.target.value)}
-                            maxLength={32}
+                            maxLength={128}
                         />
                         {form.errors.isbn ? (
                             <p className="m-0 text-[12px] text-red-600">{form.errors.isbn}</p>

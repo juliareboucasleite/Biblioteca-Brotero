@@ -19,7 +19,7 @@ export default function BibliotecaContaLeitorPerfil({ leitor }: Props) {
                     className="text-[14px] font-semibold text-(--brotero-texto-link) no-underline hover:underline"
                     preserveScroll
                 >
-                    ← Mensagens
+                    ← Conversas
                 </Link>
             </div>
 

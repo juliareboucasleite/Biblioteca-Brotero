@@ -85,7 +85,7 @@ export function BibliotecaContaLayout({
                             Favoritos
                         </Link>
                         <Link href="/biblioteca/conta/mensagens" className={active('mensagens')} preserveScroll>
-                            Mensagens
+                            Conversas
                         </Link>
                         <Link href="/biblioteca/conta/perfil" className={active('perfil')} preserveScroll>
                             Perfil

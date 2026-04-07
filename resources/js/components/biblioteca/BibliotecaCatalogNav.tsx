@@ -147,9 +147,9 @@ export function BibliotecaCatalogNav() {
                 />
                 <NavItem
                     href={patron ? '/biblioteca/conta/mensagens' : '/biblioteca/entrar'}
-                    title={patron ? 'Mensagens com outros leitores' : 'Entrar para mensagens'}
+                    title={patron ? 'Conversas com outros leitores' : 'Entrar para conversas'}
                     icon={MessageCircle}
-                    label="Chats"
+                    label="Conversas"
                     active={isNavActive(url, '/biblioteca/conta/mensagens')}
                 />
                 <NavItem

@@ -1,6 +1,6 @@
 import { Head } from '@inertiajs/react';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
-import { useRef } from 'react';
+import { useHorizontalDragScroll } from '@/hooks/useHorizontalDragScroll';
 import { BibliotecaCatalogSearchBar } from '@/components/biblioteca/BibliotecaCatalogSearchBar';
 import { BibliotecaCatalogShell } from '@/components/biblioteca/BibliotecaCatalogShell';
 import { BibliotecaCategoryChips } from '@/components/biblioteca/BibliotecaCategoryChips';
@@ -63,7 +63,8 @@ export default function Library({
     ano,
     rankingCatalogo = [],
 }: LibraryProps) {
-    const novosRef = useRef<HTMLDivElement>(null);
+    const novosDrag = useHorizontalDragScroll();
+    const maisPedidosDrag = useHorizontalDragScroll();
     const lista = useBibliotecaLivrosPolling(livros, {
         categoriaSelecionada,
         q,
@@ -98,8 +99,16 @@ export default function Library({
 
     const temMaisPedidos = livrosMaisPedidos.length > 0;
     const scrollNovos = (delta: number) => {
-        novosRef.current?.scrollBy({ left: delta, behavior: 'smooth' });
+        novosDrag.scrollRef.current?.scrollBy({ left: delta, behavior: 'smooth' });
     };
+    const scrollMaisPedidos = (delta: number) => {
+        maisPedidosDrag.scrollRef.current?.scrollBy({ left: delta, behavior: 'smooth' });
+    };
+    const carrosselArrowBtnClass = cn(
+        'inline-flex size-[36px] items-center justify-center rounded-full border border-(--brotero-borda) bg-(--brotero-branco) text-(--brotero-texto) shadow-sm transition-colors',
+        'hover:border-(--brotero-primaria-claro) hover:text-(--brotero-primaria)',
+        'focus-visible:outline-2 focus-visible:outline-(--brotero-primaria)',
+    );
     const carrosselCardClass =
         'w-[160px] flex-[0_0_160px] snap-start rounded-[18px] border-(--brotero-borda-suave) shadow-[0_8px_22px_rgba(42,38,48,0.06)]';
 
@@ -148,11 +157,7 @@ export default function Library({
                                     <button
                                         type="button"
                                         onClick={() => scrollNovos(-280)}
-                                        className={cn(
-                                            'inline-flex size-[36px] items-center justify-center rounded-full border border-(--brotero-borda) bg-(--brotero-branco) text-(--brotero-texto) shadow-sm transition-colors',
-                                            'hover:border-(--brotero-primaria-claro) hover:text-(--brotero-primaria)',
-                                            'focus-visible:outline focus-visible:outline-2 focus-visible:outline-(--brotero-primaria)',
-                                        )}
+                                        className={carrosselArrowBtnClass}
                                         aria-label="Deslocar lista para a esquerda"
                                     >
                                         <ChevronLeft
@@ -163,11 +168,7 @@ export default function Library({
                                     <button
                                         type="button"
                                         onClick={() => scrollNovos(280)}
-                                        className={cn(
-                                            'inline-flex size-[36px] items-center justify-center rounded-full border border-(--brotero-borda) bg-(--brotero-branco) text-(--brotero-texto) shadow-sm transition-colors',
-                                            'hover:border-(--brotero-primaria-claro) hover:text-(--brotero-primaria)',
-                                            'focus-visible:outline focus-visible:outline-2 focus-visible:outline-(--brotero-primaria)',
-                                        )}
+                                        className={carrosselArrowBtnClass}
                                         aria-label="Deslocar lista para a direita"
                                     >
                                         <ChevronRight
@@ -186,9 +187,12 @@ export default function Library({
                         }
                     />
                     <div
-                        ref={novosRef}
-                        className="flex snap-x snap-proximity gap-[16px] overflow-x-auto pb-[8px] [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
+                        ref={novosDrag.scrollRef}
+                        className="flex cursor-grab snap-x snap-proximity gap-[16px] overflow-x-auto pb-[8px] select-none [-ms-overflow-style:none] [scrollbar-width:none] active:cursor-grabbing [&::-webkit-scrollbar]:hidden"
                         aria-label="Lista de livros recentes"
+                        onMouseDown={novosDrag.onMouseDown}
+                        onClickCapture={novosDrag.onClickCapture}
+                        onDragStart={(e) => e.preventDefault()}
                     >
                         {lista.slice(0, 10).map((livro) => (
                             <CardLivro
@@ -244,18 +248,48 @@ export default function Library({
                     <BookSectionHeader
                         title="Os mais pedidos"
                         action={
-                            <a
-                                href={`/biblioteca/livros?${query}`}
-                                className="text-[13px] whitespace-nowrap text-(--brotero-texto-link) hover:text-(--brotero-texto-link-hover) hover:underline"
-                            >
-                                Ver mais
-                            </a>
+                            <div className="flex items-center gap-[10px]">
+                                <div className="hidden items-center gap-[4px] sm:flex">
+                                    <button
+                                        type="button"
+                                        onClick={() => scrollMaisPedidos(-280)}
+                                        className={carrosselArrowBtnClass}
+                                        aria-label="Deslocar mais pedidos para a esquerda"
+                                    >
+                                        <ChevronLeft
+                                            className="size-[20px]"
+                                            aria-hidden
+                                        />
+                                    </button>
+                                    <button
+                                        type="button"
+                                        onClick={() => scrollMaisPedidos(280)}
+                                        className={carrosselArrowBtnClass}
+                                        aria-label="Deslocar mais pedidos para a direita"
+                                    >
+                                        <ChevronRight
+                                            className="size-[20px]"
+                                            aria-hidden
+                                        />
+                                    </button>
+                                </div>
+                                <a
+                                    href={`/biblioteca/livros?${query}`}
+                                    className="text-[13px] whitespace-nowrap text-(--brotero-texto-link) hover:text-(--brotero-texto-link-hover) hover:underline"
+                                >
+                                    Ver mais
+                                </a>
+                            </div>
                         }
                     />
                     {temMaisPedidos ? (
                         <div
-                            className="flex snap-x snap-proximity gap-[16px] overflow-x-auto pb-[6px]"
+                            ref={maisPedidosDrag.scrollRef}
+                            className="flex cursor-grab snap-x snap-proximity gap-[16px] overflow-x-auto pb-[6px] select-none [-ms-overflow-style:none] [scrollbar-width:none] active:cursor-grabbing [&::-webkit-scrollbar]:hidden"
                             aria-label="Livros mais requisitados"
+                            onMouseDown={maisPedidosDrag.onMouseDown}
+                            onClickCapture={maisPedidosDrag.onClickCapture}
+                            onDragStart={(e) => e.preventDefault()}
                         >
                             {livrosMaisPedidos.map((livro) => (
                                 <CardLivro

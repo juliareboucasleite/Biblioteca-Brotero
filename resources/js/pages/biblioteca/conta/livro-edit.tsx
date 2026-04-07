@@ -51,7 +51,7 @@ export default function BibliotecaContaLivroEdit({ book }: Props) {
 
     return (
         <BibliotecaContaLayout title="Editar livro" secao="livro-novo">
-            <Head title={`Editar: ${book.title} — Biblioteca`} />
+            <Head title={`Editar: ${book.title} · Biblioteca`} />
 
             {flash?.success ? (
                 <p
@@ -66,7 +66,7 @@ export default function BibliotecaContaLivroEdit({ book }: Props) {
 
             <p className="m-0 mb-[20px] text-[14px] text-(--brotero-texto-cinza)">
                 Alterações reflectem-se de imediato no catálogo. Deixe «Capa» em branco para manter a imagem actual.
-                Capa nova: JPEG, PNG ou WebP (máx. 5&nbsp;MB). E-book privado: PDF ou EPUB (máx. 50&nbsp;MB) — só
+                Capa nova: JPEG, PNG ou WebP (máx. 5&nbsp;MB). E-book privado: PDF ou EPUB (máx. 50&nbsp;MB). Só
                 leitores autenticados abrem no site.
             </p>
 

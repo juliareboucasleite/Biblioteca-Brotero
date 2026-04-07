@@ -26,7 +26,7 @@ export default function BibliotecaContaLivroNovo() {
 
     return (
         <BibliotecaContaLayout title="Novo livro (manual)" secao="livro-novo">
-            <Head title="Novo livro — Biblioteca" />
+            <Head title="Novo livro · Biblioteca" />
 
             {flash?.success ? (
                 <p

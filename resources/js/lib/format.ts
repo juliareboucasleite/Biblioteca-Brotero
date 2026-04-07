@@ -2,7 +2,7 @@
 
 export function formatDt(iso: string | null): string {
     if (!iso) {
-        return '—';
+        return '-';
     }
 
     try {
@@ -17,7 +17,7 @@ export function formatDt(iso: string | null): string {
 
 export function formatEur(val: string | undefined | null): string {
     if (val === undefined || val === null) {
-        return '—';
+        return '-';
     }
 
     const n = Number(val);

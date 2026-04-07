@@ -37,7 +37,7 @@ class BookOverdueNotification extends Notification implements ShouldQueue
         $fine = number_format($this->fineAmount, 2, ',', ' ');
 
         return (new MailMessage)
-            ->subject('Biblioteca — livro em atraso')
+            ->subject('Biblioteca · livro em atraso')
             ->line('O livro «'.$this->bookRequest->book_title.'» ultrapassou o prazo de devolução.')
             ->line('Multa acumulada (estimativa): **'.$fine.' €**.');
     }

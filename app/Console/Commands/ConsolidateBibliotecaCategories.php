@@ -75,7 +75,7 @@ class ConsolidateBibliotecaCategories extends Command
                     (string) $r['source_id'],
                     $r['source_name'],
                     $r['target_slug'],
-                    $r['target_id'] !== null ? (string) $r['target_id'] : '(em falta — migrar primeiro)',
+                    $r['target_id'] !== null ? (string) $r['target_id'] : '(em falta: migrar primeiro)',
                 ], $plan),
             );
             $this->comment('Execute sem --dry-run para aplicar as fusões (reatribuir livros e remover categorias duplicadas).');
@@ -182,6 +182,16 @@ class ConsolidateBibliotecaCategories extends Command
         }
 
         // Ordem: mais específico primeiro.
+        if (
+            str_contains($n, 'livros novos')
+            || str_contains($n, 'livros novas')
+            || (str_contains($n, 'novos adicionados') && str_contains($n, 'livro'))
+            || str_contains($n, 'novos livros adicionados')
+            || preg_match('/\bnovos\s+livros\b/u', $n) === 1
+        ) {
+            return 'livros-novos';
+        }
+
         if (
             str_contains($n, 'science fiction')
             || str_contains($n, 'sci-fi')

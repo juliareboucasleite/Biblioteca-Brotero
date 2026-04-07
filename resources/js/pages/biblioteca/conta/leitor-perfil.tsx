@@ -12,7 +12,7 @@ type Props = {
 
 export default function BibliotecaContaLeitorPerfil({ leitor }: Props) {
     return (
-        <BibliotecaContaLayout title={`Perfil — ${leitor.label}`} secao="mensagens">
+        <BibliotecaContaLayout title={`Perfil · ${leitor.label}`} secao="mensagens">
             <div className="mb-[16px]">
                 <Link
                     href="/biblioteca/conta/mensagens"

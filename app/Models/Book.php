@@ -89,6 +89,10 @@ class Book extends Model
             return $query->withReadableEbookFile();
         }
 
+        if (self::categoryIdIsRecentBooksListing($categoryId)) {
+            return $query;
+        }
+
         return $query->whereHas('categories', function ($q2) use ($categoryId): void {
             $q2->whereKey($categoryId);
         });
@@ -107,6 +111,21 @@ class Book extends Model
         $cat = Category::query()->find($categoryId);
 
         return $cat !== null && $cat->slug === 'e-books';
+    }
+
+    /**
+     * Categoria «Livros novos»: listagem por data de entrada no catálogo (não só pivot).
+     */
+    public static function categoryIdIsRecentBooksListing(string $categoryId): bool
+    {
+        $configured = (int) config('biblioteca_canonical_categories.recent_books_category_id', 0);
+        if ($configured > 0 && ctype_digit($categoryId) && (int) $categoryId === $configured) {
+            return true;
+        }
+
+        $cat = Category::query()->find($categoryId);
+
+        return $cat !== null && $cat->slug === 'livros-novos';
     }
 
     public function authors()

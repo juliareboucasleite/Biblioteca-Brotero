@@ -11,15 +11,15 @@ type Props = {
 export default function BibliotecaRanking({ ranking }: Props) {
     return (
         <>
-            <Head title="Ranking — Biblioteca Brotero" />
+            <Head title="Ranking · Biblioteca Brotero" />
             <BibliotecaCatalogShell>
                 <header className="mb-[22px] pt-[4px] lg:pt-0">
                     <h1 className="m-0 mb-[8px] text-[1.6rem] font-bold leading-tight text-(--brotero-texto)">
                         Ranking de leitores
                     </h1>
                     <p className="m-0 max-w-[54ch] text-[15px] leading-snug text-(--brotero-texto-cinza)">
-                        Pontos por requisitar (+10) e por devolver no prazo (+20). Só aparecem leitores com
-                        pontos.
+                        Pontos por requisitar (+10) e por devolver no prazo (+20). O ranking destaca quem vai
+                        acumulando pontos.
                     </p>
                 </header>
 
@@ -29,8 +29,8 @@ export default function BibliotecaRanking({ ranking }: Props) {
                             className="m-0 rounded-[14px] border border-dashed border-(--brotero-borda) bg-(--brotero-branco) p-[18px] text-[15px] text-(--brotero-texto-cinza)"
                             role="status"
                         >
-                            Ainda não há pontos registados. Requisite um livro ou devolva dentro do prazo para
-                            começar a acumular.
+                            Soma pontos ao requisitar (+10) e ao devolver no prazo (+20). Segue o ranking para ver a
+                            comunidade em movimento.
                         </p>
                     ) : (
                         <BibliotecaRankingPaginaCompleta ranking={ranking} />

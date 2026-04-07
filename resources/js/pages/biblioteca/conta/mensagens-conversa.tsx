@@ -191,7 +191,7 @@ function SugerirLivroInline({
                                     />
                                 ) : (
                                     <span className="flex size-[36px] shrink-0 items-center justify-center rounded-[6px] bg-(--brotero-branco) text-[10px] text-(--brotero-texto-cinza)">
-                                        —
+                                        …
                                     </span>
                                 )}
                                 <span className="min-w-0">
@@ -303,7 +303,7 @@ export default function BibliotecaContaMensagensConversa({
 
     return (
         <BibliotecaContaLayout
-            title={`Chat — ${conversa.outro_label}`}
+            title={`Chat · ${conversa.outro_label}`}
             secao="mensagens"
             ocuparAlturaConteudo
         >
@@ -532,12 +532,12 @@ export default function BibliotecaContaMensagensConversa({
                         {!conversa.pode_enviar_mensagens ? (
                             <p className="m-0 py-[24px] text-center text-[14px] text-(--brotero-texto-cinza)">
                                 {conversa.estado === 'pending'
-                                    ? 'O histórico fica aqui depois de aceitarem a conversa.'
+                                    ? 'A conversa abre aqui quando ambos aceitarem o pedido.'
                                     : null}
                             </p>
                         ) : timeline.length === 0 ? (
                             <p className="m-0 py-[28px] text-center text-[14px] text-(--brotero-texto-cinza)">
-                                Ainda não há mensagens nem sugestões. Escreva abaixo ou partilhe um livro.
+                                Escreva abaixo ou partilhe um livro do catálogo para continuar a conversa.
                             </p>
                         ) : (
                             timeline.map((item) => {

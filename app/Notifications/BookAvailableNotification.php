@@ -36,7 +36,7 @@ class BookAvailableNotification extends Notification implements ShouldQueue
     public function toMail(object $notifiable): MailMessage
     {
         return (new MailMessage)
-            ->subject('Biblioteca — livro disponível')
+            ->subject('Biblioteca · livro disponível')
             ->line('O livro «'.$this->book->title.'» voltou a ficar disponível para requisição.');
     }
 

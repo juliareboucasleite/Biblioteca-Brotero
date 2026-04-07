@@ -126,7 +126,7 @@ function PatronRegisterBlock({ pedidoId, cardNumber }: { pedidoId: number; cardN
                         onChange={(e) => form.setData('is_librarian', e.target.checked)}
                     />
                     <span className="text-sm leading-snug text-(--brotero-texto)">
-                        Cartão de bibliotecária/o — ao entrar no quiosque, escolhe modo de sessão
+                        Cartão de bibliotecária/o: ao entrar no quiosque, escolhe modo de sessão
                     </span>
                 </label>
             </div>
@@ -197,7 +197,7 @@ export default function StaffPedidos({ pedidos }: Props) {
         <AppLayout
             breadcrumbs={[{ title: 'Pedidos da biblioteca', href: staffPedidos.index.url() }]}
         >
-            <Head title="Pedidos pendentes — Biblioteca" />
+            <Head title="Pedidos pendentes · Biblioteca" />
 
             <div className="mx-auto max-w-5xl space-y-6 p-4 md:p-8">
                 <h1 className="text-2xl font-semibold tracking-tight">Pedidos pendentes</h1>

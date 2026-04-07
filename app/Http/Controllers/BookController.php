@@ -25,7 +25,11 @@ class BookController extends Controller
             ->latest('id');
 
         if (! empty($categoriaId)) {
-            $query->forCatalogCategory((string) $categoriaId);
+            $cid = (string) $categoriaId;
+            $query->forCatalogCategory($cid);
+            if (Book::categoryIdIsRecentBooksListing($cid)) {
+                $query->reorder()->orderByDesc('created_at')->orderByDesc('id');
+            }
         }
 
         if ($authorId !== '') {
@@ -60,7 +64,7 @@ class BookController extends Controller
     }
 
     /**
-     * Pesquisa avançada (filtros composáveis) — devolve o mesmo formato JSON que `index`.
+     * Pesquisa avançada (filtros composáveis): devolve o mesmo formato JSON que `index`.
      */
     public function search(Request $request)
     {
@@ -80,7 +84,11 @@ class BookController extends Controller
                 });
             })
             ->when($categoryId, function ($qBook) use ($categoryId): void {
-                $qBook->forCatalogCategory((string) $categoryId);
+                $cid = (string) $categoryId;
+                $qBook->forCatalogCategory($cid);
+                if (Book::categoryIdIsRecentBooksListing($cid)) {
+                    $qBook->reorder()->orderByDesc('created_at')->orderByDesc('id');
+                }
             })
             ->when($year !== null && $year !== '' && is_numeric($year), function ($qBook) use ($year): void {
                 $qBook->where('published_year', (int) $year);

@@ -2,7 +2,7 @@ import { MessageCircle, Send, X } from 'lucide-react';
 import { useCallback, useEffect, useId, useState } from 'react';
 import { cn } from '@/lib/utils';
 
-/** Balão flutuante de ajuda (estilo chat) — sem backend em tempo real. */
+/** Balão flutuante de ajuda (estilo chat); sem backend em tempo real. */
 export function BibliotecaCatalogHelpPanel() {
     const [open, setOpen] = useState(false);
     const titleId = useId();
@@ -31,13 +31,13 @@ export function BibliotecaCatalogHelpPanel() {
             {open ? (
                 <button
                     type="button"
-                    className="fixed inset-0 z-[190] cursor-default border-0 bg-black/20 p-0 sm:bg-black/15"
+                    className="fixed inset-0 z-190 cursor-default border-0 bg-black/20 p-0 sm:bg-black/15"
                     aria-label="Fechar ajuda"
                     onClick={close}
                 />
             ) : null}
 
-            <div className="pointer-events-none fixed right-[14px] bottom-[14px] z-[200] flex flex-col items-end gap-[12px] sm:right-[22px] sm:bottom-[22px]">
+            <div className="pointer-events-none fixed right-[14px] bottom-[14px] z-200 flex flex-col items-end gap-[12px] sm:right-[22px] sm:bottom-[22px]">
                 <div
                     id={dialogId}
                     role="dialog"
@@ -57,7 +57,7 @@ export function BibliotecaCatalogHelpPanel() {
                             aria-hidden
                         />
 
-                        <div className="relative z-[1] flex items-start justify-between gap-[10px] pb-[12px]">
+                        <div className="relative z-1 flex items-start justify-between gap-[10px] pb-[12px]">
                             <div className="min-w-0">
                                 <h2
                                     id={titleId}
@@ -66,20 +66,20 @@ export function BibliotecaCatalogHelpPanel() {
                                     Ajuda
                                 </h2>
                                 <p className="m-0 mt-[2px] text-[12px] text-(--brotero-texto-cinza)">
-                                    Mensagens de exemplo — chat em breve
+                                    Mensagens de exemplo; chat em breve
                                 </p>
                             </div>
                             <button
                                 type="button"
                                 onClick={close}
-                                className="inline-flex size-[40px] shrink-0 items-center justify-center rounded-full border border-(--brotero-borda-suave) bg-(--brotero-fundo) text-(--brotero-texto) transition-colors hover:bg-(--brotero-borda-suave) focus-visible:outline focus-visible:outline-2 focus-visible:outline-(--brotero-primaria)"
+                                className="inline-flex size-[40px] shrink-0 items-center justify-center rounded-full border border-(--brotero-borda-suave) bg-(--brotero-fundo) text-(--brotero-texto) transition-colors hover:bg-(--brotero-borda-suave) focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-(--brotero-primaria)"
                                 aria-label="Fechar ajuda"
                             >
                                 <X className="size-[20px]" strokeWidth={2} aria-hidden />
                             </button>
                         </div>
 
-                        <div className="relative z-[1] mb-[12px] rounded-[14px] border border-(--brotero-borda-suave) bg-(--brotero-fundo) p-[10px_12px]">
+                        <div className="relative z-1 mb-[12px] rounded-[14px] border border-(--brotero-borda-suave) bg-(--brotero-fundo) p-[10px_12px]">
                             <p className="m-0 text-[12px] font-bold text-(--brotero-primaria)">
                                 Biblioteca Brotero
                             </p>
@@ -90,7 +90,7 @@ export function BibliotecaCatalogHelpPanel() {
                         </div>
 
                         <div
-                            className="relative z-[1] mb-[12px] flex max-h-[min(42vh,280px)] flex-col gap-[10px] overflow-y-auto overscroll-contain rounded-[16px] border border-(--brotero-borda-suave) bg-linear-to-b from-[#faf7ff] to-(--brotero-branco) p-[12px_12px_10px]"
+                            className="relative z-1 mb-[12px] flex max-h-[min(42vh,280px)] flex-col gap-[10px] overflow-y-auto overscroll-contain rounded-[16px] border border-(--brotero-borda-suave) bg-linear-to-b from-[#faf7ff] to-(--brotero-branco) p-[12px_12px_10px]"
                             style={{ scrollbarWidth: 'thin' }}
                         >
                             <div className="max-w-[92%] rounded-[14px_14px_14px_4px] bg-(--brotero-branco) px-[12px] py-[10px] text-[13px] leading-snug text-(--brotero-texto) shadow-[0_2px_8px_rgba(0,0,0,0.06)]">
@@ -107,7 +107,7 @@ export function BibliotecaCatalogHelpPanel() {
                             </div>
                         </div>
 
-                        <div className="relative z-[1] flex items-center gap-[8px] rounded-full border border-(--brotero-borda) bg-(--brotero-branco) px-[14px] py-[8px] opacity-80">
+                        <div className="relative z-1 flex items-center gap-[8px] rounded-full border border-(--brotero-borda) bg-(--brotero-branco) px-[14px] py-[8px] opacity-80">
                             <span className="flex-1 text-[13px] text-(--brotero-texto-cinza)">
                                 Escrever mensagem…
                             </span>
@@ -129,7 +129,7 @@ export function BibliotecaCatalogHelpPanel() {
                     className={cn(
                         'pointer-events-auto inline-flex size-[56px] shrink-0 items-center justify-center rounded-full border-2 border-white text-white shadow-[0_10px_30px_rgba(93,122,140,0.45)] transition-[transform,box-shadow] hover:scale-[1.04] active:scale-[0.98]',
                         'bg-linear-to-br from-(--brotero-primaria) to-(--brotero-primaria-escuro)',
-                        'focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-(--brotero-primaria)',
+                        'focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-(--brotero-primaria)',
                     )}
                     aria-label={open ? 'Fechar chat de ajuda' : 'Abrir chat de ajuda'}
                 >

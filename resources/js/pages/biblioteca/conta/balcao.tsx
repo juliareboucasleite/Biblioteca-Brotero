@@ -14,7 +14,7 @@ import { Spinner } from '@/components/ui/spinner';
 import { formatDt, formatEur } from '@/lib/format';
 import { cn } from '@/lib/utils';
 
-/** Campos e botões dos modais — evita `bg-background` / `muted-foreground` do tema a ficarem ilegíveis no Brotero. */
+/** Campos e botões dos modais: evita `bg-background` / `muted-foreground` do tema a ficarem ilegíveis no Brotero. */
 const balcaoModalFieldClass =
     'w-full rounded-(--raio) border border-(--brotero-borda) bg-(--brotero-branco) px-3 py-2.5 text-[14px] leading-normal text-(--brotero-texto) placeholder:text-(--brotero-texto-cinza) shadow-none focus:border-(--brotero-primaria) focus:outline-none focus:ring-2 focus:ring-(--brotero-primaria)/35';
 
@@ -239,7 +239,7 @@ export default function BibliotecaContaBalcao({ pedidos }: Props) {
     const returnBusy = returnRow !== null && busyId === returnRow.id;
 
     return (
-        <BibliotecaContaLayout title="Balcão — todos os pedidos" secao="balcao">
+        <BibliotecaContaLayout title="Balcão · todos os pedidos" secao="balcao">
             {flash?.success ? (
                 <p
                     className="m-0 mb-[12px] rounded-(--raio) border border-emerald-200 bg-emerald-50 px-[14px] py-[10px] text-[13px] text-emerald-900"
@@ -266,7 +266,7 @@ export default function BibliotecaContaBalcao({ pedidos }: Props) {
 
             {pedidos.length === 0 ? (
                 <p className="rounded-(--raio) border border-dashed border-(--brotero-borda) bg-(--brotero-branco) p-[16px] text-(--brotero-texto-cinza)">
-                    Ainda não há pedidos registados.
+                    Painel de pedidos activos cada requisição feita pelos leitores aparece aqui para gestão e a lista actualiza em tempo real.
                 </p>
             ) : null}
 
@@ -425,7 +425,7 @@ export default function BibliotecaContaBalcao({ pedidos }: Props) {
                     <DialogHeader>
                         <DialogTitle className="text-xl font-bold text-(--brotero-texto)">Recusar pedido</DialogTitle>
                         <DialogDescription className="text-[14px] leading-relaxed text-(--brotero-texto-cinza)">
-                            Motivo opcional — pode aparecer no histórico do aluno.
+                            Motivo opcional: pode aparecer no histórico do aluno.
                         </DialogDescription>
                     </DialogHeader>
                     <textarea

@@ -62,7 +62,7 @@ export function BookEbookAside({
 
             {missingCsrf ? (
                 <p className="m-0 mb-[12px] text-[14px] text-[#b42318] bg-[#fef3f2] border border-[#fecaca] p-[10px_12px] rounded-[6px]">
-                    Token de sessão em falta. Recarregue a página e tente de novo.
+                    Recarrega a página para continuar a ler ou a transferir o ficheiro.
                 </p>
             ) : null}
 

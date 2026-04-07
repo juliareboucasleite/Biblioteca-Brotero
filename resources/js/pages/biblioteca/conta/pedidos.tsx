@@ -31,7 +31,7 @@ function EstadoPedidoBadge({ status }: { status: string }) {
                     : 'border border-emerald-200 bg-emerald-50 text-emerald-900',
             )}
         >
-            {isPending ? 'À aguardar aprovação' : 'Aprovado — em curso'}
+            {isPending ? 'À aguardar aprovação' : 'Aprovado, em curso'}
         </span>
     );
 }

@@ -14,18 +14,18 @@ const sessaoBtnSecondaryClass =
 export default function BibliotecaLoginPortal({ greeting_name }: Props) {
     const label =
         greeting_name && greeting_name.trim() !== ''
-            ? `Olá, ${greeting_name.trim()} — como vai utilizar a sessão?`
+            ? `Olá, ${greeting_name.trim()}: como vai utilizar a sessão?`
             : 'Como vai utilizar a sessão?';
 
     return (
         <>
-            <Head title="Modo de sessão — Leitor" />
+            <Head title="Modo de sessão · Leitor" />
 
             <BibliotecaCatalogShell>
                 <div className="mx-auto w-full max-w-[520px] pt-[4px] lg:pt-0">
                     <div className="rounded-[18px] border border-(--brotero-borda-suave) bg-(--brotero-branco) px-[22px] py-[26px] shadow-[0_8px_28px_rgba(42,38,48,0.06)] sm:px-[26px] sm:py-[30px]">
                         <h1 className="m-0 mb-[10px] text-[1.45rem] font-bold leading-tight tracking-tight text-(--brotero-texto)">
-                            Entrada — biblioteca
+                            Entrada · biblioteca
                         </h1>
                         <p className="m-0 mb-[26px] text-[15px] leading-relaxed text-(--brotero-texto-cinza)">
                             {label}

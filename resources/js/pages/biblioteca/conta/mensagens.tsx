@@ -61,13 +61,10 @@ export default function BibliotecaContaMensagens({ conversas }: Props) {
                     Conversas
                 </h1>
                 <p className="m-0 mt-[10px] max-w-[52ch] text-[15px] leading-relaxed text-(--brotero-texto-cinza)">
-                    Os teus chats com outros leitores. Primeiro envia um pedido — quando{' '}
-                    <strong className="font-semibold text-(--brotero-texto)">ambos aceitarem</strong>, as
-                    mensagens ficam aqui.
+                    Os teus chats com outros leitores. Primeiro envia um pedido quando ambos aceitarem, as mensagens ficam aqui.
                 </p>
                 <p className="m-0 mt-[12px] text-[12px] leading-snug text-(--brotero-texto-cinza) opacity-90">
-                    Em <Link href="/biblioteca/descobertas">Descobertas</Link>, usa «Mensagem privada» para
-                    pedir conversa a quem partilhou um livro.
+                    Em <Link href="/biblioteca/descobertas">Descobertas</Link>, usa «Mensagem privada» para pedir conversa a quem partilhou um livro.
                 </p>
             </header>
 
@@ -76,11 +73,11 @@ export default function BibliotecaContaMensagens({ conversas }: Props) {
                     className="m-0 rounded-[16px] border border-dashed border-(--brotero-borda) bg-(--brotero-branco)/80 p-[22px] text-center text-[15px] leading-relaxed text-(--brotero-texto-cinza)"
                     role="status"
                 >
-                    Ainda não tens conversas.{' '}
+                    Conversa com outros leitores: em{' '}
                     <Link href="/biblioteca/descobertas" className="font-semibold text-(--brotero-texto-link)">
-                        Explora Descobertas
+                        Descobertas
                     </Link>{' '}
-                    e envia «Mensagem privada» a um leitor.
+                    envia «Mensagem privada» a quem partilhou um livro.
                 </p>
             ) : (
                 <ul className="m-0 flex list-none flex-col gap-[10px] p-0">

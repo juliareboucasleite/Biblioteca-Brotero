@@ -30,7 +30,8 @@ export function BibliotecaRankingCatalogo({ ranking }: BibliotecaRankingCatalogo
                     id="secao-ranking-catalogo"
                     className="m-0 rounded-(--raio) border border-dashed border-(--brotero-borda) bg-(--brotero-branco) p-[16px] text-[14px] text-(--brotero-texto-cinza)"
                 >
-                    Ainda não há pontos registados. Requisite um livro ou devolva no prazo para aparecer aqui.
+                    Abre o ranking completo para acompanhar leitores. Os pontos refletem requisições e
+                    devoluções a tempo.
                 </p>
             ) : (
                 <ol

@@ -17,7 +17,7 @@ import type { Category, LivroCatalogo } from '@/types';
 
 type LibraryProps = {
     livros: LivroCatalogo[];
-    /** Outras obras do autor mais frequente entre os «novos» (servidor). */
+    /** Sugestões de obras do mesmo autor em sintonia com as novidades em destaque. */
     livrosRecomendados?: LivroCatalogo[];
     /** Nome do autor usado nas recomendações (para título e pesquisa «Ver mais»). */
     recomendadoAutorNome?: string | null;
@@ -102,7 +102,7 @@ export default function Library({
         lingua,
     );
     const tituloRecomendados = recomendadoAutorNome?.trim()
-        ? `Recomendado para si — ${recomendadoAutorNome.trim()}`
+        ? `Recomendado para si · ${recomendadoAutorNome.trim()}`
         : 'Recomendado para si';
 
     const temMaisPedidos = livrosMaisPedidos.length > 0;
@@ -244,9 +244,7 @@ export default function Library({
                     ) : (
                         <div className="grid grid-cols-[repeat(auto-fill,minmax(160px,1fr))] gap-[16px] max-[768px]:grid-cols-[repeat(auto-fill,minmax(130px,1fr))] max-[768px]:gap-[12px]">
                             <BibliotecaSectionPlaceholder>
-                                Quando houver livros com autores na base de
-                                dados, sugerimos aqui outras obras do autor mais
-                                presente nos novos títulos.
+                                Liga novidades a mais obras do mesmo autor: explora o catálogo em «Ver mais».
                             </BibliotecaSectionPlaceholder>
                         </div>
                     )}
@@ -310,9 +308,9 @@ export default function Library({
                     ) : (
                         <div className="grid grid-cols-[repeat(auto-fill,minmax(160px,1fr))] gap-[16px] max-[768px]:grid-cols-[repeat(auto-fill,minmax(130px,1fr))] max-[768px]:gap-[12px]">
                             <BibliotecaSectionPlaceholder>
-                                Ainda não há requisições registadas por livro.
-                                Quando os leitores requisitarem obras, as mais
-                                pedidas aparecerão aqui (por número de pedidos).
+                                Vê o que mais circula entre leitores: abre
+                                «Ver mais» ou o ranking para descobrir títulos
+                                em destaque na comunidade.
                             </BibliotecaSectionPlaceholder>
                         </div>
                     )}

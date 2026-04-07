@@ -180,7 +180,7 @@ export default function BibliotecaDescobertas({ descobertas }: Props) {
                                     key={index}
                                     href={link.url}
                                     preserveScroll
-                                    className={`inline-flex min-h-[40px] min-w-[40px] items-center justify-center rounded-[10px] px-[10px] text-[15px] no-underline ${
+                                    className={`inline-flex min-h-10 min-w-10 items-center justify-center rounded-[10px] px-[10px] text-[15px] no-underline ${
                                         link.active
                                             ? 'bg-(--brotero-primaria) font-semibold text-white'
                                             : 'border border-(--brotero-borda-suave) bg-(--brotero-branco) text-(--brotero-texto-link) hover:bg-(--brotero-fundo)'
@@ -190,7 +190,7 @@ export default function BibliotecaDescobertas({ descobertas }: Props) {
                             ) : (
                                 <span
                                     key={index}
-                                    className="inline-flex min-h-[40px] min-w-[40px] items-center justify-center px-[10px] text-[15px] text-(--brotero-texto-cinza)"
+                                    className="inline-flex min-h-10 min-w-10 items-center justify-center px-[10px] text-[15px] text-(--brotero-texto-cinza)"
                                     dangerouslySetInnerHTML={{ __html: link.label }}
                                 />
                             ),

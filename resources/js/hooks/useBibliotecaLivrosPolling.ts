@@ -7,7 +7,22 @@ type BooksJsonRow = {
     description?: string | null;
     cover_image?: string | null;
     authors?: Array<{ name?: string | null }> | null;
+    /** Igual a `Book::ebookFormat()` no backend (PDF/EPUB legível). */
+    ebook_mime?: string | null;
 };
+
+/** Alinhado com `App\Models\Book::ebookFormat()`. */
+function temEbookLegivel(mime: string | null | undefined): boolean {
+    const m = (mime ?? '').trim().toLowerCase();
+
+    return (
+        m === 'application/pdf' ||
+        m === 'application/x-pdf' ||
+        m === 'application/epub+zip' ||
+        m === 'application/epub' ||
+        m === 'application/x-epub+zip'
+    );
+}
 
 function mapBooksResponse(data: BooksJsonRow[] | null | undefined): LivroCatalogo[] {
     return (data ?? []).map((b) => ({
@@ -20,6 +35,7 @@ function mapBooksResponse(data: BooksJsonRow[] | null | undefined): LivroCatalog
                 .join(', ') || 'Autor desconhecido',
         desc: b.description?.toString() ?? '',
         capa: b.cover_image?.toString() ?? null,
+        tem_ebook: temEbookLegivel(b.ebook_mime),
     }));
 }
 

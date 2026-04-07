@@ -27,14 +27,14 @@
             background-color: oklch(0.145 0 0);
         }
 
-        /* Ecrã de carregamento inicial */
+        /* Ecrã de carregamento inicial (paleta catálogo Brotero / biblioteca-catalog-shell) */
         #initial-loading {
             position: fixed;
             inset: 0;
             display: flex;
             align-items: center;
             justify-content: center;
-            background: #e5edf2;
+            background: #f0ece7;
             z-index: 9999;
             transition: opacity 0.25s ease;
         }
@@ -48,8 +48,8 @@
             width: 46px;
             height: 46px;
             border-radius: 999px;
-            border: 4px solid rgba(0, 0, 0, 0.08);
-            border-top-color: #1f4c6b;
+            border: 4px solid #efe8e0;
+            border-top-color: #5d7a8c;
             animation: spin 0.7s linear infinite;
         }
 

@@ -28,14 +28,14 @@ export function BibliotecaRankingCatalogo({ ranking }: BibliotecaRankingCatalogo
             {ranking.length === 0 ? (
                 <p
                     id="secao-ranking-catalogo"
-                    className="m-0 p-[16px] text-[14px] text-(--brotero-texto-cinza) border border-dashed border-(--brotero-borda) rounded-(--raio) bg-(--brotero-branco)"
+                    className="m-0 rounded-(--raio) border border-dashed border-(--brotero-borda) bg-(--brotero-branco) p-[16px] text-[14px] text-(--brotero-texto-cinza)"
                 >
                     Ainda não há pontos registados. Requisite um livro ou devolva no prazo para aparecer aqui.
                 </p>
             ) : (
                 <ol
                     id="secao-ranking-catalogo"
-                    className="m-0 p-0 list-none flex flex-col gap-[8px]"
+                    className="m-0 flex list-none flex-col gap-[8px] p-0"
                 >
                     {ranking.map((r) => (
                         <li
@@ -45,10 +45,10 @@ export function BibliotecaRankingCatalogo({ ranking }: BibliotecaRankingCatalogo
                             <span className="text-[14px] font-bold text-(--brotero-texto)">
                                 {r.posicao}. {r.nome}
                             </span>
-                            <span className="text-[13px] text-(--brotero-texto-cinza) font-mono">
+                            <span className="font-mono text-[13px] text-(--brotero-texto-cinza)">
                                 {r.cartao_mascarado}
                             </span>
-                            <span className="text-[14px] font-semibold text-(--brotero-primaria) ml-auto">
+                            <span className="ml-auto text-[14px] font-semibold text-(--brotero-primaria)">
                                 {r.pontos} pts
                             </span>
                         </li>

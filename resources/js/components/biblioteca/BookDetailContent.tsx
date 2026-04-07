@@ -74,7 +74,7 @@ export function BookDetailContent({
                     {categoriasLabel}
                 </p>
             ) : null}
-            {disponivel !== null ? (
+            {disponivel !== null && !bookApi?.has_ebook ? (
                 <p
                     className={`m-0 mb-[12px] text-[14px] font-semibold ${disponivel ? 'text-green-700' : 'text-amber-800'}`}
                 >

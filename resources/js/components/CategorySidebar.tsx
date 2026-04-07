@@ -1,7 +1,9 @@
 import React from 'react';
 import type { Category } from '@/types';
 
-type CategoryLike = Category | { id: string | number; name?: string; nome?: string };
+type CategoryLike =
+    | Category
+    | { id: string | number; name?: string; nome?: string; slug?: string | null };
 
 function categoryDisplayName(c: CategoryLike): string {
     if (typeof c.name === 'string' && c.name !== '') {

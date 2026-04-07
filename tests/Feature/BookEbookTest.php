@@ -40,6 +40,72 @@ it('allows an authenticated patron to stream an ebook', function (): void {
     expect((string) $res->headers->get('content-type'))->toContain('application/pdf');
 });
 
+it('redirects to ebook download when registar-download is posted as a normal form', function (): void {
+    Storage::fake('local');
+
+    $patron = LibraryPatron::factory()->create();
+    $book = Book::query()->create([
+        'title' => 'Form redirect',
+        'description' => null,
+        'ebook_disk' => 'local',
+        'ebook_path' => 'ebooks/form.pdf',
+        'ebook_mime' => 'application/pdf',
+        'ebook_downloads_count' => 0,
+    ]);
+
+    Storage::disk('local')->put('ebooks/form.pdf', '%PDF-1.4 fake');
+
+    $this->actingAs($patron, 'patron')
+        ->post(route('biblioteca.livro.ebook.registar-download', $book))
+        ->assertRedirect(route('biblioteca.livro.ebook', $book).'?download=1');
+
+    expect((int) $book->fresh()->ebook_downloads_count)->toBe(1);
+});
+
+it('increments ebook download count when registar-download is posted', function (): void {
+    $patron = LibraryPatron::factory()->create();
+    $book = Book::query()->create([
+        'title' => 'Contagem',
+        'description' => null,
+        'ebook_disk' => 'local',
+        'ebook_path' => 'ebooks/c.pdf',
+        'ebook_mime' => 'application/pdf',
+        'ebook_downloads_count' => 0,
+    ]);
+
+    $res = $this->actingAs($patron, 'patron')->postJson(
+        route('biblioteca.livro.ebook.registar-download', $book),
+    );
+
+    $res->assertOk()
+        ->assertJsonPath('ok', true)
+        ->assertJsonPath('ebook_downloads_count', 1);
+
+    expect((int) $book->fresh()->ebook_downloads_count)->toBe(1);
+});
+
+it('serves attachment disposition when download query is set', function (): void {
+    Storage::fake('local');
+
+    $patron = LibraryPatron::factory()->create();
+    $book = Book::query()->create([
+        'title' => 'Download',
+        'description' => null,
+        'ebook_disk' => 'local',
+        'ebook_path' => 'ebooks/d.pdf',
+        'ebook_mime' => 'application/pdf',
+    ]);
+
+    Storage::disk('local')->put('ebooks/d.pdf', '%PDF-1.4 fake');
+
+    $res = $this->actingAs($patron, 'patron')->get(
+        route('biblioteca.livro.ebook', ['book' => $book, 'download' => '1']),
+    );
+
+    $res->assertOk();
+    expect((string) $res->headers->get('content-disposition'))->toContain('attachment');
+});
+
 it('redirects reader page when the book has no recognised ebook format', function (): void {
     $patron = LibraryPatron::factory()->create();
     $book = Book::query()->create([

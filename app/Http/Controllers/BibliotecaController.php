@@ -28,9 +28,7 @@ class BibliotecaController extends Controller
         $lingua = trim((string) $request->query('lingua', ''));
 
         if ($categoriaId !== '') {
-            $query->whereHas('categories', function ($q2) use ($categoriaId) {
-                $q2->whereKey($categoriaId);
-            });
+            $query->forCatalogCategory($categoriaId);
         }
 
         if ($authorId !== '') {
@@ -84,6 +82,39 @@ class BibliotecaController extends Controller
             ->all();
     }
 
+    /**
+     * Categorias do catálogo: nomes em português, ordem pela taxonomia canónica quando há `slug`.
+     *
+     * @return list<array{id: string, name: string, slug: string|null}>
+     */
+    private function categoriasParaCatalogo(): array
+    {
+        /** @var list<string> $order */
+        $order = config('biblioteca_canonical_categories.order', []);
+
+        return Category::query()
+            ->get(['id', 'name', 'slug'])
+            ->map(fn (Category $c): array => [
+                'id' => (string) $c->id,
+                'name' => CategoryLabel::toPortuguese((string) $c->name),
+                'slug' => $c->slug,
+            ])
+            ->sortBy(function (array $row) use ($order): string {
+                $slug = $row['slug'] ?? null;
+                $pos = 999;
+                if (is_string($slug) && $slug !== '') {
+                    $i = array_search($slug, $order, true);
+                    if ($i !== false) {
+                        $pos = $i;
+                    }
+                }
+
+                return sprintf('%04d|%s', $pos, (string) $row['name']);
+            }, SORT_NATURAL)
+            ->values()
+            ->all();
+    }
+
     public function index(Request $request, PatronRankingService $rankingService): Response
     {
         $livrosQuery = Book::query()
@@ -115,16 +146,7 @@ class BibliotecaController extends Controller
 
         $rankingCatalogo = $rankingService->topEntries(10);
 
-        $categorias = Category::query()
-            ->orderBy('name')
-            ->get(['id', 'name'])
-            ->map(fn (Category $c) => [
-                'id' => (string) $c->id,
-                'name' => CategoryLabel::toPortuguese((string) $c->name),
-            ])
-            ->sortBy('name', SORT_NATURAL | SORT_FLAG_CASE)
-            ->values()
-            ->all();
+        $categorias = $this->categoriasParaCatalogo();
 
         return Inertia::render('library', [
             'livros' => $livros,
@@ -160,16 +182,7 @@ class BibliotecaController extends Controller
             $livros = $this->livrosEmDestaque();
         }
 
-        $categorias = Category::query()
-            ->orderBy('name')
-            ->get(['id', 'name'])
-            ->map(fn (Category $c) => [
-                'id' => (string) $c->id,
-                'name' => CategoryLabel::toPortuguese((string) $c->name),
-            ])
-            ->sortBy('name', SORT_NATURAL | SORT_FLAG_CASE)
-            ->values()
-            ->all();
+        $categorias = $this->categoriasParaCatalogo();
 
         return Inertia::render('library-all', [
             'livros' => $livros,

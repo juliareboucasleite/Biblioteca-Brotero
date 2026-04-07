@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
@@ -27,6 +28,16 @@ class Book extends Model
         'ebook_mime',
     ];
 
+    /**
+     * @return array<string, string>
+     */
+    protected function casts(): array
+    {
+        return [
+            'ebook_downloads_count' => 'integer',
+        ];
+    }
+
     public function hasEbook(): bool
     {
         $path = $this->ebook_path;
@@ -47,6 +58,55 @@ class Book extends Model
             'application/epub+zip', 'application/epub', 'application/x-epub+zip' => 'epub',
             default => null,
         };
+    }
+
+    /**
+     * PDF ou EPUB no armazenamento (mesmo critério que {@see ebookFormat()}).
+     *
+     * @param  Builder<Book>  $query
+     */
+    public function scopeWithReadableEbookFile(Builder $query): Builder
+    {
+        return $query->whereNotNull('ebook_path')
+            ->where('ebook_path', '!=', '')
+            ->whereIn('ebook_mime', [
+                'application/pdf',
+                'application/x-pdf',
+                'application/epub+zip',
+                'application/epub',
+                'application/x-epub+zip',
+            ]);
+    }
+
+    /**
+     * Filtro do catálogo: categoria normal, ou «E-books» (id em config / slug e-books) por ficheiro digital.
+     *
+     * @param  Builder<Book>  $query
+     */
+    public function scopeForCatalogCategory(Builder $query, string $categoryId): Builder
+    {
+        if (self::categoryIdIsEbooksListing($categoryId)) {
+            return $query->withReadableEbookFile();
+        }
+
+        return $query->whereHas('categories', function ($q2) use ($categoryId): void {
+            $q2->whereKey($categoryId);
+        });
+    }
+
+    /**
+     * Categoria «E-books» do carrossel: lista por ficheiro, não só por etiqueta.
+     */
+    public static function categoryIdIsEbooksListing(string $categoryId): bool
+    {
+        $configured = (int) config('biblioteca_canonical_categories.ebooks_category_id', 64);
+        if ($configured > 0 && ctype_digit($categoryId) && (int) $categoryId === $configured) {
+            return true;
+        }
+
+        $cat = Category::query()->find($categoryId);
+
+        return $cat !== null && $cat->slug === 'e-books';
     }
 
     public function authors()

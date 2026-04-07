@@ -1,4 +1,5 @@
 import { Form, Head, Link } from '@inertiajs/react';
+import { BookOpen } from 'lucide-react';
 import { BibliotecaCatalogShell } from '@/components/biblioteca/BibliotecaCatalogShell';
 import type { DescobertaEntrada } from '@/types/biblioteca';
 
@@ -33,10 +34,9 @@ function formatData(iso: string): string {
         return iso;
     }
 
-    return d.toLocaleDateString('pt-PT', {
+    return d.toLocaleString('pt-PT', {
         day: 'numeric',
         month: 'short',
-        year: 'numeric',
         hour: '2-digit',
         minute: '2-digit',
     });
@@ -44,80 +44,103 @@ function formatData(iso: string): string {
 
 export default function BibliotecaDescobertas({ descobertas }: Props) {
     const items = descobertas.data ?? [];
+    const livroHref = (id: string) => `/biblioteca/livro/${encodeURIComponent(id)}`;
 
     return (
         <>
-            <Head title="Descobertas da comunidade" />
+            <Head title="Descobertas" />
 
             <BibliotecaCatalogShell>
-                <header className="mb-[22px] pt-[4px] lg:pt-0">
-                    <h1 className="m-0 mb-[8px] text-[1.6rem] font-bold text-(--brotero-texto) leading-tight">
+                <header className="mb-[22px]">
+                    <h1 className="m-0 text-[1.6rem] font-semibold leading-tight tracking-tight text-(--brotero-texto)">
                         Descobertas
                     </h1>
-                    <p className="m-0 max-w-[54ch] text-[15px] leading-snug text-(--brotero-texto-cinza)">
-                        Recomendações de leitores da escola. Abra uma ficha para requisitar o livro na
-                        biblioteca.
+                    <p className="m-0 mt-[10px] max-w-[52ch] text-[15px] leading-relaxed text-(--brotero-texto-cinza)">
+                        Recomendações dos leitores. Na ficha podes requisitar o exemplar ou abrir o e-book, se
+                        existir.
                     </p>
                 </header>
 
                 {items.length === 0 ? (
                     <p
-                        className="m-0 rounded-[14px] border border-dashed border-(--brotero-borda) bg-(--brotero-branco) p-[20px] text-[15px] text-(--brotero-texto-cinza)"
+                        className="m-0 rounded-[14px] border border-dashed border-(--brotero-borda) bg-(--brotero-branco) px-[18px] py-[22px] text-[15px] leading-relaxed text-(--brotero-texto-cinza)"
                         role="status"
                     >
-                        Ainda não há recomendações. Ao visitar um livro, utilize «Recomendar à comunidade»
-                        na ficha para partilhar.
+                        Ainda não há partilhas. Na ficha de um livro, usa «Recomendar à comunidade».
                     </p>
                 ) : (
                     <ul className="m-0 flex list-none flex-col gap-[16px] p-0">
                         {items.map((item) => (
                             <li key={item.id}>
-                                <article className="overflow-hidden rounded-[18px] border border-(--brotero-borda-suave) bg-(--brotero-branco) shadow-[0_8px_28px_rgba(42,38,48,0.06)]">
-                                    <div className="flex flex-col gap-[12px] p-[16px_18px] sm:flex-row sm:items-stretch sm:gap-[16px]">
+                                <article className="overflow-hidden rounded-[16px] border border-(--brotero-borda-suave) bg-(--brotero-branco) shadow-[0_1px_3px_rgba(42,38,48,0.06)]">
+                                    <div className="flex flex-col gap-[16px] p-[16px] sm:flex-row sm:items-start sm:gap-[20px] sm:p-[20px]">
                                         <Link
-                                            href={`/biblioteca/livro/${encodeURIComponent(item.livro.id)}`}
-                                            className="group relative mx-auto flex aspect-2/3 w-[min(104px,28vw)] shrink-0 items-center justify-center overflow-hidden rounded-[12px] bg-linear-to-br from-[#e8e8e8] to-[#d0d0d0] sm:mx-0 sm:w-[118px]"
-                                            aria-label={`Ver ficha: ${item.livro.titulo}`}
+                                            href={livroHref(item.livro.id)}
+                                            className="relative mx-auto flex aspect-2/3 w-[min(108px,32vw)] shrink-0 overflow-hidden rounded-[10px] bg-(--brotero-fundo) ring-1 ring-black/6 sm:mx-0 sm:w-[120px]"
+                                            aria-label={`Capa: ${item.livro.titulo}`}
                                         >
                                             {item.livro.capa ? (
                                                 <img
                                                     src={item.livro.capa}
                                                     alt=""
-                                                    className="h-full w-full object-contain object-center transition-transform group-hover:scale-[1.02]"
+                                                    className="h-full w-full object-contain object-center"
                                                     loading="lazy"
                                                     referrerPolicy="no-referrer"
                                                 />
                                             ) : (
-                                                <span className="flex h-full w-full items-center justify-center p-[8px] text-center text-[11px] font-semibold text-(--brotero-texto-cinza)">
-                                                    Sem capa
+                                                <span className="flex h-full w-full items-center justify-center">
+                                                    <BookOpen
+                                                        className="size-[28px] text-(--brotero-texto-cinza) opacity-35"
+                                                        aria-hidden
+                                                    />
                                                 </span>
                                             )}
                                         </Link>
+
                                         <div className="min-w-0 flex-1">
-                                            <p className="m-0 mb-[4px] text-[12px] font-semibold uppercase tracking-[0.04em] text-(--brotero-primaria)">
-                                                {item.patron_label}
-                                                <span className="font-normal text-(--brotero-texto-cinza)">
-                                                    {' '}
-                                                    · {formatData(item.created_at)}
+                                            <p className="m-0 text-[14px] leading-snug text-(--brotero-texto-cinza)">
+                                                <span className="font-semibold text-(--brotero-texto)">
+                                                    {item.patron_label}
                                                 </span>
+                                                <span aria-hidden> · </span>
+                                                <time dateTime={item.created_at}>
+                                                    {formatData(item.created_at)}
+                                                </time>
                                             </p>
-                                            <h2 className="m-0 mb-[6px] text-[1.1rem] font-bold leading-snug text-(--brotero-texto)">
+
+                                            <h2 className="m-0 mt-[10px] text-[1.125rem] font-semibold leading-snug tracking-tight text-(--brotero-texto) sm:text-[1.2rem]">
                                                 <Link
-                                                    href={`/biblioteca/livro/${encodeURIComponent(item.livro.id)}`}
+                                                    href={livroHref(item.livro.id)}
                                                     className="text-inherit no-underline hover:text-(--brotero-texto-link) hover:underline"
                                                 >
                                                     {item.livro.titulo}
                                                 </Link>
                                             </h2>
-                                            <p className="m-0 mb-[10px] text-[14px] text-(--brotero-texto-cinza)">
+                                            <p className="m-0 mt-[4px] text-[15px] text-(--brotero-texto-cinza)">
                                                 {item.livro.autor}
                                             </p>
+
                                             {item.message ? (
-                                                <p className="m-0 rounded-[12px] bg-(--brotero-fundo) p-[10px_12px] text-[14px] leading-snug text-(--brotero-texto)">
+                                                <p className="m-0 mt-[14px] rounded-[10px] bg-(--brotero-fundo) px-[14px] py-[12px] text-[15px] leading-relaxed text-(--brotero-texto)">
                                                     {item.message}
                                                 </p>
                                             ) : null}
-                                            <div className="mt-[12px] flex flex-wrap items-center gap-x-[14px] gap-y-[6px]">
+
+                                            <div className="mt-[14px] flex flex-wrap items-center gap-x-[10px] gap-y-[8px] border-t border-(--brotero-borda-suave) pt-[14px] text-[15px]">
+                                                <Link
+                                                    href={livroHref(item.livro.id)}
+                                                    className="inline-flex min-h-[40px] items-center rounded-[10px] bg-(--brotero-primaria) px-[16px] text-[15px] font-semibold text-white no-underline transition-opacity hover:opacity-90"
+                                                >
+                                                    Ver ficha
+                                                </Link>
+                                                {item.livro.tem_ebook ? (
+                                                    <Link
+                                                        href={`${livroHref(item.livro.id)}/ler`}
+                                                        className="inline-flex min-h-[40px] items-center rounded-[10px] border border-(--brotero-borda) bg-(--brotero-branco) px-[14px] text-[15px] font-medium text-(--brotero-texto) no-underline hover:border-(--brotero-primaria-claro) hover:bg-(--brotero-fundo)"
+                                                    >
+                                                        E-book
+                                                    </Link>
+                                                ) : null}
                                                 {item.pode_contactar ? (
                                                     <Form
                                                         action="/biblioteca/conta/mensagens/abrir"
@@ -131,25 +154,11 @@ export default function BibliotecaDescobertas({ descobertas }: Props) {
                                                         />
                                                         <button
                                                             type="submit"
-                                                            className="cursor-pointer border-0 bg-transparent p-0 text-[13px] font-semibold text-violet-700 no-underline hover:text-violet-900 hover:underline"
+                                                            className="inline-flex min-h-[40px] cursor-pointer items-center rounded-[10px] border border-transparent px-[10px] text-[15px] font-medium text-(--brotero-texto-link) underline decoration-(--brotero-borda-suave) underline-offset-4 hover:decoration-(--brotero-texto-link)"
                                                         >
-                                                            Mensagem privada →
+                                                            Mensagem ao leitor
                                                         </button>
                                                     </Form>
-                                                ) : null}
-                                                <Link
-                                                    href={`/biblioteca/livro/${encodeURIComponent(item.livro.id)}`}
-                                                    className="text-[13px] font-semibold text-(--brotero-texto-link) no-underline hover:text-(--brotero-texto-link-hover) hover:underline"
-                                                >
-                                                    Ver ficha e requisitar →
-                                                </Link>
-                                                {item.livro.tem_ebook ? (
-                                                    <Link
-                                                        href={`/biblioteca/livro/${encodeURIComponent(item.livro.id)}/ler`}
-                                                        className="text-[13px] font-semibold text-violet-700 no-underline hover:text-violet-900 hover:underline"
-                                                    >
-                                                        Ler e-book (com sessão) →
-                                                    </Link>
                                                 ) : null}
                                             </div>
                                         </div>
@@ -162,7 +171,7 @@ export default function BibliotecaDescobertas({ descobertas }: Props) {
 
                 {descobertas.last_page > 1 ? (
                     <nav
-                        className="mt-[22px] flex flex-wrap justify-center gap-[6px]"
+                        className="mt-[22px] flex flex-wrap items-center gap-[6px]"
                         aria-label="Paginação"
                     >
                         {descobertas.links.map((link, index) =>
@@ -171,17 +180,17 @@ export default function BibliotecaDescobertas({ descobertas }: Props) {
                                     key={index}
                                     href={link.url}
                                     preserveScroll
-                                    className={`min-w-[2.25rem] rounded-full px-[10px] py-[8px] text-center text-[13px] font-semibold no-underline ${
+                                    className={`inline-flex min-h-[40px] min-w-[40px] items-center justify-center rounded-[10px] px-[10px] text-[15px] no-underline ${
                                         link.active
-                                            ? 'bg-(--brotero-primaria) text-white'
-                                            : 'border border-(--brotero-borda) bg-(--brotero-branco) text-(--brotero-texto) hover:border-(--brotero-primaria-claro)'
+                                            ? 'bg-(--brotero-primaria) font-semibold text-white'
+                                            : 'border border-(--brotero-borda-suave) bg-(--brotero-branco) text-(--brotero-texto-link) hover:bg-(--brotero-fundo)'
                                     }`}
                                     dangerouslySetInnerHTML={{ __html: link.label }}
                                 />
                             ) : (
                                 <span
                                     key={index}
-                                    className="min-w-[2.25rem] px-[10px] py-[8px] text-center text-[13px] text-(--brotero-texto-cinza)"
+                                    className="inline-flex min-h-[40px] min-w-[40px] items-center justify-center px-[10px] text-[15px] text-(--brotero-texto-cinza)"
                                     dangerouslySetInnerHTML={{ __html: link.label }}
                                 />
                             ),

@@ -36,7 +36,7 @@ class PatronLibrarianBookController extends Controller
         $data = $request->validate([
             'title' => ['required', 'string', 'max:500'],
             'description' => ['nullable', 'string', 'max:65535'],
-            'isbn' => ['nullable', 'string', 'max:32', Rule::unique('books', 'isbn')],
+            'isbn' => ['nullable', 'string', 'max:128', Rule::unique('books', 'isbn')],
             'published_year' => ['nullable', 'integer', 'min:1000', 'max:2100'],
             'pages' => ['nullable', 'integer', 'min:1', 'max:50000'],
             'language' => ['nullable', 'string', 'max:32'],
@@ -132,7 +132,7 @@ class PatronLibrarianBookController extends Controller
         $data = $request->validate([
             'title' => ['required', 'string', 'max:500'],
             'description' => ['nullable', 'string', 'max:65535'],
-            'isbn' => ['nullable', 'string', 'max:32', Rule::unique('books', 'isbn')->ignore($book->id)],
+            'isbn' => ['nullable', 'string', 'max:128', Rule::unique('books', 'isbn')->ignore($book->id)],
             'published_year' => ['nullable', 'integer', 'min:1000', 'max:2100'],
             'pages' => ['nullable', 'integer', 'min:1', 'max:50000'],
             'language' => ['nullable', 'string', 'max:32'],

@@ -66,6 +66,8 @@ Route::post('/biblioteca/sair', [LibraryPatronAuthController::class, 'destroy'])
 
 Route::middleware('auth:patron')->group(function (): void {
     Route::get('/biblioteca/livro/{book}/ler', [BookEbookReaderController::class, 'show'])->name('biblioteca.livro.ler');
+    Route::post('/biblioteca/livro/{book}/ebook/registar-download', [BookEbookReaderController::class, 'registarDownload'])
+        ->name('biblioteca.livro.ebook.registar-download');
     Route::get('/biblioteca/livro/{book}/ebook', [BookEbookReaderController::class, 'stream'])->name(
         'biblioteca.livro.ebook',
     );

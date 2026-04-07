@@ -25,9 +25,7 @@ class BookController extends Controller
             ->latest('id');
 
         if (! empty($categoriaId)) {
-            $query->whereHas('categories', function ($q) use ($categoriaId) {
-                $q->whereKey($categoriaId);
-            });
+            $query->forCatalogCategory((string) $categoriaId);
         }
 
         if ($authorId !== '') {
@@ -82,9 +80,7 @@ class BookController extends Controller
                 });
             })
             ->when($categoryId, function ($qBook) use ($categoryId): void {
-                $qBook->whereHas('categories', function ($qCat) use ($categoryId): void {
-                    $qCat->whereKey($categoryId);
-                });
+                $qBook->forCatalogCategory((string) $categoryId);
             })
             ->when($year !== null && $year !== '' && is_numeric($year), function ($qBook) use ($year): void {
                 $qBook->where('published_year', (int) $year);
@@ -135,6 +131,7 @@ class BookController extends Controller
         $payload['available'] = $book->isAvailableForRequest();
         $payload['has_ebook'] = $book->hasEbook() && $book->ebookFormat() !== null;
         $payload['ebook_format'] = $book->ebookFormat();
+        $payload['ebook_downloads_count'] = (int) ($book->ebook_downloads_count ?? 0);
         $payload['recommendations'] = $recommendedByAuthor->map($mapBook)->values()->all();
         $payload['category_recommendations'] = $recommendedByCategory->map($mapBook)->values()->all();
         $payload['fallback_recommendations'] = $recommendedFallback->map($mapBook)->values()->all();

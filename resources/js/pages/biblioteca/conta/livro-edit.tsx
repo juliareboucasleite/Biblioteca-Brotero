@@ -116,13 +116,18 @@ export default function BibliotecaContaLivroEdit({ book }: Props) {
 
                 <div className="grid gap-[6px] sm:grid-cols-2 sm:gap-[16px]">
                     <div className="grid gap-[6px]">
-                        <label htmlFor="le-isbn" className="text-[13px] font-semibold text-(--brotero-texto)">ISBN (opcional)</label>
+                        <label htmlFor="le-isbn" className="text-[13px] font-semibold text-(--brotero-texto)">
+                            ISBN (opcional)
+                        </label>
+                        <p className="m-0 text-[12px] text-(--brotero-texto-cinza)">
+                            ISBN-10 e/ou ISBN-13, separados por vírgula se forem dois.
+                        </p>
                         <input
                             id="le-isbn"
                             className="rounded-(--raio) border border-(--brotero-borda) bg-(--brotero-branco) px-[12px] py-[10px] text-[14px] text-(--brotero-texto)"
                             value={form.data.isbn}
                             onChange={(e) => form.setData('isbn', e.target.value)}
-                            maxLength={32}
+                            maxLength={128}
                         />
                         {form.errors.isbn ? (
                             <p className="m-0 text-[12px] text-red-600">{form.errors.isbn}</p>

@@ -104,6 +104,8 @@ export type BookApi = {
     /** Existe ficheiro e-book (PDF ou EPUB) no armazenamento privado. */
     has_ebook?: boolean;
     ebook_format?: 'pdf' | 'epub' | null;
+    /** Transferências registadas (botão «Baixar» na ficha). */
+    ebook_downloads_count?: number;
     details?: {
         publisher?: string | null;
         location?: string | null;

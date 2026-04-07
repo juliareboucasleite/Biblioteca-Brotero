@@ -1,4 +1,4 @@
-import { Head, Link, usePage } from '@inertiajs/react';
+import { Head, usePage } from '@inertiajs/react';
 import { isLivroPlaceholder } from '@/components/biblioteca/biblioteca-constants';
 import { BibliotecaCatalogShell } from '@/components/biblioteca/BibliotecaCatalogShell';
 import { BookCover } from '@/components/biblioteca/BookCover';
@@ -7,6 +7,7 @@ import { BookPatronShareSection } from '@/components/biblioteca/BookPatronShareS
 import { BookRecommendationsByAuthor } from '@/components/biblioteca/BookRecommendationsByAuthor';
 import { BookRecommendationsByCategory } from '@/components/biblioteca/BookRecommendationsByCategory';
 import { BookRecommendationsRow } from '@/components/biblioteca/BookRecommendationsRow';
+import { BookEbookAside } from '@/components/biblioteca/BookEbookAside';
 import { BookRequestAside } from '@/components/biblioteca/BookRequestAside';
 import { useBookDetailApi } from '@/hooks/useBookDetailApi';
 import type { LivroCatalogo } from '@/types';
@@ -24,6 +25,7 @@ type LibraryBookProps = {
 
 export default function LibraryBook({ livro, patron_share = null }: LibraryBookProps) {
     const { flash, auth } = usePage<{ auth: Auth }>().props;
+    const isPatron = Boolean(auth?.patron);
     const placeholder = isLivroPlaceholder(livro.titulo);
     const bookApi = useBookDetailApi(livro.id, !placeholder);
 
@@ -54,30 +56,6 @@ export default function LibraryBook({ livro, patron_share = null }: LibraryBookP
                         </p>
                     ) : null}
 
-                    {bookApi?.has_ebook && !placeholder ? (
-                        <div className="m-0 mb-[18px] flex flex-wrap items-center gap-[12px] rounded-[14px] border border-violet-200/80 bg-linear-to-r from-violet-50/95 to-fuchsia-50/80 px-[16px] py-[12px] text-[14px] text-(--brotero-texto) shadow-[0_6px_20px_rgba(124,58,237,0.12)]">
-                            <span className="font-semibold text-violet-900">E-book disponível</span>
-                            {auth.patron ? (
-                                <Link
-                                    href={`/biblioteca/livro/${encodeURIComponent(livro.id)}/ler`}
-                                    className="inline-flex items-center rounded-full bg-violet-600 px-[16px] py-[8px] text-[13px] font-semibold text-white no-underline shadow-[0_4px_14px_rgba(124,58,237,0.35)] hover:bg-violet-700"
-                                >
-                                    {bookApi?.ebook_format === 'epub' ? 'Ler EPUB' : 'Ler PDF'} no browser
-                                </Link>
-                            ) : (
-                                <span className="text-[14px] text-(--brotero-texto-cinza)">
-                                    <a
-                                        href="/biblioteca/entrar"
-                                        className="font-semibold text-(--brotero-texto-link) hover:underline"
-                                    >
-                                        Entre com o cartão
-                                    </a>{' '}
-                                    para ler online.
-                                </span>
-                            )}
-                        </div>
-                    ) : null}
-
                     <nav
                         aria-label="Navegação do catálogo"
                         className="m-0 mb-[22px] flex flex-wrap items-center gap-x-[14px] gap-y-[8px] text-[14px]"
@@ -106,7 +84,21 @@ export default function LibraryBook({ livro, patron_share = null }: LibraryBookP
                             bookApi={bookApi}
                             authorsLabel={authorsLabel}
                         />
-                        <BookRequestAside livro={livro} placeholder={placeholder} />
+                        {!placeholder && bookApi === null && livro.tem_ebook ? (
+                            <aside className="border border-(--brotero-borda) rounded-(--raio) p-[20px] bg-(--brotero-branco) text-[14px] text-(--brotero-texto-cinza) shadow-[0_1px_3px_rgba(0,0,0,0.06)] max-[900px]:col-span-2 max-[600px]:col-span-1">
+                                A carregar detalhes do e-book…
+                            </aside>
+                        ) : bookApi?.has_ebook ? (
+                            <BookEbookAside
+                                livro={livro}
+                                placeholder={placeholder}
+                                ebookFormat={bookApi.ebook_format === 'epub' ? 'epub' : 'pdf'}
+                                initialDownloadCount={bookApi.ebook_downloads_count ?? 0}
+                                isPatron={isPatron}
+                            />
+                        ) : (
+                            <BookRequestAside livro={livro} placeholder={placeholder} />
+                        )}
                     </div>
 
                     <BookPatronShareSection

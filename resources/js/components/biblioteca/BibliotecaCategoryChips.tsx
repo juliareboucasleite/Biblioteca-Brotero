@@ -7,18 +7,113 @@ import type { Category } from '@/types';
 
 const SCROLL_STEP_PX = 280;
 
-/** Categoria «e-book» na BD — mostrada logo a seguir a «Todas». */
+/** Categoria «e-book» (PDF online) na BD — mostrada logo a seguir a «Todas». */
 const CATEGORIA_EBOOK_ID = 64;
 
+/** Categoria «audiobook» na BD — ícone dedicado. */
+const CATEGORIA_AUDIOBOOK_ID = 65;
+
+/** Categoria «livros novos» na BD — ícone dedicado. */
+const CATEGORIA_LIVROS_NOVOS_ID = 66;
+
+/** Categoria «bestsellers» na BD — ícone dedicado. */
+const CATEGORIA_BESTSELLERS_ID = 67;
+
+/** Categoria «manga» na BD — mesmo ícone que banda desenhada. */
+const CATEGORIA_MANGA_ID = 68;
+
+/** Alinhar com `config/biblioteca_canonical_categories.php` → `order` (índice = prioridade no carrossel). */
+const ORDEM_SLUGS_CATALOGO = [
+    'e-books',
+    'livros-novos',
+    'bestsellers',
+    'audiobooks',
+    'romance',
+    'fantasia',
+    'ficcao-cientifica',
+    'terror',
+    'misterio-suspense',
+    'aventura',
+    'drama',
+    'biografia-autobiografia',
+    'historia',
+    'ciencia',
+    'autoajuda',
+    'educacao-didaticos',
+    'negocios-financas',
+    'poesia',
+    'hq-banda-desenhada',
+    'manga',
+    'infantil-juvenil',
+] as const;
+
 /**
- * Cada ficheiro tem um significado fixo (não é rotação por posição):
  * - pilha: «Todas» — catálogo completo
- * - livr3o: livros físicos / para requisitar na biblioteca
- * - livros-pdf: categoria de obras online em PDF (não confundir com EPUB ou e-reader genérico)
+ * - livros-pdf: obras online em PDF (categoria e-book id 64 ou nome com pistas)
+ * - livro-de-musica: categoria audiobook id 65
+ * - new: categoria livros novos id 66
+ * - livro-bestsellers: categoria bestsellers id 67
+ * - livro-de-banda-desenhada: manga id 68; também BD / comics / manga (nome)
+ * - romance: nome da categoria (romance.png)
+ * - livro-azul: fantasia / fantasy (nome)
+ * - livro-magico: categorias de ficção (nome com «ficção» / «fiction», exceto não-ficção)
+ * - restantes categorias físicas: cor estável por id entre as variantes em `public/images/livro-*.png`
  */
 const ICON_TODAS = '/images/pilha-de-livros.png';
-const ICON_LIVROS_REQUISITAR = '/images/livr3o.png';
 const ICON_LIVROS_PDF_ONLINE = '/images/livros-pdf.png';
+const ICON_AUDIOBOOK = '/images/livro-de-musica.png';
+const ICON_LIVROS_NOVOS = '/images/new.png';
+const ICON_BESTSELLERS = '/images/livro-bestsellers.png';
+const ICON_ROMANCE = '/images/romance.png';
+const ICON_FANTASIA = '/images/livro-azul.png';
+const ICON_FICCAO = '/images/livro-magico.png';
+const ICON_BANDA_DESENHADA = '/images/livro-de-banda-desenhada.png';
+
+/** Ícones dedicados por slug canónico (quando o backend envia `slug`). */
+const ICON_POR_SLUG: Partial<Record<(typeof ORDEM_SLUGS_CATALOGO)[number], string>> = {
+    'e-books': ICON_LIVROS_PDF_ONLINE,
+    audiobooks: ICON_AUDIOBOOK,
+    'livros-novos': ICON_LIVROS_NOVOS,
+    bestsellers: ICON_BESTSELLERS,
+    manga: ICON_BANDA_DESENHADA,
+    'hq-banda-desenhada': ICON_BANDA_DESENHADA,
+    romance: ICON_ROMANCE,
+    fantasia: ICON_FANTASIA,
+    'ficcao-cientifica': ICON_FICCAO,
+    terror: '/images/livro-vermelho.png',
+    'misterio-suspense': '/images/livro-roxo.png',
+    aventura: '/images/livro-verde.png',
+    drama: '/images/livro-rosa.png',
+    'biografia-autobiografia': '/images/livro-amarelo.png',
+    historia: '/images/livro-amarelo.png',
+    ciencia: '/images/livro-azul.png',
+    autoajuda: '/images/livro-verde.png',
+    'educacao-didaticos': '/images/livro-amarelo.png',
+    'negocios-financas': '/images/livro-vermelho.png',
+    poesia: '/images/livro-roxo.png',
+    'infantil-juvenil': '/images/livro-rosa.png',
+};
+
+/** Livros físicos — variações de cor (ícones dedicados ficam fora desta lista). */
+const ICON_LIVROS_COLORIDOS = [
+    '/images/livro-roxo.png',
+    '/images/livro-rosa.png',
+    '/images/livro-verde.png',
+    '/images/livro-amarelo.png',
+    '/images/livro-vermelho.png',
+] as const;
+
+/** Índice estável pseudo-aleatório a partir do id (não muda a cada render). */
+function indiceCorPorCategoriaId(id: string | number): number {
+    const s = String(id);
+    let h = 0;
+
+    for (let i = 0; i < s.length; i += 1) {
+        h = Math.imul(31, h) + s.charCodeAt(i);
+    }
+
+    return Math.abs(h) % ICON_LIVROS_COLORIDOS.length;
+}
 
 /** Palavras no nome da categoria (normalizado) que indicam PDF/online — ajuste se os nomes na BD forem outros. */
 const PDF_ONLINE_HINTS = [
@@ -32,6 +127,68 @@ const PDF_ONLINE_HINTS = [
     'em pdf',
 ] as const;
 
+/** Nome normalizado sugere «não ficção» — não usar ícone de ficção. */
+function pareceNaoFiccao(n: string): boolean {
+    return (
+        n.includes('nao ficcao') ||
+        n.includes('nao-ficcao') ||
+        n.includes('non-fiction') ||
+        n.includes('nonfiction') ||
+        n.includes('narrativa nao ficcao')
+    );
+}
+
+/** Categoria de ficção — nomes com «ficção» / «fiction» (exceto não-ficção). */
+function pareceFiccao(n: string): boolean {
+    if (pareceNaoFiccao(n)) {
+        return false;
+    }
+
+    return n.includes('ficcao') || n.includes('fiction');
+}
+
+/** Romance (género) — nome da categoria. */
+function pareceRomance(n: string): boolean {
+    return n.includes('romance');
+}
+
+/** Fantasia / fantasy — nome da categoria (normalizado). */
+function pareceFantasia(n: string): boolean {
+    return (
+        n.includes('fantasia') ||
+        n.includes('fantasy') ||
+        n.includes('fantastica') ||
+        n.includes('fantastico')
+    );
+}
+
+/** Banda desenhada, BD, comics, etc. */
+function pareceBandaDesenhada(n: string): boolean {
+    return (
+        n.includes('banda desenhada') ||
+        n.includes('banda-desenhada') ||
+        n.includes('bandas desenhadas') ||
+        n.includes('quadrinhos') ||
+        n.includes('graphic novel') ||
+        n.includes('comic') ||
+        n.includes('comics') ||
+        n.includes('manga') ||
+        /\bbd\b/.test(n)
+    );
+}
+
+/** Policial / crime / thriller (nome da categoria). */
+function pareceCrime(n: string): boolean {
+    return (
+        n.includes('crime') ||
+        n.includes('policial') ||
+        n.includes('thriller') ||
+        n.includes('misterio') ||
+        n.includes('suspense') ||
+        n.includes('detective')
+    );
+}
+
 function normalizeForMatch(s: string): string {
     return s
         .normalize('NFD')
@@ -41,7 +198,20 @@ function normalizeForMatch(s: string): string {
 
 type CategoryLike =
     | Category
-    | { id: string | number; name?: string; nome?: string };
+    | {
+          id: string | number;
+          name?: string;
+          nome?: string;
+          slug?: string | null;
+      };
+
+function categorySlug(c: CategoryLike): string | null {
+    if ('slug' in c && typeof c.slug === 'string' && c.slug !== '') {
+        return c.slug;
+    }
+
+    return null;
+}
 
 function categoryDisplayName(c: CategoryLike): string {
     if (typeof c.name === 'string' && c.name !== '') {
@@ -56,12 +226,49 @@ function categoryDisplayName(c: CategoryLike): string {
 }
 
 function iconSrcForCategory(c: CategoryLike): string {
+    const slug = categorySlug(c);
+    if (slug !== null && ICON_POR_SLUG[slug as keyof typeof ICON_POR_SLUG] !== undefined) {
+        return ICON_POR_SLUG[slug as keyof typeof ICON_POR_SLUG] as string;
+    }
+
     if (String(c.id) === String(CATEGORIA_EBOOK_ID)) {
         return ICON_LIVROS_PDF_ONLINE;
     }
 
+    if (String(c.id) === String(CATEGORIA_AUDIOBOOK_ID)) {
+        return ICON_AUDIOBOOK;
+    }
+
+    if (String(c.id) === String(CATEGORIA_LIVROS_NOVOS_ID)) {
+        return ICON_LIVROS_NOVOS;
+    }
+
+    if (String(c.id) === String(CATEGORIA_BESTSELLERS_ID)) {
+        return ICON_BESTSELLERS;
+    }
+
+    if (String(c.id) === String(CATEGORIA_MANGA_ID)) {
+        return ICON_BANDA_DESENHADA;
+    }
+
     const raw = categoryDisplayName(c);
     const n = normalizeForMatch(raw);
+
+    if (pareceBandaDesenhada(n)) {
+        return ICON_BANDA_DESENHADA;
+    }
+
+    if (pareceRomance(n)) {
+        return ICON_ROMANCE;
+    }
+
+    if (pareceFantasia(n)) {
+        return ICON_FANTASIA;
+    }
+
+    if (pareceFiccao(n)) {
+        return ICON_FICCAO;
+    }
 
     for (const hint of PDF_ONLINE_HINTS) {
         if (n.includes(hint)) {
@@ -69,22 +276,99 @@ function iconSrcForCategory(c: CategoryLike): string {
         }
     }
 
-    return ICON_LIVROS_REQUISITAR;
+    const idx = indiceCorPorCategoriaId(c.id);
+
+    return ICON_LIVROS_COLORIDOS[idx];
 }
 
-/** Coloca a categoria e-book (id {@link CATEGORIA_EBOOK_ID}) imediatamente após «Todas». */
-function categoriasComEbookAposTodas(lista: CategoryLike[]): CategoryLike[] {
-    const idAlvo = String(CATEGORIA_EBOOK_ID);
-    const i = lista.findIndex((c) => String(c.id) === idAlvo);
-
-    if (i <= 0) {
-        return lista;
+/**
+ * Ordem de referência (após «Todas»): e-books → novos → bestsellers → audiobooks →
+ * ficção (genérica) → romance → fantasia → manga → crime → banda desenhada → restantes.
+ */
+function ordemCatalogoReferencia(c: CategoryLike): number {
+    const slug = categorySlug(c);
+    if (slug !== null) {
+        const idx = ORDEM_SLUGS_CATALOGO.indexOf(
+            slug as (typeof ORDEM_SLUGS_CATALOGO)[number],
+        );
+        if (idx >= 0) {
+            return 10 + idx;
+        }
     }
 
-    const ebook = lista[i];
-    const resto = lista.filter((_, idx) => idx !== i);
+    const id = String(c.id);
+    const n = normalizeForMatch(categoryDisplayName(c));
 
-    return [ebook, ...resto];
+    if (id === String(CATEGORIA_EBOOK_ID)) {
+        return 10;
+    }
+
+    if (id === String(CATEGORIA_LIVROS_NOVOS_ID)) {
+        return 20;
+    }
+
+    if (id === String(CATEGORIA_BESTSELLERS_ID)) {
+        return 30;
+    }
+
+    if (id === String(CATEGORIA_AUDIOBOOK_ID)) {
+        return 40;
+    }
+
+    if (pareceRomance(n)) {
+        return 60;
+    }
+
+    if (pareceFantasia(n)) {
+        return 70;
+    }
+
+    if (id === String(CATEGORIA_MANGA_ID)) {
+        return 80;
+    }
+
+    if (pareceCrime(n)) {
+        return 90;
+    }
+
+    if (
+        pareceFiccao(n) &&
+        !pareceFantasia(n) &&
+        !pareceCrime(n) &&
+        !pareceBandaDesenhada(n)
+    ) {
+        return 50;
+    }
+
+    if (pareceBandaDesenhada(n)) {
+        return 95;
+    }
+
+    return 100;
+}
+
+function compararIdCategoria(a: string | number, b: string | number): number {
+    const na = Number(a);
+    const nb = Number(b);
+
+    if (!Number.isNaN(na) && !Number.isNaN(nb)) {
+        return na - nb;
+    }
+
+    return String(a).localeCompare(String(b));
+}
+
+function ordenarCategoriasCatalogo(lista: CategoryLike[]): CategoryLike[] {
+    return [...lista].sort((a, b) => {
+        const oa = ordemCatalogoReferencia(a);
+        const ob = ordemCatalogoReferencia(b);
+
+        if (oa !== ob) {
+            return oa - ob;
+        }
+
+        return compararIdCategoria(a.id, b.id);
+    });
 }
 
 type BibliotecaCategoryChipsProps = {
@@ -191,7 +475,7 @@ export function BibliotecaCategoryChips({
     className,
 }: BibliotecaCategoryChipsProps) {
     const allHref = buildUrl(basePath, { q, lingua, author_id: authorId, ano });
-    const categoriasOrdenadas = categoriasComEbookAposTodas(categorias);
+    const categoriasOrdenadas = ordenarCategoriasCatalogo(categorias);
     const { scrollRef, onMouseDown, onClickCapture } = useHorizontalDragScroll();
 
     const scrollCategorias = useCallback(

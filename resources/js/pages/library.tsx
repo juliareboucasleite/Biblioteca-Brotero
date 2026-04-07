@@ -1,6 +1,5 @@
 import { Head } from '@inertiajs/react';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
-import { useHorizontalDragScroll } from '@/hooks/useHorizontalDragScroll';
 import { BibliotecaCatalogSearchBar } from '@/components/biblioteca/BibliotecaCatalogSearchBar';
 import { BibliotecaCatalogShell } from '@/components/biblioteca/BibliotecaCatalogShell';
 import { BibliotecaCategoryChips } from '@/components/biblioteca/BibliotecaCategoryChips';
@@ -12,6 +11,7 @@ import { BibliotecaSectionPlaceholder } from '@/components/biblioteca/Biblioteca
 import { BookSectionHeader } from '@/components/biblioteca/BookSectionHeader';
 import { CardLivro } from '@/components/CardLivro';
 import { useBibliotecaLivrosPolling } from '@/hooks/useBibliotecaLivrosPolling';
+import { useHorizontalDragScroll } from '@/hooks/useHorizontalDragScroll';
 import { cn } from '@/lib/utils';
 import type { Category, LivroCatalogo } from '@/types';
 
@@ -63,8 +63,16 @@ export default function Library({
     ano,
     rankingCatalogo = [],
 }: LibraryProps) {
-    const novosDrag = useHorizontalDragScroll();
-    const maisPedidosDrag = useHorizontalDragScroll();
+    const {
+        scrollRef: novosScrollRef,
+        onMouseDown: novosOnMouseDown,
+        onClickCapture: novosOnClickCapture,
+    } = useHorizontalDragScroll();
+    const {
+        scrollRef: maisPedidosScrollRef,
+        onMouseDown: maisPedidosOnMouseDown,
+        onClickCapture: maisPedidosOnClickCapture,
+    } = useHorizontalDragScroll();
     const lista = useBibliotecaLivrosPolling(livros, {
         categoriaSelecionada,
         q,
@@ -99,10 +107,10 @@ export default function Library({
 
     const temMaisPedidos = livrosMaisPedidos.length > 0;
     const scrollNovos = (delta: number) => {
-        novosDrag.scrollRef.current?.scrollBy({ left: delta, behavior: 'smooth' });
+        novosScrollRef.current?.scrollBy({ left: delta, behavior: 'smooth' });
     };
     const scrollMaisPedidos = (delta: number) => {
-        maisPedidosDrag.scrollRef.current?.scrollBy({ left: delta, behavior: 'smooth' });
+        maisPedidosScrollRef.current?.scrollBy({ left: delta, behavior: 'smooth' });
     };
     const carrosselArrowBtnClass = cn(
         'inline-flex size-[36px] items-center justify-center rounded-full border border-(--brotero-borda) bg-(--brotero-branco) text-(--brotero-texto) shadow-sm transition-colors',
@@ -187,11 +195,11 @@ export default function Library({
                         }
                     />
                     <div
-                        ref={novosDrag.scrollRef}
+                        ref={novosScrollRef}
                         className="flex cursor-grab snap-x snap-proximity gap-[16px] overflow-x-auto pb-[8px] select-none [-ms-overflow-style:none] [scrollbar-width:none] active:cursor-grabbing [&::-webkit-scrollbar]:hidden"
                         aria-label="Lista de livros recentes"
-                        onMouseDown={novosDrag.onMouseDown}
-                        onClickCapture={novosDrag.onClickCapture}
+                        onMouseDown={novosOnMouseDown}
+                        onClickCapture={novosOnClickCapture}
                         onDragStart={(e) => e.preventDefault()}
                     >
                         {lista.slice(0, 10).map((livro) => (
@@ -284,11 +292,11 @@ export default function Library({
                     />
                     {temMaisPedidos ? (
                         <div
-                            ref={maisPedidosDrag.scrollRef}
+                            ref={maisPedidosScrollRef}
                             className="flex cursor-grab snap-x snap-proximity gap-[16px] overflow-x-auto pb-[6px] select-none [-ms-overflow-style:none] [scrollbar-width:none] active:cursor-grabbing [&::-webkit-scrollbar]:hidden"
                             aria-label="Livros mais requisitados"
-                            onMouseDown={maisPedidosDrag.onMouseDown}
-                            onClickCapture={maisPedidosDrag.onClickCapture}
+                            onMouseDown={maisPedidosOnMouseDown}
+                            onClickCapture={maisPedidosOnClickCapture}
                             onDragStart={(e) => e.preventDefault()}
                         >
                             {livrosMaisPedidos.map((livro) => (

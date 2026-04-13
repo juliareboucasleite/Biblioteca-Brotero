@@ -1,28 +1,86 @@
-import { MessageCircle, Send, X } from 'lucide-react';
-import { useCallback, useEffect, useId, useState } from 'react';
+import { MessageCircle, Send, X, Bot } from 'lucide-react';
+import { useCallback, useEffect, useId, useState, useRef } from 'react';
 import { cn } from '@/lib/utils';
 
-/** Balão flutuante de ajuda (estilo chat); sem backend em tempo real. */
+type Message = {
+    id: string;
+    text: string;
+    sender: 'user' | 'ai';
+    timestamp: Date;
+};
+
+/** Balão flutuante de ajuda com Assistente IA (Simulado). */
 export function BibliotecaCatalogHelpPanel() {
     const [open, setOpen] = useState(false);
+    const [messages, setMessages] = useState<Message[]>([
+        {
+            id: '1',
+            text: 'Olá! Eu sou o assistente digital da Biblioteca Brotero. Posso ajudar a encontrar livros ou explicar como funcionam as requisições.',
+            sender: 'ai',
+            timestamp: new Date(),
+        },
+    ]);
+    const [input, setInput] = useState('');
+    const [isTyping, setIsTyping] = useState(false);
+    const scrollRef = useRef<HTMLDivElement>(null);
     const titleId = useId();
     const dialogId = useId();
 
     const close = useCallback(() => setOpen(false), []);
 
     useEffect(() => {
-        if (!open) {
-            return;
+        if (scrollRef.current) {
+            scrollRef.current.scrollTop = scrollRef.current.scrollHeight;
         }
+    }, [messages, isTyping]);
 
-        const onKey = (e: KeyboardEvent) => {
-            if (e.key === 'Escape') {
-                close();
-            }
+    const handleSend = async () => {
+        if (!input.trim()) return;
+
+        const userMsg: Message = {
+            id: Date.now().toString(),
+            text: input.trim(),
+            sender: 'user',
+            timestamp: new Date(),
         };
 
-        window.addEventListener('keydown', onKey);
+        setMessages((prev) => [...prev, userMsg]);
+        setInput('');
+        setIsTyping(true);
 
+        // Simulação de IA Inteligente local
+        setTimeout(() => {
+            const query = userMsg.text.toLowerCase();
+            let response = "Peço desculpa, ainda estou a aprender. Pode reformular a sua pergunta ou contactar a biblioteca por e-mail?";
+
+            if (query.includes('requisitar') || query.includes('pedir') || query.includes('livro')) {
+                response = "Para requisitar um livro, basta abrir a página da obra e clicar em 'take it'. Se estiver disponível, o staff irá preparar o livro para entrega.";
+            } else if (query.includes('entrar') || query.includes('cartão') || query.includes('senha') || query.includes('passe')) {
+                response = "Use o seu número de cartão (5 algarismos) e a senha no formato data (DDMMAA ou DDMMAAAA).";
+            } else if (query.includes('ranking') || query.includes('quem')) {
+                response = "O nosso ranking destaca os leitores com mais requisições concluídas. Visite a página 'Ranking' para ver os líderes!";
+            } else if (query.includes('ola') || query.includes('oi') || query.includes('bom dia')) {
+                response = "Olá! Como posso ajudar na sua jornada de leitura hoje?";
+            }
+
+            const aiMsg: Message = {
+                id: (Date.now() + 1).toString(),
+                text: response,
+                sender: 'ai',
+                timestamp: new Date(),
+            };
+
+            setMessages((prev) => [...prev, aiMsg]);
+            setIsTyping(false);
+        }, 1200);
+    };
+
+    useEffect(() => {
+        if (!open) return;
+        const onKey = (e: KeyboardEvent) => {
+            if (e.key === 'Escape') close();
+        };
+        window.addEventListener('keydown', onKey);
         return () => window.removeEventListener('keydown', onKey);
     }, [open, close]);
 
@@ -31,7 +89,7 @@ export function BibliotecaCatalogHelpPanel() {
             {open ? (
                 <button
                     type="button"
-                    className="fixed inset-0 z-190 cursor-default border-0 bg-black/20 p-0 sm:bg-black/15"
+                    className="fixed inset-0 z-190 cursor-default border-0 bg-black/20 p-0 transition-opacity duration-300"
                     aria-label="Fechar ajuda"
                     onClick={close}
                 />
@@ -44,79 +102,98 @@ export function BibliotecaCatalogHelpPanel() {
                     aria-modal="true"
                     aria-labelledby={titleId}
                     className={cn(
-                        'pointer-events-auto w-[min(calc(100vw-28px),360px)] origin-bottom-right transition-[opacity,transform,visibility] duration-200 ease-out motion-reduce:transition-opacity motion-reduce:duration-150',
+                        'pointer-events-auto w-[min(calc(100vw-28px),380px)] origin-bottom-right transition-all duration-300 cubic-bezier(0.4, 0, 0.2, 1)',
                         open
                             ? 'visible translate-y-0 scale-100 opacity-100'
-                            : 'pointer-events-none invisible translate-y-3 scale-95 opacity-0 motion-reduce:translate-y-0 motion-reduce:scale-100',
+                            : 'pointer-events-none invisible translate-y-6 scale-90 opacity-0',
                     )}
                 >
-                    {/* Balão principal + “tail” a apontar para o botão */}
-                    <div className="relative w-[min(calc(100vw-28px),360px)] rounded-[22px] border border-(--brotero-borda-suave) bg-(--brotero-branco) p-[14px_16px] shadow-[0_22px_50px_rgba(42,38,48,0.18),0_0_1px_rgba(0,0,0,0.08)]">
-                        <span
-                            className="pointer-events-none absolute -bottom-[9px] right-[22px] size-[18px] rotate-45 border-r border-b border-(--brotero-borda-suave) bg-(--brotero-branco)"
-                            aria-hidden
-                        />
-
-                        <div className="relative z-1 flex items-start justify-between gap-[10px] pb-[12px]">
-                            <div className="min-w-0">
-                                <h2
-                                    id={titleId}
-                                    className="m-0 text-[1.05rem] font-bold text-(--brotero-texto)"
+                    <div className="relative overflow-hidden rounded-[28px] border border-(--brotero-borda) bg-(--brotero-branco) shadow-premium">
+                        {/* Header do Chat */}
+                        <div className="bg-linear-to-br from-(--brotero-primaria) to-(--brotero-primaria-escuro) px-5 py-4 text-white">
+                            <div className="flex items-center justify-between">
+                                <div className="flex items-center gap-3">
+                                    <div className="flex size-10 items-center justify-center rounded-full bg-white/20 backdrop-blur-md">
+                                        <Bot className="size-6" />
+                                    </div>
+                                    <div>
+                                        <h2 id={titleId} className="m-0 text-[1rem] font-bold">Assistente Brotero</h2>
+                                        <div className="flex items-center gap-1.5 mt-0.5">
+                                            <span className="size-2 rounded-full bg-emerald-400 animate-pulse"></span>
+                                            <span className="text-[11px] font-medium opacity-80 uppercase tracking-wider">Online</span>
+                                        </div>
+                                    </div>
+                                </div>
+                                <button
+                                    type="button"
+                                    onClick={close}
+                                    className="rounded-full p-2 hover:bg-white/10 transition-colors"
+                                    aria-label="Fechar ajuda"
                                 >
-                                    Ajuda
-                                </h2>
-                                <p className="m-0 mt-[2px] text-[12px] text-(--brotero-texto-cinza)">
-                                    Mensagens de exemplo; chat em breve
-                                </p>
+                                    <X className="size-5" />
+                                </button>
                             </div>
-                            <button
-                                type="button"
-                                onClick={close}
-                                className="inline-flex size-[40px] shrink-0 items-center justify-center rounded-full border border-(--brotero-borda-suave) bg-(--brotero-fundo) text-(--brotero-texto) transition-colors hover:bg-(--brotero-borda-suave) focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-(--brotero-primaria)"
-                                aria-label="Fechar ajuda"
-                            >
-                                <X className="size-[20px]" strokeWidth={2} aria-hidden />
-                            </button>
                         </div>
 
-                        <div className="relative z-1 mb-[12px] rounded-[14px] border border-(--brotero-borda-suave) bg-(--brotero-fundo) p-[10px_12px]">
-                            <p className="m-0 text-[12px] font-bold text-(--brotero-primaria)">
-                                Biblioteca Brotero
-                            </p>
-                            <p className="mt-[6px] mb-0 text-[13px] leading-snug text-(--brotero-texto-cinza)">
-                                Dúvidas sobre requisições ou o catálogo? Envie um e-mail ou fale connosco na
-                                escola.
-                            </p>
-                        </div>
-
+                        {/* Área de Mensagens */}
                         <div
-                            className="relative z-1 mb-[12px] flex max-h-[min(42vh,280px)] flex-col gap-[10px] overflow-y-auto overscroll-contain rounded-[16px] border border-(--brotero-borda-suave) bg-linear-to-b from-[#faf7ff] to-(--brotero-branco) p-[12px_12px_10px]"
-                            style={{ scrollbarWidth: 'thin' }}
+                            ref={scrollRef}
+                            className="flex max-h-[400px] min-h-[300px] flex-col gap-4 overflow-y-auto px-5 py-6 bg-linear-to-b from-slate-50 to-white"
+                            style={{ scrollbarWidth: 'none' }}
                         >
-                            <div className="max-w-[92%] rounded-[14px_14px_14px_4px] bg-(--brotero-branco) px-[12px] py-[10px] text-[13px] leading-snug text-(--brotero-texto) shadow-[0_2px_8px_rgba(0,0,0,0.06)]">
-                                Olá! Posso indicar como requisitar um livro ou recuperar a senha do cartão?
-                            </div>
-                            <div className="max-w-[88%] self-end rounded-[14px_14px_4px_14px] bg-linear-to-br from-violet-500 to-fuchsia-600 px-[12px] py-[10px] text-[13px] leading-snug text-white shadow-[0_4px_12px_rgba(124,58,237,0.35)]">
-                                Quero saber como entrar com o número do cartão.
-                            </div>
-                            <div className="max-w-[92%] rounded-[14px_14px_14px_4px] bg-(--brotero-branco) px-[12px] py-[10px] text-[13px] leading-snug text-(--brotero-texto) shadow-[0_2px_8px_rgba(0,0,0,0.06)]">
-                                Use o menu <strong className="font-semibold">Entrar</strong>, o cartão (5
-                                algarismos) e a palavra-passe no formato data:{' '}
-                                <strong className="font-semibold">DDMMAA</strong> ou{' '}
-                                <strong className="font-semibold">DDMMAAAA</strong>.
-                            </div>
+                            {messages.map((msg) => (
+                                <div
+                                    key={msg.id}
+                                    className={cn(
+                                        "flex flex-col gap-1.5 max-w-[85%]",
+                                        msg.sender === 'user' ? "self-end items-end" : "self-start items-start"
+                                    )}
+                                >
+                                    <div className={cn(
+                                        "px-4 py-2.5 rounded-[20px] text-[14px] leading-relaxed shadow-sm",
+                                        msg.sender === 'user' 
+                                            ? "bg-(--brotero-primaria) text-white rounded-tr-none" 
+                                            : "bg-white text-(--brotero-texto) border border-(--brotero-borda-suave) rounded-tl-none"
+                                    )}>
+                                        {msg.text}
+                                    </div>
+                                    <span className="text-[10px] text-(--brotero-texto-cinza) px-1 font-medium">
+                                        {msg.timestamp.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                                    </span>
+                                </div>
+                            ))}
+                            {isTyping && (
+                                <div className="self-start bg-white border border-(--brotero-borda-suave) px-4 py-3 rounded-[20px] rounded-tl-none shadow-sm">
+                                    <div className="flex gap-1">
+                                        <span className="size-1.5 rounded-full bg-(--brotero-primaria) animate-bounce"></span>
+                                        <span className="size-1.5 rounded-full bg-(--brotero-primaria) animate-bounce [animation-delay:0.2s]"></span>
+                                        <span className="size-1.5 rounded-full bg-(--brotero-primaria) animate-bounce [animation-delay:0.4s]"></span>
+                                    </div>
+                                </div>
+                            )}
                         </div>
 
-                        <div className="relative z-1 flex items-center gap-[8px] rounded-full border border-(--brotero-borda) bg-(--brotero-branco) px-[14px] py-[8px] opacity-80">
-                            <span className="flex-1 text-[13px] text-(--brotero-texto-cinza)">
-                                Escrever mensagem…
-                            </span>
-                            <span
-                                className="inline-flex size-[40px] shrink-0 items-center justify-center rounded-full bg-(--brotero-primaria) text-white"
-                                aria-hidden
+                        {/* Input Area */}
+                        <div className="p-4 border-t border-(--brotero-borda-suave) bg-white">
+                            <form
+                                onSubmit={(e) => { e.preventDefault(); handleSend(); }}
+                                className="flex items-center gap-2 rounded-full border border-(--brotero-borda) bg-slate-50 pr-1 pl-4 focus-within:border-(--brotero-primaria) focus-within:ring-2 focus-within:ring-(--brotero-primaria)/10 transition-all"
                             >
-                                <Send className="size-[18px]" strokeWidth={2} />
-                            </span>
+                                <input
+                                    type="text"
+                                    value={input}
+                                    onChange={(e) => setInput(e.target.value)}
+                                    placeholder="Pergunte ao assistente..."
+                                    className="flex-1 border-none bg-transparent py-3 text-[14px] focus:ring-0 outline-none"
+                                />
+                                <button
+                                    type="submit"
+                                    disabled={!input.trim()}
+                                    className="flex size-10 items-center justify-center rounded-full bg-(--brotero-primaria) text-white hover:bg-(--brotero-primaria-escuro) disabled:opacity-50 disabled:grayscale transition-all"
+                                >
+                                    <Send className="size-5" />
+                                </button>
+                            </form>
                         </div>
                     </div>
                 </div>
@@ -127,16 +204,14 @@ export function BibliotecaCatalogHelpPanel() {
                     aria-expanded={open}
                     aria-controls={dialogId}
                     className={cn(
-                        'pointer-events-auto inline-flex size-[56px] shrink-0 items-center justify-center rounded-full border-2 border-white text-white shadow-[0_10px_30px_rgba(93,122,140,0.45)] transition-[transform,box-shadow] hover:scale-[1.04] active:scale-[0.98]',
+                        'pointer-events-auto inline-flex size-[64px] shrink-0 items-center justify-center rounded-full border-4 border-white text-white shadow-premium transition-all duration-300 hover:scale-110 active:scale-95',
                         'bg-linear-to-br from-(--brotero-primaria) to-(--brotero-primaria-escuro)',
-                        'focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-(--brotero-primaria)',
                     )}
-                    aria-label={open ? 'Fechar chat de ajuda' : 'Abrir chat de ajuda'}
                 >
                     {open ? (
-                        <X className="size-[26px]" strokeWidth={2} aria-hidden />
+                        <X className="size-[32px]" strokeWidth={2.5} />
                     ) : (
-                        <MessageCircle className="size-[28px]" strokeWidth={1.9} aria-hidden />
+                        <MessageCircle className="size-[34px]" strokeWidth={2} />
                     )}
                 </button>
             </div>

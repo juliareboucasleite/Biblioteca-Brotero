@@ -1,32 +1,44 @@
 /* --- Estilo Biblioteca Brotero --- */
 :root {
-    --brotero-primaria: #4a6572;
-    --brotero-primaria-escuro: #3d5663;
-    --brotero-primaria-claro: #5d7a8c;
-    --brotero-fundo: #e8ecf0;
-    --brotero-branco: #fff;
-    --brotero-texto: #1c2128;
-    --brotero-texto-cinza: #5c656d;
-    --brotero-texto-link: #3d6b7c;
-    --brotero-texto-link-hover: #2d5160;
-    --brotero-borda: #c2cbd4;
-    --brotero-borda-suave: #d8dfe6;
-    --brotero-dark: #2c3e50;
+    --brotero-primaria: oklch(0.55 0.18 263);
+    --brotero-primaria-escuro: oklch(0.45 0.18 263);
+    --brotero-primaria-claro: oklch(0.65 0.15 263);
+    --brotero-fundo: oklch(0.98 0.01 263);
+    --brotero-branco: #ffffff;
+    --brotero-texto: oklch(0.25 0.02 263);
+    --brotero-texto-cinza: oklch(0.5 0.02 263);
+    --brotero-texto-link: var(--brotero-primaria);
+    --brotero-texto-link-hover: var(--brotero-primaria-escuro);
+    --brotero-borda: oklch(0.9 0.01 263);
+    --brotero-borda-suave: oklch(0.95 0.01 263);
+    --brotero-dark: oklch(0.2 0.02 263);
     --brotero-nav: var(--brotero-primaria);
-    --brotero-laranja: var(--brotero-primaria);
-    --brotero-laranja-hover: #e8ecf0;
-    --brotero-laranja-escuro: var(--brotero-primaria-escuro);
-    --raio: 6px;
-    --max-largura: 1220px;
+    --brotero-glass: rgba(255, 255, 255, 0.7);
+    --brotero-shadow-premium: 0 12px 40px -12px rgba(0, 0, 0, 0.08);
+    --brotero-radius-lg: 24px;
+    --brotero-radius-md: 16px;
+    --raio: 12px;
+    --max-largura: 1280px;
 }
 
-/* Wrapper das páginas Biblioteca: fundo e layout (sticky footer) */
+.dark {
+    --brotero-fundo: oklch(0.12 0.02 263);
+    --brotero-branco: oklch(0.18 0.02 263);
+    --brotero-texto: oklch(0.95 0.01 263);
+    --brotero-texto-cinza: oklch(0.7 0.01 263);
+    --brotero-borda: oklch(0.25 0.02 263);
+    --brotero-borda-suave: oklch(0.22 0.02 263);
+    --brotero-glass: rgba(30, 30, 40, 0.6);
+}
+
 .brotero-scope {
     background: var(--brotero-fundo);
     color: var(--brotero-texto);
     min-height: 100vh;
     display: flex;
     flex-direction: column;
+    font-feature-settings: "cv02", "cv03", "cv04", "ss01";
+    transition: background 0.3s ease, color 0.3s ease;
 }
 
 .brotero-scope .container {
@@ -78,47 +90,43 @@
     white-space: nowrap;
 }
 
-/* Barra de pesquisa no header (estilo antigo style.css + Amazon) */
+/* Barra de pesquisa no header - Modernizada */
 .header-search {
     display: flex;
     flex: 1;
     min-width: 0;
     max-width: 1000px;
-    height: 40px;
-    background: #fff;
-    border-radius: 1px;
+    height: 48px;
+    background: var(--brotero-branco);
+    border: 1px solid var(--brotero-borda);
+    border-radius: var(--brotero-radius-md);
     overflow: hidden;
-    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.12);
+    box-shadow: var(--brotero-shadow-premium);
+    transition: all 0.2s ease;
+}
+
+.header-search:focus-within {
+    border-color: var(--brotero-primaria);
+    box-shadow: 0 0 0 4px oklch(0.55 0.18 263 / 0.15);
 }
 
 .header-search-input {
     flex: 1;
     min-width: 0;
-    padding: 8px 14px;
+    padding: 12px 20px;
     border: none;
-    font-size: 15px;
+    font-size: 16px;
     background: transparent;
     color: var(--brotero-texto);
 }
 
-.header-search-input::placeholder {
-    color: var(--brotero-texto-cinza);
-}
-
-.header-search-input:focus {
-    outline: none;
-}
-
 .header-search-btn {
-    padding: 0 16px;
+    padding: 0 24px;
     border: none;
-    border-radius: 0;
-    background: var(--brotero-primaria-claro);
+    background: var(--brotero-primaria);
     color: #fff;
     cursor: pointer;
-    font-size: 1.25rem;
-    line-height: 1;
-    transition: background 0.15s ease;
+    transition: all 0.2s ease;
     display: flex;
     align-items: center;
     justify-content: center;
@@ -126,12 +134,7 @@
 
 .header-search-btn:hover {
     background: var(--brotero-primaria-escuro);
-}
-
-.icon-search {
-    display: inline-block;
-    font-size: 1.25rem;
-    line-height: 1;
+    transform: scale(1.02);
 }
 
 /* --- Layout principal --- */
@@ -144,49 +147,58 @@
 }
 
 .sidebar-categorias {
-    width: 220px;
+    width: 240px;
     flex-shrink: 0;
-    padding: 12px 0;
+    padding: 16px 8px;
+    background: var(--brotero-glass);
+    backdrop-filter: blur(12px);
+    border-radius: var(--brotero-radius-md);
+    border: 1px solid var(--brotero-borda-suave);
+    box-shadow: var(--brotero-shadow-premium);
 }
 
 .sidebar-titulo {
-    margin: 0 14px 10px;
-    font-size: 1rem;
+    margin: 0 14px 14px;
+    font-size: 0.85rem;
     font-weight: 700;
-    color: var(--brotero-texto);
+    color: var(--brotero-texto-cinza);
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
 }
 
 .sidebar-lista {
     list-style: none;
     margin: 0;
-    padding: 6px 0 10px;
-    border-top: 1px solid var(--brotero-borda);
-}
-
-.sidebar-lista li {
-    margin: 0;
+    padding: 0;
+    border: none;
 }
 
 .sidebar-link {
-    display: block;
+    display: flex;
+    align-items: center;
     width: 100%;
-    padding: 6px 14px;
+    padding: 10px 16px;
     text-align: left;
     border: none;
     background: transparent;
     color: var(--brotero-texto);
-    font-size: 13px;
+    font-size: 14px;
+    font-weight: 500;
     cursor: pointer;
-    transition: background 0.15s ease;
+    border-radius: 12px;
+    transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+    margin-bottom: 4px;
 }
 
 .sidebar-link:hover {
-    background: #f3f3f3;
+    background: oklch(0.55 0.18 263 / 0.08);
+    color: var(--brotero-primaria);
+    transform: translateX(4px);
 }
 
-.sidebar-link:focus {
-    outline: 2px solid var(--brotero-primaria);
-    outline-offset: -2px;
+.sidebar-link.active {
+    background: var(--brotero-primaria);
+    color: #fff;
 }
 
 .conteudo-main {
@@ -310,26 +322,29 @@
 .card-livro {
     background: var(--brotero-branco);
     border: 1px solid var(--brotero-borda);
-    border-radius: var(--raio);
+    border-radius: var(--brotero-radius-md);
     padding: 0;
     overflow: hidden;
     display: flex;
     flex-direction: column;
-    transition: box-shadow 0.15s ease;
+    transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
 }
 
 .card-livro:hover {
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.12);
+    transform: translateY(-8px) scale(1.02);
+    box-shadow: var(--brotero-shadow-premium), 0 20px 25px -5px rgba(0, 0, 0, 0.1);
 }
 
 .card-livro-capa {
     position: relative;
     aspect-ratio: 2/3;
-    background: linear-gradient(145deg, #e8e8e8 0%, #d0d0d0 100%);
+    background: oklch(0.9 0.01 263);
     min-height: 200px;
     text-decoration: none;
     color: inherit;
     display: block;
+    overflow: hidden;
 }
 
 .card-livro-img {
@@ -338,6 +353,11 @@
     width: 100%;
     height: 100%;
     object-fit: cover;
+    transition: transform 0.6s ease;
+}
+
+.card-livro:hover .card-livro-img {
+    transform: scale(1.1);
 }
 
 .card-livro-take-btn {

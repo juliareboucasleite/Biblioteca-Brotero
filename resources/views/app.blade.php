@@ -21,23 +21,29 @@
 
     <style>
         html {
-            background-color: oklch(1 0 0);
+            background-color: oklch(0.98 0.01 263);
+            scrollbar-gutter: stable;
         }
 
         html.dark {
-            background-color: oklch(0.145 0 0);
+            background-color: oklch(0.12 0.02 263);
         }
 
-        /* Ecrã de carregamento inicial (paleta catálogo Brotero / biblioteca-catalog-shell) */
+        ::selection {
+            background-color: oklch(0.55 0.18 263 / 0.2);
+            color: oklch(0.55 0.18 263);
+        }
+
+        /* Ecrã de carregamento inicial */
         #initial-loading {
             position: fixed;
             inset: 0;
             display: flex;
             align-items: center;
             justify-content: center;
-            background: #f0ece7;
+            background: oklch(0.98 0.01 263);
             z-index: 9999;
-            transition: opacity 0.25s ease;
+            transition: opacity 0.4s cubic-bezier(0.4, 0, 0.2, 1);
         }
 
         #initial-loading.hidden {
@@ -46,12 +52,12 @@
         }
 
         #initial-loading .spinner {
-            width: 46px;
-            height: 46px;
+            width: 48px;
+            height: 48px;
             border-radius: 999px;
-            border: 4px solid #efe8e0;
-            border-top-color: #5d7a8c;
-            animation: spin 0.7s linear infinite;
+            border: 3px solid oklch(0.9 0.01 263);
+            border-top-color: oklch(0.55 0.18 263);
+            animation: spin 0.8s cubic-bezier(0.4, 0, 0.2, 1) infinite;
         }
 
         @keyframes spin {

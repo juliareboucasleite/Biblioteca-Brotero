@@ -50,29 +50,29 @@ export function CardLivro({ livro, className }: CardLivroProps) {
     return (
         <article
             className={clsx(
-                'bg-(--brotero-branco) border border-(--brotero-borda) rounded-(--raio) p-0 overflow-hidden flex flex-col transition-shadow duration-150 ease-in-out hover:shadow-[0_2px_8px_rgba(0,0,0,0.12)]',
+                'card-livro group',
                 className,
             )}
         >
             <div className="relative">
                 <a
                     href={href}
-                    className="group relative aspect-2/3 bg-linear-to-br from-[#e8e8e8] to-[#d0d0d0] min-h-[200px] max-[768px]:min-h-[160px] block no-underline text-inherit"
+                    className="group relative aspect-2/3 bg-linear-to-br from-[#f8f8f8] to-[#ededed] min-h-[200px] max-[768px]:min-h-[160px] block no-underline text-inherit overflow-hidden"
                     aria-label="Ver livro e requisitar"
                     onMouseEnter={updatePosition}
                     onMouseMove={updatePosition}
                 >
                     {hasCover && (
                         <img
-                            className="absolute inset-0 w-full h-full object-cover"
+                            className="absolute inset-0 w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
                             src={livro.capa as string}
                             alt={`Capa do livro ${livro.titulo}`}
                             loading="lazy"
                             referrerPolicy="no-referrer"
                         />
                     )}
-                    <span
-                        className="absolute left-0 top-0 -translate-x-1/2 -translate-y-1/2 px-[16px] py-[8px] rounded-[16px] bg-black text-white text-[13px] font-semibold cursor-pointer opacity-0 pointer-events-none transition-opacity duration-200 ease-in-out will-change-[left,top] group-hover:opacity-100 group-hover:pointer-events-auto"
+                    <div
+                        className="absolute left-0 top-0 -translate-x-1/2 -translate-y-1/2 px-[20px] py-[10px] rounded-full bg-(--brotero-primaria) text-white text-[14px] font-bold shadow-2xl opacity-0 pointer-events-none transition-all duration-300 ease-out will-change-[left,top] group-hover:opacity-100 group-hover:pointer-events-auto"
                         style={
                             position !== null
                                 ? { left: position.x, top: position.y }
@@ -80,24 +80,24 @@ export function CardLivro({ livro, className }: CardLivroProps) {
                         }
                     >
                         take it
-                    </span>
+                    </div>
                 </a>
                 {livro.tem_ebook ? (
-                    <span className="pointer-events-none absolute top-[8px] left-[8px] z-10 rounded-full bg-violet-600/92 px-[7px] py-[3px] text-[9px] font-bold uppercase tracking-[0.06em] text-white shadow-sm">
+                    <span className="pointer-events-none absolute top-[12px] left-[12px] z-10 rounded-full bg-(--brotero-primaria)/90 backdrop-blur-md px-[10px] py-[4px] text-[10px] font-black uppercase tracking-wider text-white shadow-lg">
                         E-book
                     </span>
                 ) : null}
                 <button
                     type="button"
                     className={clsx(
-                        'absolute top-[8px] right-[8px] z-10 w-[36px] h-[36px] rounded-full border border-(--brotero-borda) bg-(--brotero-branco) text-[18px] leading-none flex items-center justify-center cursor-pointer shadow-sm hover:shadow-md transition-shadow',
-                        isFavorite && 'bg-red-50 border-red-200',
+                        'absolute top-[12px] right-[12px] z-10 w-[40px] h-[40px] rounded-full bg-white/80 backdrop-blur-md border border-white/20 text-[20px] leading-none flex items-center justify-center cursor-pointer shadow-xl transition-all duration-200 hover:scale-110 active:scale-95',
+                        isFavorite ? 'text-red-500' : 'text-(--brotero-texto-cinza)',
                     )}
                     title={isFavorite ? 'Remover dos favoritos' : 'Adicionar aos favoritos'}
                     aria-label={isFavorite ? 'Remover dos favoritos' : 'Adicionar aos favoritos'}
                     onClick={onToggleFavorite}
                 >
-                    {isFavorite ? '❤︎' : '♡'}
+                    {isFavorite ? '❤' : '♡'}
                 </button>
             </div>
             {(livro.requisicoes_count ?? 0) > 0 ? (

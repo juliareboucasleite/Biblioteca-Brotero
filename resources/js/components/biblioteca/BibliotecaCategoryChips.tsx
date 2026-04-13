@@ -464,10 +464,11 @@ function CategoriaIconSlot({ src, label, href, selected }: IconSlotProps) {
                     loading="lazy"
                     draggable={false}
                     className={cn(
-                        'relative z-1 h-[64px] w-[64px] object-contain sm:h-[72px] sm:w-[72px]',
+                        'relative z-1 h-[64px] w-[64px] object-contain transition-all duration-300 sm:h-[72px] sm:w-[72px]',
                         'drop-shadow-[0_3px_10px_rgba(42,38,48,0.14)]',
                         'motion-reduce:transition-none',
-                        selected && 'drop-shadow-[0_4px_14px_rgba(77,107,122,0.22)]',
+                        selected && 'scale-110 drop-shadow-[0_4px_14px_rgba(77,107,122,0.22)]',
+                        !selected && 'group-hover:scale-110 group-hover:rotate-6',
                     )}
                 />
             </div>

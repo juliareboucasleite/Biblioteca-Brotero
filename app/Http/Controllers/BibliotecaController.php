@@ -26,6 +26,9 @@ class BibliotecaController extends Controller
         $ano = trim((string) $request->query('ano', ''));
         $q = trim((string) $request->query('q', ''));
         $lingua = trim((string) $request->query('lingua', ''));
+        $isbn = trim((string) $request->query('isbn', ''));
+        $disciplina = trim((string) $request->query('disciplina', ''));
+        $anoEscolar = trim((string) $request->query('ano_escolar', ''));
 
         if ($categoriaId !== '') {
             $query->forCatalogCategory($categoriaId);
@@ -53,10 +56,23 @@ class BibliotecaController extends Controller
             $query->where(function ($q2) use ($q) {
                 $q2->where('title', 'like', '%'.$q.'%')
                     ->orWhere('description', 'like', '%'.$q.'%')
+                    ->orWhere('isbn', 'like', '%'.$q.'%')
                     ->orWhereHas('authors', function ($q3) use ($q) {
                         $q3->where('name', 'like', '%'.$q.'%');
                     });
             });
+        }
+
+        if ($isbn !== '') {
+            $query->where('isbn', 'like', '%'.$isbn.'%');
+        }
+
+        if ($disciplina !== '') {
+            $query->where('school_subject', 'like', '%'.$disciplina.'%');
+        }
+
+        if ($anoEscolar !== '') {
+            $query->where('school_year', 'like', '%'.$anoEscolar.'%');
         }
 
         return [

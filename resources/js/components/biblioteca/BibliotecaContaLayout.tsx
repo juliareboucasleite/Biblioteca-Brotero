@@ -6,6 +6,7 @@ import { cn } from '@/lib/utils';
 type ContaSecao =
     | 'balcao'
     | 'livro-novo'
+    | 'livro-import'
     | 'pedidos'
     | 'historico'
     | 'favoritos'
@@ -30,8 +31,16 @@ export function BibliotecaContaLayout({
     ocuparAlturaConteudo = false,
 }: BibliotecaContaLayoutProps) {
     const patron = usePage().props.auth?.patron;
+    const patronRole = patron?.role ?? 'student';
+    const isStaff = patronRole === 'staff';
+    const perfilLabel =
+        patronRole === 'staff'
+            ? 'Funcionária/o'
+            : patronRole === 'teacher'
+              ? 'Professor/a'
+              : 'Aluno/a';
     const modoBiblioteca =
-        patron?.is_librarian === true && patron?.portal_mode === 'bibliotecaria';
+        isStaff && patron?.portal_mode === 'bibliotecaria';
 
     const active = (s: ContaSecao) =>
         cn(linkBase, s === secao && 'font-bold text-(--brotero-texto) no-underline pointer-events-none');
@@ -53,6 +62,12 @@ export function BibliotecaContaLayout({
                         )}
                         aria-label="Área do leitor"
                     >
+                        <span
+                            className="rounded-full border border-(--brotero-borda) bg-(--brotero-branco) px-[10px] py-[4px] text-[12px] font-semibold text-(--brotero-texto-cinza)"
+                            title="Perfil de acesso"
+                        >
+                            Perfil: {perfilLabel}
+                        </span>
                         {modoBiblioteca ? (
                             <span
                                 className="rounded-full border border-(--brotero-borda) bg-(--brotero-branco) px-[10px] py-[4px] text-[12px] font-semibold text-(--brotero-texto)"
@@ -60,6 +75,24 @@ export function BibliotecaContaLayout({
                             >
                                 Modo bibliotecária/o
                             </span>
+                        ) : null}
+                        {isStaff ? (
+                            <button
+                                type="button"
+                                className={cn(
+                                    'cursor-pointer rounded-full border px-[10px] py-[4px] text-[12px] font-semibold',
+                                    modoBiblioteca
+                                        ? 'border-emerald-200 bg-emerald-50 text-emerald-900 hover:bg-emerald-100'
+                                        : 'border-sky-200 bg-sky-50 text-sky-900 hover:bg-sky-100',
+                                )}
+                                onClick={() =>
+                                    router.post('/biblioteca/modo', {
+                                        portal_mode: modoBiblioteca ? 'comunidade' : 'bibliotecaria',
+                                    })
+                                }
+                            >
+                                {modoBiblioteca ? 'Mudar para comunidade' : 'Mudar para bibliotecária/o'}
+                            </button>
                         ) : null}
                         {modoBiblioteca ? (
                             <>
@@ -73,6 +106,13 @@ export function BibliotecaContaLayout({
                                 >
                                     Novo livro
                                 </Link>
+                                <Link
+                                    href="/biblioteca/conta/balcao/livros/importar"
+                                    className={active('livro-import')}
+                                    preserveScroll
+                                >
+                                    Importar livros
+                                </Link>
                             </>
                         ) : null}
                         <Link href="/biblioteca/conta/pedidos" className={active('pedidos')} preserveScroll>
@@ -81,12 +121,16 @@ export function BibliotecaContaLayout({
                         <Link href="/biblioteca/conta/historico" className={active('historico')} preserveScroll>
                             Histórico
                         </Link>
-                        <Link href="/biblioteca/conta/favoritos" className={active('favoritos')} preserveScroll>
-                            Favoritos
-                        </Link>
-                        <Link href="/biblioteca/conta/mensagens" className={active('mensagens')} preserveScroll>
-                            Conversas
-                        </Link>
+                        {!modoBiblioteca && patronRole !== 'staff' ? (
+                            <>
+                                <Link href="/biblioteca/conta/favoritos" className={active('favoritos')} preserveScroll>
+                                    Listas
+                                </Link>
+                                <Link href="/biblioteca/conta/mensagens" className={active('mensagens')} preserveScroll>
+                                    Conversas
+                                </Link>
+                            </>
+                        ) : null}
                         <Link href="/biblioteca/conta/perfil" className={active('perfil')} preserveScroll>
                             Perfil
                         </Link>

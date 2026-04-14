@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Biblioteca;
 
 use App\Http\Controllers\Controller;
+use App\Models\Book;
 use App\Models\BookRequest;
 use App\Models\LibraryPatron;
 use App\Services\BookFineCalculator;
@@ -11,6 +12,7 @@ use App\Services\BookReturnService;
 use App\Support\SchoolLocationNormalizer;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Symfony\Component\HttpFoundation\StreamedResponse;
 use Inertia\Inertia;
 use Inertia\Response;
 
@@ -38,9 +40,153 @@ class PatronLibrarianDeskController extends Controller
             ->values()
             ->all();
 
+        $metrics = [
+            'pendentes' => BookRequest::query()->where('status', 'pending')->count(),
+            'ativos' => BookRequest::query()->where('status', 'created')->whereNull('returned_at')->count(),
+            'atrasados' => BookRequest::query()
+                ->where('status', 'created')
+                ->whereDate('return_deadline', '<', now()->toDateString())
+                ->whereNull('returned_at')
+                ->count(),
+            'vencem_hoje' => BookRequest::query()
+                ->where('status', 'created')
+                ->whereDate('return_deadline', now()->toDateString())
+                ->whereNull('returned_at')
+                ->count(),
+            'mais_procurados' => Book::query()
+                ->withCount('bookRequests as requisicoes_count')
+                ->having('requisicoes_count', '>', 0)
+                ->orderByDesc('requisicoes_count')
+                ->limit(3)
+                ->get(['id', 'title'])
+                ->map(static fn (Book $book): array => [
+                    'id' => (int) $book->id,
+                    'title' => (string) ($book->title ?? 'Sem título'),
+                    'requests' => (int) ($book->requisicoes_count ?? 0),
+                ])
+                ->values()
+                ->all(),
+        ];
+
         return Inertia::render('biblioteca/conta/balcao', [
             'pedidos' => $pedidos,
+            'metrics' => $metrics,
         ]);
+    }
+
+    public function quickScan(Request $request): RedirectResponse
+    {
+        $data = $request->validate([
+            'scan_value' => ['required', 'string', 'max:128'],
+        ]);
+
+        $raw = trim((string) $data['scan_value']);
+        if ($raw === '') {
+            return back()->with('error', 'Leitura vazia.');
+        }
+
+        if (preg_match('/^[0-9]{5}$/', $raw) === 1) {
+            $count = BookRequest::query()
+                ->where('card_number', $raw)
+                ->whereIn('status', ['pending', 'created'])
+                ->count();
+
+            return back()->with('success', "Cartão {$raw} lido. Pedidos ativos/pendentes: {$count}.");
+        }
+
+        if (preg_match('/^[0-9]{10,13}$/', $raw) === 1) {
+            $count = BookRequest::query()
+                ->where('isbn', $raw)
+                ->whereIn('status', ['pending', 'created'])
+                ->count();
+
+            return back()->with('success', "ISBN {$raw} lido. Pedidos ativos/pendentes: {$count}.");
+        }
+
+        if (preg_match('/^#?([0-9]{1,8})$/', $raw, $m) === 1) {
+            $id = (int) $m[1];
+            $pedido = BookRequest::query()->find($id);
+            if ($pedido === null) {
+                return back()->with('error', "Pedido #{$id} não encontrado.");
+            }
+
+            return back()->with('success', "Pedido #{$id} encontrado com estado: {$pedido->status}.");
+        }
+
+        return back()->with('error', 'Formato de scan não reconhecido (cartão, ISBN ou #pedido).');
+    }
+
+    public function exportCsv(Request $request): StreamedResponse
+    {
+        $scope = (string) $request->query('scope', 'all');
+        $today = now()->toDateString();
+
+        $query = BookRequest::query()
+            ->latest('id');
+
+        if ($scope === 'overdue') {
+            $query
+                ->where('status', 'created')
+                ->whereNull('returned_at')
+                ->whereDate('return_deadline', '<', $today);
+        } elseif ($scope === 'active') {
+            $query
+                ->where('status', 'created')
+                ->whereNull('returned_at');
+        }
+
+        $filename = 'emprestimos_'.now()->format('Ymd_His').'_'.($scope === 'overdue' ? 'atrasados' : $scope).'.csv';
+
+        $headers = [
+            'Content-Type' => 'text/csv; charset=UTF-8',
+            'Content-Disposition' => 'attachment; filename="'.$filename.'"',
+        ];
+
+        return response()->streamDownload(function () use ($query): void {
+            $out = fopen('php://output', 'wb');
+            if (! is_resource($out)) {
+                return;
+            }
+
+            fwrite($out, "\xEF\xBB\xBF");
+            fputcsv($out, [
+                'ID',
+                'Livro',
+                'ISBN',
+                'Cartao',
+                'Estado',
+                'Tipo_pedido',
+                'Escola',
+                'Cacifo',
+                'Criado_em',
+                'Prazo_levantamento',
+                'Prazo_devolucao',
+                'Devolvido_em',
+                'Multa',
+            ], ';');
+
+            $query->chunkById(500, function ($rows) use ($out): void {
+                foreach ($rows as $row) {
+                    fputcsv($out, [
+                        $row->id,
+                        $row->book_title,
+                        $row->isbn,
+                        $row->card_number,
+                        $row->status,
+                        $row->request_type,
+                        SchoolLocationNormalizer::fix($row->school_location),
+                        $row->cacifo_code,
+                        $row->created_at?->format('Y-m-d H:i:s'),
+                        $row->pickup_deadline?->format('Y-m-d H:i:s'),
+                        $row->return_deadline?->format('Y-m-d H:i:s'),
+                        $row->returned_at?->format('Y-m-d H:i:s'),
+                        $row->fine_amount !== null ? (string) $row->fine_amount : '0.00',
+                    ], ';');
+                }
+            }, 'id');
+
+            fclose($out);
+        }, $filename, $headers);
     }
 
     public function approve(Request $request, BookRequest $bookRequest, BookRequestApprovalService $approval): RedirectResponse

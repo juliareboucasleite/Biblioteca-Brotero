@@ -51,7 +51,7 @@ class LibraryPatronAuthController extends Controller
             ]);
         }
 
-        if ($patron->isLibrarian()) {
+        if ($patron->isStaff()) {
             $request->session()->put(self::SESSION_CANDIDATE_KEY, $patron->id);
             $request->session()->put('patron_login_remember', $request->boolean('remember'));
 
@@ -75,7 +75,7 @@ class LibraryPatronAuthController extends Controller
 
         $patron = LibraryPatron::query()->find((int) $rawId);
 
-        if ($patron === null || ! $patron->isLibrarian()) {
+        if ($patron === null || ! $patron->isStaff()) {
             $request->session()->forget(self::SESSION_CANDIDATE_KEY);
 
             return redirect()->route('biblioteca.login');
@@ -100,7 +100,7 @@ class LibraryPatronAuthController extends Controller
 
         $patron = LibraryPatron::query()->find((int) $rawId);
 
-        if ($patron === null || ! $patron->isLibrarian()) {
+        if ($patron === null || ! $patron->isStaff()) {
             $request->session()->forget(self::SESSION_CANDIDATE_KEY);
 
             return redirect()->route('biblioteca.login');
@@ -128,5 +128,31 @@ class LibraryPatronAuthController extends Controller
         $request->session()->regenerateToken();
 
         return redirect()->route('biblioteca.login');
+    }
+
+    public function switchPortalMode(Request $request): RedirectResponse
+    {
+        /** @var LibraryPatron|null $patron */
+        $patron = Auth::guard('patron')->user();
+
+        if (! $patron instanceof LibraryPatron || ! $patron->isStaff()) {
+            return redirect()
+                ->route('biblioteca.conta.pedidos')
+                ->with('error', 'Só o pessoal da biblioteca pode alternar o modo.');
+        }
+
+        $data = $request->validate([
+            'portal_mode' => ['required', 'in:bibliotecaria,comunidade'],
+        ]);
+
+        $request->session()->put(self::SESSION_PORTAL_MODE_KEY, $data['portal_mode']);
+
+        $targetRoute = $data['portal_mode'] === 'bibliotecaria'
+            ? 'biblioteca.conta.balcao.index'
+            : 'biblioteca.conta.pedidos';
+
+        return redirect()
+            ->route($targetRoute)
+            ->with('success', 'Modo de sessão atualizado.');
     }
 }

@@ -19,6 +19,9 @@ class BookController extends Controller
         $ano = trim((string) $request->query('ano', ''));
         $q = trim((string) $request->query('q', ''));
         $lingua = trim((string) $request->query('lingua', ''));
+        $isbn = trim((string) $request->query('isbn', ''));
+        $disciplina = trim((string) $request->query('disciplina', ''));
+        $anoEscolar = trim((string) $request->query('ano_escolar', ''));
 
         $query = Book::query()
             ->with(['authors', 'categories', 'details'])
@@ -50,10 +53,23 @@ class BookController extends Controller
             $query->where(function ($q2) use ($q) {
                 $q2->where('title', 'like', '%'.$q.'%')
                     ->orWhere('description', 'like', '%'.$q.'%')
+                    ->orWhere('isbn', 'like', '%'.$q.'%')
                     ->orWhereHas('authors', function ($q3) use ($q) {
                         $q3->where('name', 'like', '%'.$q.'%');
                     });
             });
+        }
+
+        if ($isbn !== '') {
+            $query->where('isbn', 'like', '%'.$isbn.'%');
+        }
+
+        if ($disciplina !== '') {
+            $query->where('school_subject', 'like', '%'.$disciplina.'%');
+        }
+
+        if ($anoEscolar !== '') {
+            $query->where('school_year', 'like', '%'.$anoEscolar.'%');
         }
 
         if ($limit > 0) {
@@ -72,6 +88,9 @@ class BookController extends Controller
         $categoryId = $request->query('category_id', $request->query('categoria'));
         $year = $request->query('year', $request->query('ano'));
         $language = trim((string) $request->query('language', $request->query('lingua', '')));
+        $isbn = trim((string) $request->query('isbn', ''));
+        $disciplina = trim((string) $request->query('disciplina', ''));
+        $anoEscolar = trim((string) $request->query('ano_escolar', ''));
         $q = trim((string) $request->query('q', ''));
         $limit = min(max((int) $request->query('limit', 50), 1), 200);
 
@@ -100,10 +119,20 @@ class BookController extends Controller
                 $qBook->where(function ($inner) use ($q): void {
                     $inner->where('title', 'like', '%'.$q.'%')
                         ->orWhere('description', 'like', '%'.$q.'%')
+                        ->orWhere('isbn', 'like', '%'.$q.'%')
                         ->orWhereHas('authors', function ($qAuthor) use ($q): void {
                             $qAuthor->where('name', 'like', '%'.$q.'%');
                         });
                 });
+            })
+            ->when($isbn !== '', function ($qBook) use ($isbn): void {
+                $qBook->where('isbn', 'like', '%'.$isbn.'%');
+            })
+            ->when($disciplina !== '', function ($qBook) use ($disciplina): void {
+                $qBook->where('school_subject', 'like', '%'.$disciplina.'%');
+            })
+            ->when($anoEscolar !== '', function ($qBook) use ($anoEscolar): void {
+                $qBook->where('school_year', 'like', '%'.$anoEscolar.'%');
             });
 
         return $query->limit($limit)->get();
@@ -121,6 +150,7 @@ class BookController extends Controller
             $recommendedByCategory->pluck('id')->all(),
         );
         $recommendedFallback = $this->recommendationsLatestExcluding($book, $excludeForFallback, 12);
+        $recommendedSchool = $this->recommendationsBySchoolContext($request, $book, 12);
 
         $mapBook = function (Book $b): array {
             return [
@@ -143,6 +173,7 @@ class BookController extends Controller
         $payload['recommendations'] = $recommendedByAuthor->map($mapBook)->values()->all();
         $payload['category_recommendations'] = $recommendedByCategory->map($mapBook)->values()->all();
         $payload['fallback_recommendations'] = $recommendedFallback->map($mapBook)->values()->all();
+        $payload['school_recommendations'] = $recommendedSchool->map($mapBook)->values()->all();
 
         return $payload;
     }
@@ -213,6 +244,44 @@ class BookController extends Controller
             ->with(['authors:id,name'])
             ->whereNotIn('id', $excludeIds)
             ->latest('id')
+            ->limit(min($limit, 50))
+            ->get();
+    }
+
+    /**
+     * Recomendações escolares por faixa etária + ano + disciplina.
+     *
+     * @return Collection<int, Book>
+     */
+    private function recommendationsBySchoolContext(Request $request, Book $book, int $limit = 12)
+    {
+        $patron = $request->user('patron');
+        $age = null;
+        if ($patron !== null && isset($patron->birth_date)) {
+            $age = now()->diffInYears($patron->birth_date);
+        }
+
+        return Book::query()
+            ->with(['authors:id,name'])
+            ->whereKeyNot($book->getKey())
+            ->when($book->school_subject, function ($q) use ($book): void {
+                $q->where('school_subject', $book->school_subject);
+            })
+            ->when($book->school_year, function ($q) use ($book): void {
+                $q->where('school_year', $book->school_year);
+            })
+            ->when(is_int($age), function ($q) use ($age): void {
+                $q->where(function ($inner) use ($age): void {
+                    $inner->whereNull('target_age_min')
+                        ->orWhere('target_age_min', '<=', $age);
+                })->where(function ($inner) use ($age): void {
+                    $inner->whereNull('target_age_max')
+                        ->orWhere('target_age_max', '>=', $age);
+                });
+            })
+            ->withCount('bookRequests as requisicoes_count')
+            ->orderByDesc('requisicoes_count')
+            ->orderByDesc('id')
             ->limit(min($limit, 50))
             ->get();
     }

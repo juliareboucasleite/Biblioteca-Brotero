@@ -39,3 +39,17 @@
     --raio: 14px;
     --max-largura: 1280px;
 }
+
+@keyframes brotero-confetti-fall {
+    0% {
+        transform: translateY(0) rotate(0deg);
+        opacity: 1;
+    }
+    80% {
+        opacity: 1;
+    }
+    100% {
+        transform: translateY(110vh) rotate(540deg);
+        opacity: 0;
+    }
+}

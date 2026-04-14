@@ -34,7 +34,7 @@ class BookDueSoonNotification extends Notification implements ShouldQueue
         $deadline = $this->bookRequest->return_deadline?->format('d/m/Y') ?? '-';
 
         return (new MailMessage)
-            ->subject('Biblioteca · devolução dentro de 2 dias')
+            ->subject('Biblioteca · devolução amanhã')
             ->line('O prazo de devolução do livro «'.$this->bookRequest->book_title.'» termina em breve (até **'.$deadline.'**).')
             ->line('Evite multas por atraso.');
     }
@@ -46,7 +46,7 @@ class BookDueSoonNotification extends Notification implements ShouldQueue
     {
         return [
             'type' => 'due_soon',
-            'title' => 'Devolução em 2 dias',
+            'title' => 'Devolução amanhã',
             'message' => 'O livro «'.$this->bookRequest->book_title.'» deve ser devolvido até '.$this->bookRequest->return_deadline?->format('d/m/Y'),
             'book_request_id' => $this->bookRequest->id,
             'book_title' => $this->bookRequest->book_title,

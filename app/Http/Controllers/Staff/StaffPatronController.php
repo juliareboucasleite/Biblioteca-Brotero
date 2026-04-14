@@ -20,8 +20,10 @@ class StaffPatronController extends Controller
             'birth_date' => ['required', 'date'],
             'name' => ['nullable', 'string', 'max:255'],
             'email' => ['nullable', 'email', 'max:255'],
-            'is_librarian' => ['sometimes', 'boolean'],
+            'role' => ['required', Rule::in(LibraryPatron::validRoles())],
         ]);
+
+        $isStaff = $data['role'] === LibraryPatron::ROLE_STAFF;
 
         LibraryPatron::query()->create([
             'card_number' => $data['card_number'],
@@ -29,7 +31,9 @@ class StaffPatronController extends Controller
             'name' => $data['name'] ?? null,
             'email' => $data['email'] ?? null,
             'points' => 0,
-            'is_librarian' => (bool) ($data['is_librarian'] ?? false),
+            'role' => $data['role'],
+            // Compatibilidade com regras legadas que ainda consultam este campo.
+            'is_librarian' => $isStaff,
         ]);
 
         return back()->with('success', 'Leitor cadastrado. Pode aprovar o pedido associado a este cartão.');

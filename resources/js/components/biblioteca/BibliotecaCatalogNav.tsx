@@ -154,9 +154,9 @@ export function BibliotecaCatalogNav() {
                 />
                 <NavItem
                     href={patron ? '/biblioteca/conta/favoritos' : '/biblioteca/entrar'}
-                    title={patron ? 'Favoritos' : 'Entrar para favoritos'}
+                    title={patron ? 'Listas' : 'Entrar para listas'}
                     icon={Heart}
-                    label="Favoritos"
+                    label="Listas"
                     active={isNavActive(url, '/biblioteca/conta/favoritos')}
                 />
                 <NavItem

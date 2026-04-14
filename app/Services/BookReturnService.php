@@ -34,6 +34,7 @@ final class BookReturnService
             $request->forceFill([
                 'status' => 'returned',
                 'returned_at' => now(),
+                'notified_available_at' => now(),
             ])->save();
 
             $patron = $actingPatron;

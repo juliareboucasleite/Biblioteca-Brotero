@@ -23,6 +23,10 @@ class Book extends Model
         'pages',
         'cover_image',
         'language',
+        'school_subject',
+        'school_year',
+        'target_age_min',
+        'target_age_max',
         'ebook_disk',
         'ebook_path',
         'ebook_mime',
@@ -35,6 +39,8 @@ class Book extends Model
     {
         return [
             'ebook_downloads_count' => 'integer',
+            'target_age_min' => 'integer',
+            'target_age_max' => 'integer',
         ];
     }
 
@@ -163,6 +169,24 @@ class Book extends Model
     {
         return $this->belongsToMany(LibraryPatron::class, 'book_favorites', 'book_id', 'library_patron_id')
             ->withTimestamps();
+    }
+
+    /**
+     * @return BelongsToMany<PatronReadingList, $this>
+     */
+    public function readingLists(): BelongsToMany
+    {
+        return $this->belongsToMany(PatronReadingList::class, 'patron_reading_list_books', 'book_id', 'patron_reading_list_id')
+            ->withPivot(['progress_percent', 'current_page', 'reading_status', 'started_at', 'finished_at'])
+            ->withTimestamps();
+    }
+
+    /**
+     * @return HasMany<TeacherBookReservation, $this>
+     */
+    public function teacherReservations(): HasMany
+    {
+        return $this->hasMany(TeacherBookReservation::class);
     }
 
     /**

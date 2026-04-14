@@ -12,6 +12,7 @@ export type User = {
 
 /** Leitor autenticado na área «Minha conta» (cartão). */
 export type PatronPortalMode = 'bibliotecaria' | 'comunidade';
+export type PatronRole = 'student' | 'teacher' | 'staff';
 
 export type LibraryPatronAuth = {
     id: number;
@@ -23,6 +24,8 @@ export type LibraryPatronAuth = {
     portal_mode: PatronPortalMode;
     /** Se o cartão está marcado como bibliotecária/o (BD ou env). */
     is_librarian: boolean;
+    /** Perfil do utilizador na biblioteca. */
+    role: PatronRole;
 };
 
 /** Utilizadores web com acesso ao painel /staff/pedidos (config `biblioteca.staff_user_emails`). */

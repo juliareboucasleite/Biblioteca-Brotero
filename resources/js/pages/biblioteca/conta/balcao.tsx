@@ -46,7 +46,61 @@ type DeskPedido = {
 
 type Props = {
     pedidos: DeskPedido[];
+    metrics?: {
+        pendentes: number;
+        ativos: number;
+        atrasados: number;
+        vencem_hoje: number;
+        mais_procurados?: Array<{ id: number; title: string; requests: number }>;
+    };
 };
+
+function parseIsoDate(value: string | null): Date | null {
+    if (!value) {
+        return null;
+    }
+
+    const date = new Date(value);
+
+    return Number.isNaN(date.getTime()) ? null : date;
+}
+
+function dateOnly(date: Date): Date {
+    return new Date(date.getFullYear(), date.getMonth(), date.getDate());
+}
+
+function prazoMeta(returnDeadline: string | null): { texto: string; classe: string } | null {
+    const deadline = parseIsoDate(returnDeadline);
+
+    if (!deadline) {
+        return null;
+    }
+
+    const hoje = dateOnly(new Date());
+    const devolucao = dateOnly(deadline);
+    const diffDias = Math.round((devolucao.getTime() - hoje.getTime()) / 86400000);
+
+    if (diffDias < 0) {
+        const diasAtraso = Math.abs(diffDias);
+
+        return {
+            texto: diasAtraso === 1 ? 'Atrasado 1 dia' : `Atrasado ${diasAtraso} dias`,
+            classe: 'border-red-200 bg-red-50 text-red-900',
+        };
+    }
+
+    if (diffDias <= 2) {
+        return {
+            texto: diffDias === 0 ? 'Vence hoje' : diffDias === 1 ? 'Vence amanhã' : `Vence em ${diffDias} dias`,
+            classe: 'border-amber-200 bg-amber-50 text-amber-950',
+        };
+    }
+
+    return {
+        texto: `Vence em ${diffDias} dias`,
+        classe: 'border-emerald-200 bg-emerald-50 text-emerald-900',
+    };
+}
 
 /** Pedidos pendentes ou activos não podem ser ocultados do balcão. */
 function podeOcultarDoBalcao(status: string): boolean {
@@ -95,8 +149,10 @@ function EstadoBadge({ status }: { status: string }) {
     );
 }
 
-export default function BibliotecaContaBalcao({ pedidos }: Props) {
+export default function BibliotecaContaBalcao({ pedidos, metrics }: Props) {
     const { flash } = usePage().props;
+    const scanForm = useForm({ scan_value: '' });
+    const [filtroPrazo, setFiltroPrazo] = useState<'all' | 'late' | 'due_today'>('all');
     const [busyId, setBusyId] = useState<number | null>(null);
     const [rejectId, setRejectId] = useState<number | null>(null);
     const [noteRow, setNoteRow] = useState<DeskPedido | null>(null);
@@ -237,6 +293,27 @@ export default function BibliotecaContaBalcao({ pedidos }: Props) {
     const cancelBusy = cancelRow !== null && busyId === cancelRow.id;
     const returnOpen = returnRow !== null;
     const returnBusy = returnRow !== null && busyId === returnRow.id;
+    const pedidosFiltrados = pedidos.filter((pedido) => {
+        if (filtroPrazo === 'all') {
+            return true;
+        }
+
+        if (pedido.status !== 'created') {
+            return false;
+        }
+
+        const prazo = prazoMeta(pedido.return_deadline);
+
+        if (!prazo) {
+            return false;
+        }
+
+        if (filtroPrazo === 'late') {
+            return prazo.texto === 'Atrasado';
+        }
+
+        return prazo.texto === 'Vence hoje';
+    });
 
     return (
         <BibliotecaContaLayout title="Balcão · todos os pedidos" secao="balcao">
@@ -263,17 +340,129 @@ export default function BibliotecaContaBalcao({ pedidos }: Props) {
                 <strong>30 dias</strong> após a data de devolução. Em pedidos concluídos pode usar{' '}
                 <strong>Ocultar</strong> para os retirar da lista de imediato (permanecem no histórico do aluno).
             </p>
+            <div className="mb-[12px] grid gap-[8px] sm:grid-cols-2 lg:grid-cols-4">
+                <div className="rounded-(--raio) border border-(--brotero-borda) bg-(--brotero-branco) px-[10px] py-[8px]">
+                    <p className="m-0 text-[11px] font-semibold uppercase tracking-wide text-(--brotero-texto-cinza)">Pendentes</p>
+                    <p className="m-0 mt-[2px] text-[20px] font-bold text-(--brotero-texto)">{metrics?.pendentes ?? 0}</p>
+                </div>
+                <div className="rounded-(--raio) border border-(--brotero-borda) bg-(--brotero-branco) px-[10px] py-[8px]">
+                    <p className="m-0 text-[11px] font-semibold uppercase tracking-wide text-(--brotero-texto-cinza)">Ativos</p>
+                    <p className="m-0 mt-[2px] text-[20px] font-bold text-(--brotero-texto)">{metrics?.ativos ?? 0}</p>
+                </div>
+                <div className="rounded-(--raio) border border-red-200 bg-red-50 px-[10px] py-[8px]">
+                    <p className="m-0 text-[11px] font-semibold uppercase tracking-wide text-red-700">Atrasados</p>
+                    <p className="m-0 mt-[2px] text-[20px] font-bold text-red-900">{metrics?.atrasados ?? 0}</p>
+                </div>
+                <div className="rounded-(--raio) border border-amber-200 bg-amber-50 px-[10px] py-[8px]">
+                    <p className="m-0 text-[11px] font-semibold uppercase tracking-wide text-amber-800">Vencem hoje</p>
+                    <p className="m-0 mt-[2px] text-[20px] font-bold text-amber-950">{metrics?.vencem_hoje ?? 0}</p>
+                </div>
+            </div>
+            {metrics?.mais_procurados?.length ? (
+                <div className="mb-[12px] rounded-(--raio) border border-(--brotero-borda) bg-(--brotero-branco) px-[10px] py-[8px]">
+                    <p className="m-0 text-[11px] font-semibold uppercase tracking-wide text-(--brotero-texto-cinza)">
+                        Livros mais procurados
+                    </p>
+                    <div className="mt-[6px] flex flex-wrap gap-[8px]">
+                        {metrics.mais_procurados.map((item) => (
+                            <span
+                                key={item.id}
+                                className="rounded-full border border-(--brotero-borda) bg-(--brotero-fundo) px-[8px] py-[3px] text-[12px] font-semibold text-(--brotero-texto)"
+                            >
+                                {item.title} ({item.requests})
+                            </span>
+                        ))}
+                    </div>
+                </div>
+            ) : null}
+            <form
+                className="mb-[12px] flex flex-wrap items-end gap-[8px]"
+                onSubmit={(e) => {
+                    e.preventDefault();
+                    scanForm.post('/biblioteca/conta/balcao/scan', { preserveScroll: true });
+                }}
+            >
+                <label className="grid gap-[4px] text-[12px] font-semibold text-(--brotero-texto-cinza)">
+                    Scan rápido (cartão, ISBN ou #pedido)
+                    <input
+                        className="min-w-[260px] rounded-(--raio) border border-(--brotero-borda) bg-(--brotero-branco) px-[10px] py-[8px] text-[14px]"
+                        value={scanForm.data.scan_value}
+                        onChange={(e) => scanForm.setData('scan_value', e.target.value)}
+                        placeholder="ex.: 12345 · 978.... · #456"
+                    />
+                </label>
+                <button
+                    type="submit"
+                    className="cursor-pointer rounded-(--raio) border border-(--brotero-borda) bg-(--brotero-fundo) px-[12px] py-[8px] text-[13px] font-semibold text-(--brotero-texto)"
+                >
+                    Processar scan
+                </button>
+                <a
+                    href="/biblioteca/conta/balcao/exportar?scope=active"
+                    className="rounded-(--raio) border border-(--brotero-borda) bg-(--brotero-branco) px-[12px] py-[8px] text-[13px] font-semibold text-(--brotero-texto) no-underline"
+                >
+                    Exportar CSV (ativos)
+                </a>
+                <a
+                    href="/biblioteca/conta/balcao/exportar?scope=overdue"
+                    className="rounded-(--raio) border border-red-200 bg-red-50 px-[12px] py-[8px] text-[13px] font-semibold text-red-900 no-underline"
+                >
+                    Exportar CSV (atrasados)
+                </a>
+            </form>
 
-            {pedidos.length === 0 ? (
+            <div className="mb-[12px] flex flex-wrap gap-[8px]">
+                <button
+                    type="button"
+                    onClick={() => setFiltroPrazo('all')}
+                    className={cn(
+                        'rounded-full border px-[12px] py-[6px] text-[12px] font-semibold',
+                        filtroPrazo === 'all'
+                            ? 'border-(--brotero-primaria) bg-(--brotero-primaria) text-white'
+                            : 'border-(--brotero-borda) bg-(--brotero-branco) text-(--brotero-texto)',
+                    )}
+                >
+                    Todos
+                </button>
+                <button
+                    type="button"
+                    onClick={() => setFiltroPrazo('late')}
+                    className={cn(
+                        'rounded-full border px-[12px] py-[6px] text-[12px] font-semibold',
+                        filtroPrazo === 'late'
+                            ? 'border-red-700 bg-red-700 text-white'
+                            : 'border-red-200 bg-red-50 text-red-900',
+                    )}
+                >
+                    Só atrasados
+                </button>
+                <button
+                    type="button"
+                    onClick={() => setFiltroPrazo('due_today')}
+                    className={cn(
+                        'rounded-full border px-[12px] py-[6px] text-[12px] font-semibold',
+                        filtroPrazo === 'due_today'
+                            ? 'border-amber-700 bg-amber-700 text-white'
+                            : 'border-amber-200 bg-amber-50 text-amber-900',
+                    )}
+                >
+                    Vence hoje
+                </button>
+            </div>
+
+            {pedidosFiltrados.length === 0 ? (
                 <p className="rounded-(--raio) border border-dashed border-(--brotero-borda) bg-(--brotero-branco) p-[16px] text-(--brotero-texto-cinza)">
-                    Este painel apresenta todas as requisições para gestão. A lista é atualizada em tempo real.
+                    {pedidos.length === 0
+                        ? 'Este painel apresenta todas as requisições para gestão. A lista é atualizada em tempo real.'
+                        : 'Não existem pedidos para o filtro selecionado.'}
                 </p>
             ) : null}
 
             <div className="flex flex-col gap-[14px]">
-                {pedidos.map((p) => {
+                {pedidosFiltrados.map((p) => {
                     const busy = busyId === p.id;
                     const escola = p.request_type === 'escola';
+                    const prazo = p.status === 'created' ? prazoMeta(p.return_deadline) : null;
 
                     return (
                         <div
@@ -317,6 +506,18 @@ export default function BibliotecaContaBalcao({ pedidos }: Props) {
                             <p className="m-0 mb-[10px] text-[13px] font-semibold text-(--brotero-texto)">
                                 Multa: {formatEur(p.fine_amount)}
                             </p>
+                            {prazo ? (
+                                <p className="m-0 mb-[10px]">
+                                    <span
+                                        className={cn(
+                                            'inline-flex rounded-full border px-[10px] py-[3px] text-[12px] font-semibold',
+                                            prazo.classe,
+                                        )}
+                                    >
+                                        {prazo.texto}
+                                    </span>
+                                </p>
+                            ) : null}
                             {p.patron_visible_note ? (
                                 <p className="m-0 mb-[10px] border-l-2 border-(--brotero-primaria) pl-[8px] text-[12px] text-(--brotero-texto)">
                                     <span className="font-semibold text-(--brotero-texto-cinza)">Nota ao aluno: </span>

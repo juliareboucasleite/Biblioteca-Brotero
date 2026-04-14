@@ -56,6 +56,7 @@ class HandleInertiaRequests extends Middleware
                 'pedidosUrl' => $canStaffPedidos ? route('staff.pedidos.index') : null,
             ],
             'favoriteBookIds' => $this->favoriteBookIds($request),
+            'patronReadingLists' => $this->patronReadingLists($request),
             'sidebarOpen' => ! $request->hasCookie('sidebar_state') || $request->cookie('sidebar_state') === 'true',
             'flash' => [
                 'success' => $request->session()->get('success'),
@@ -65,7 +66,7 @@ class HandleInertiaRequests extends Middleware
     }
 
     /**
-     * @return array{id: int, name: string|null, card_number: string, points: int, portal_mode: string, is_librarian: bool}|null
+     * @return array{id: int, name: string|null, card_number: string, points: int, portal_mode: string, is_librarian: bool, role: string}|null
      */
     private function patronForFrontend(Request $request, ?LibraryPatron $patron): ?array
     {
@@ -89,6 +90,7 @@ class HandleInertiaRequests extends Middleware
             'points' => (int) ($patron->points ?? 0),
             'portal_mode' => $mode,
             'is_librarian' => $patron->isLibrarian(),
+            'role' => $patron->role(),
         ];
     }
 
@@ -103,6 +105,17 @@ class HandleInertiaRequests extends Middleware
             return [];
         }
 
+        if (Schema::hasTable('patron_reading_list_books') && Schema::hasTable('patron_reading_lists')) {
+            return DB::table('patron_reading_list_books as rb')
+                ->join('patron_reading_lists as rl', 'rl.id', '=', 'rb.patron_reading_list_id')
+                ->where('rl.library_patron_id', $patron->id)
+                ->pluck('rb.book_id')
+                ->map(static fn ($id): string => (string) $id)
+                ->unique()
+                ->values()
+                ->all();
+        }
+
         if (! Schema::hasTable('book_favorites')) {
             return [];
         }
@@ -111,6 +124,34 @@ class HandleInertiaRequests extends Middleware
             ->where('library_patron_id', $patron->id)
             ->pluck('book_id')
             ->map(static fn ($id): string => (string) $id)
+            ->values()
+            ->all();
+    }
+
+    /**
+     * @return list<array{id: int, name: string, type: string}>
+     */
+    private function patronReadingLists(Request $request): array
+    {
+        $patron = $request->user('patron');
+
+        if (! $patron instanceof LibraryPatron) {
+            return [];
+        }
+
+        if (! Schema::hasTable('patron_reading_lists')) {
+            return [];
+        }
+
+        return DB::table('patron_reading_lists')
+            ->where('library_patron_id', $patron->id)
+            ->orderBy('name')
+            ->get(['id', 'name', 'type'])
+            ->map(static fn ($row): array => [
+                'id' => (int) $row->id,
+                'name' => (string) $row->name,
+                'type' => (string) ($row->type ?? 'custom'),
+            ])
             ->values()
             ->all();
     }

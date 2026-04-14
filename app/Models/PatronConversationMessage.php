@@ -19,6 +19,13 @@ class PatronConversationMessage extends Model
         'body',
     ];
 
+    protected function casts(): array
+    {
+        return [
+            'body' => 'encrypted',
+        ];
+    }
+
     /**
      * @return BelongsTo<PatronConversation, $this>
      */

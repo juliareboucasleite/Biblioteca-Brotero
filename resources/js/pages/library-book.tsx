@@ -128,6 +128,13 @@ export default function LibraryBook({ livro, patron_share = null }: LibraryBookP
                             ariaLabel="Outros livros no catálogo"
                         />
                     ) : null}
+                    {bookApi?.school_recommendations?.length ? (
+                        <BookRecommendationsRow
+                            title="Recomendados para o seu contexto escolar"
+                            recommendations={bookApi.school_recommendations}
+                            ariaLabel="Recomendações escolares"
+                        />
+                    ) : null}
                 </div>
             </BibliotecaCatalogShell>
         </>

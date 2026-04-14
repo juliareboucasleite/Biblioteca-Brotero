@@ -19,6 +19,53 @@ type Props = {
     pedidos: PedidoLeitor[];
 };
 
+function parseIsoDate(value: string | null): Date | null {
+    if (!value) {
+        return null;
+    }
+
+    const date = new Date(value);
+
+    return Number.isNaN(date.getTime()) ? null : date;
+}
+
+function dateOnly(date: Date): Date {
+    return new Date(date.getFullYear(), date.getMonth(), date.getDate());
+}
+
+function prazoMeta(returnDeadline: string | null): { texto: string; classe: string } | null {
+    const deadline = parseIsoDate(returnDeadline);
+
+    if (!deadline) {
+        return null;
+    }
+
+    const hoje = dateOnly(new Date());
+    const devolucao = dateOnly(deadline);
+    const diffDias = Math.round((devolucao.getTime() - hoje.getTime()) / 86400000);
+
+    if (diffDias < 0) {
+        const diasAtraso = Math.abs(diffDias);
+
+        return {
+            texto: diasAtraso === 1 ? 'Atrasado 1 dia' : `Atrasado ${diasAtraso} dias`,
+            classe: 'border-red-200 bg-red-50 text-red-900',
+        };
+    }
+
+    if (diffDias <= 2) {
+        return {
+            texto: diffDias === 0 ? 'Vence hoje' : diffDias === 1 ? 'Vence amanhã' : `Vence em ${diffDias} dias`,
+            classe: 'border-amber-200 bg-amber-50 text-amber-950',
+        };
+    }
+
+    return {
+        texto: `Vence em ${diffDias} dias`,
+        classe: 'border-emerald-200 bg-emerald-50 text-emerald-900',
+    };
+}
+
 function EstadoPedidoBadge({ status }: { status: string }) {
     const isPending = status === 'pending';
 
@@ -78,6 +125,7 @@ export default function BibliotecaContaPedidos({ pedidos }: Props) {
 
     function renderPedidoCard(p: PedidoLeitor): ReactElement {
         const isPending = p.status === 'pending';
+        const prazo = prazoMeta(p.return_deadline);
 
         return (
             <li
@@ -113,6 +161,18 @@ export default function BibliotecaContaPedidos({ pedidos }: Props) {
                                 Levantar até: {formatDt(p.pickup_deadline)} · Devolução:{' '}
                                 {formatDt(p.return_deadline)}
                             </p>
+                            {prazo ? (
+                                <p className="m-0 mt-[8px]">
+                                    <span
+                                        className={cn(
+                                            'inline-flex rounded-full border px-[10px] py-[3px] text-[12px] font-semibold',
+                                            prazo.classe,
+                                        )}
+                                    >
+                                        {prazo.texto}
+                                    </span>
+                                </p>
+                            ) : null}
                             <p className="m-0 mt-[8px] text-[13px] font-semibold text-(--brotero-texto)">
                                 Multa estimada: {formatEur(p.fine_amount)}
                             </p>

@@ -21,6 +21,7 @@ class LibraryPatronFactory extends Factory
             'card_number' => str_pad((string) random_int(0, 99999), 5, '0', STR_PAD_LEFT),
             'birth_date' => fake()->date(),
             'name' => fake()->name(),
+            'role' => LibraryPatron::ROLE_STUDENT,
             'is_librarian' => false,
         ];
     }

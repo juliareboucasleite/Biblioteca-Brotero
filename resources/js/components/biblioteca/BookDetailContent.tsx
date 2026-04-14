@@ -18,7 +18,7 @@ export function BookDetailContent({
 }: BookDetailContentProps) {
     const patron = usePage().props.auth?.patron;
     const modoBibliotecaria =
-        patron?.is_librarian === true && patron?.portal_mode === 'bibliotecaria';
+        patron?.role === 'staff' && patron?.portal_mode === 'bibliotecaria';
     const editarLivroHref = modoBibliotecaria ? `/biblioteca/conta/balcao/livros/${livro.id}/editar` : null;
 
     const details = bookApi?.details ?? null;

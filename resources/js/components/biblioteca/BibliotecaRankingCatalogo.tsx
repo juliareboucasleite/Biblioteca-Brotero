@@ -12,6 +12,8 @@ type BibliotecaRankingCatalogoProps = {
 };
 
 export function BibliotecaRankingCatalogo({ ranking }: BibliotecaRankingCatalogoProps) {
+    const topRanking = ranking.slice(0, 4);
+
     return (
         <section className="mb-[24px]" aria-labelledby="secao-ranking-catalogo">
             <BookSectionHeader
@@ -25,7 +27,7 @@ export function BibliotecaRankingCatalogo({ ranking }: BibliotecaRankingCatalogo
                     </a>
                 }
             />
-            {ranking.length === 0 ? (
+            {topRanking.length === 0 ? (
                 <p
                     id="secao-ranking-catalogo"
                     className="m-0 rounded-(--raio) border border-dashed border-(--brotero-borda) bg-(--brotero-branco) p-[16px] text-[14px] text-(--brotero-texto-cinza)"
@@ -38,7 +40,7 @@ export function BibliotecaRankingCatalogo({ ranking }: BibliotecaRankingCatalogo
                     id="secao-ranking-catalogo"
                     className="m-0 flex list-none flex-col gap-[8px] p-0"
                 >
-                    {ranking.map((r) => (
+                    {topRanking.map((r) => (
                         <li
                             key={`${r.posicao}-${r.cartao_mascarado}`}
                             className="flex flex-wrap items-baseline justify-between gap-[10px] rounded-[14px] border border-(--brotero-borda-suave) bg-(--brotero-branco) px-[14px] py-[11px] shadow-[0_4px_16px_rgba(42,38,48,0.05)] transition-shadow hover:shadow-[0_6px_20px_rgba(42,38,48,0.08)] motion-reduce:transition-none"

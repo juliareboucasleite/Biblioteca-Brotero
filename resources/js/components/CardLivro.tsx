@@ -10,11 +10,17 @@ type CardLivroProps = {
     className?: string;
 };
 
-type PageProps = { auth: Auth; favoriteBookIds?: string[] };
+type ReadingListOption = { id: number; name: string };
+type PageProps = { auth: Auth; favoriteBookIds?: string[]; patronReadingLists?: ReadingListOption[] };
 
 export function CardLivro({ livro, className }: CardLivroProps) {
-    const { auth, favoriteBookIds = [] } = usePage<PageProps>().props;
+    const { auth, favoriteBookIds = [], patronReadingLists = [] } = usePage<PageProps>().props;
     const [position, setPosition] = useState<{ x: number; y: number } | null>(null);
+    const [isListModalOpen, setIsListModalOpen] = useState(false);
+    const [selectedListId, setSelectedListId] = useState<string>('');
+    const [listName, setListName] = useState('Ler depois');
+    const [isSavingList, setIsSavingList] = useState(false);
+    const [savedListFeedback, setSavedListFeedback] = useState<string | null>(null);
 
     const updatePosition = useCallback((e: MouseEvent<HTMLAnchorElement>) => {
         const rect = e.currentTarget.getBoundingClientRect();
@@ -26,9 +32,9 @@ export function CardLivro({ livro, className }: CardLivroProps) {
 
     const href = `/biblioteca/livro/${encodeURIComponent(livro.id)}`;
     const hasCover = Boolean(livro.capa && livro.capa.trim().length > 0);
-    const isFavorite = favoriteBookIds.includes(String(livro.id));
+    const isSaved = favoriteBookIds.includes(String(livro.id));
 
-    const onToggleFavorite = (e: MouseEvent<HTMLButtonElement>) => {
+    const onSaveToList = (e: MouseEvent<HTMLButtonElement>) => {
         e.preventDefault();
         e.stopPropagation();
 
@@ -38,13 +44,43 @@ export function CardLivro({ livro, className }: CardLivroProps) {
             return;
         }
 
-        const bookId = encodeURIComponent(livro.id);
+        setSelectedListId(patronReadingLists[0] ? String(patronReadingLists[0].id) : '');
+        setListName('Ler depois');
+        setIsListModalOpen(true);
+    };
 
-        if (isFavorite) {
-            router.delete(`/biblioteca/conta/favoritos/${bookId}`, { preserveScroll: true });
-        } else {
-            router.post(`/biblioteca/conta/favoritos/${bookId}`, {}, { preserveScroll: true });
+    const onConfirmSaveToList = () => {
+        if (isSavingList) {
+            return;
         }
+
+        const bookId = encodeURIComponent(livro.id);
+        const trimmedName = listName.trim();
+        const listId = selectedListId !== '' ? Number(selectedListId) : null;
+        const listNameForFeedback =
+            listId !== null
+                ? (patronReadingLists.find((list) => list.id === listId)?.name ?? 'lista selecionada')
+                : (trimmedName !== '' ? trimmedName : 'Ler depois');
+
+        const payload =
+            listId !== null
+                ? { list_id: listId }
+                : { list_name: trimmedName !== '' ? trimmedName : 'Ler depois' };
+
+        setIsSavingList(true);
+        router.post(
+            `/biblioteca/conta/listas/livros/${bookId}`,
+            payload,
+            {
+                preserveScroll: true,
+                onSuccess: () => {
+                    setIsListModalOpen(false);
+                    setSavedListFeedback(`Guardado em «${listNameForFeedback}»`);
+                    window.setTimeout(() => setSavedListFeedback(null), 2400);
+                },
+                onFinish: () => setIsSavingList(false),
+            },
+        );
     };
 
     return (
@@ -91,15 +127,79 @@ export function CardLivro({ livro, className }: CardLivroProps) {
                     type="button"
                     className={clsx(
                         'absolute top-[12px] right-[12px] z-10 w-[40px] h-[40px] rounded-full bg-white/80 backdrop-blur-md border border-white/20 text-[20px] leading-none flex items-center justify-center cursor-pointer shadow-xl transition-all duration-200 hover:scale-110 active:scale-95',
-                        isFavorite ? 'text-red-500' : 'text-(--brotero-texto-cinza)',
+                        isSaved ? 'text-(--brotero-primaria)' : 'text-(--brotero-texto-cinza)',
                     )}
-                    title={isFavorite ? 'Remover dos favoritos' : 'Adicionar aos favoritos'}
-                    aria-label={isFavorite ? 'Remover dos favoritos' : 'Adicionar aos favoritos'}
-                    onClick={onToggleFavorite}
+                    title={isSaved ? 'Guardar noutra lista' : 'Guardar numa lista'}
+                    aria-label={isSaved ? 'Guardar noutra lista' : 'Guardar numa lista'}
+                    onClick={onSaveToList}
                 >
-                    {isFavorite ? '❤' : '♡'}
+                    {isSaved ? '✓' : '+'}
                 </button>
+                {savedListFeedback ? (
+                    <span className="pointer-events-none absolute right-[12px] top-[58px] z-10 rounded-full border border-emerald-200 bg-emerald-50 px-[10px] py-[4px] text-[11px] font-semibold text-emerald-900 shadow-sm">
+                        {savedListFeedback}
+                    </span>
+                ) : null}
             </div>
+            {isListModalOpen ? (
+                <div className="fixed inset-0 z-80 flex items-center justify-center p-[16px]">
+                    <button
+                        type="button"
+                        aria-label="Fechar modal"
+                        className="absolute inset-0 border-0 bg-black/35"
+                        onClick={() => setIsListModalOpen(false)}
+                    />
+                    <div className="relative z-81 w-full max-w-[420px] rounded-[14px] border border-(--brotero-borda) bg-(--brotero-branco) p-[16px] shadow-[0_12px_34px_rgba(0,0,0,0.2)]">
+                        <h3 className="m-0 text-[16px] font-bold text-(--brotero-texto)">Guardar em lista</h3>
+                        <p className="m-0 mt-[6px] text-[13px] text-(--brotero-texto-cinza)">
+                            Escolha uma lista existente ou crie uma nova para este livro.
+                        </p>
+                        <label className="mt-[12px] block text-[12px] font-semibold uppercase tracking-wide text-(--brotero-texto-cinza)">
+                            Lista
+                        </label>
+                        <select
+                            autoFocus
+                            value={selectedListId}
+                            onChange={(e) => setSelectedListId(e.target.value)}
+                            className="mt-[6px] w-full rounded-(--raio) border border-(--brotero-borda) bg-(--brotero-branco) px-[10px] py-[9px] text-[14px] text-(--brotero-texto)"
+                        >
+                            {patronReadingLists.map((list) => (
+                                <option key={list.id} value={String(list.id)}>
+                                    {list.name}
+                                </option>
+                            ))}
+                            <option value="">Criar nova lista</option>
+                        </select>
+                        {selectedListId === '' ? (
+                            <input
+                                value={listName}
+                                onChange={(e) => setListName(e.target.value)}
+                                maxLength={120}
+                                placeholder="Nome da nova lista"
+                                className="mt-[10px] w-full rounded-(--raio) border border-(--brotero-borda) bg-(--brotero-branco) px-[10px] py-[9px] text-[14px] text-(--brotero-texto)"
+                            />
+                        ) : null}
+                        <div className="mt-[14px] flex justify-end gap-[8px]">
+                            <button
+                                type="button"
+                                disabled={isSavingList}
+                                className="cursor-pointer rounded-(--raio) border border-(--brotero-borda) bg-(--brotero-branco) px-[12px] py-[8px] text-[13px] font-semibold text-(--brotero-texto)"
+                                onClick={() => setIsListModalOpen(false)}
+                            >
+                                Cancelar
+                            </button>
+                            <button
+                                type="button"
+                                disabled={isSavingList || (selectedListId === '' && listName.trim() === '')}
+                                className="cursor-pointer rounded-(--raio) border-0 bg-(--brotero-primaria) px-[12px] py-[8px] text-[13px] font-semibold text-white"
+                                onClick={onConfirmSaveToList}
+                            >
+                                {isSavingList ? 'A guardar...' : 'Guardar'}
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            ) : null}
             {(livro.requisicoes_count ?? 0) > 0 ? (
                 <p className="m-0 px-[10px] py-[8px] text-[12px] font-semibold text-(--brotero-texto-cinza) border-t border-(--brotero-borda)">
                     {livro.requisicoes_count}{' '}

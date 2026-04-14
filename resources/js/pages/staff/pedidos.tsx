@@ -48,7 +48,7 @@ function PatronRegisterBlock({ pedidoId, cardNumber }: { pedidoId: number; cardN
         birth_date: '',
         name: '',
         email: '',
-        is_librarian: false,
+        role: 'student',
     });
 
     return (
@@ -118,17 +118,24 @@ function PatronRegisterBlock({ pedidoId, cardNumber }: { pedidoId: number; cardN
                         <p className="text-destructive text-xs">{form.errors.email}</p>
                     ) : null}
                 </div>
-                <label className="flex cursor-pointer items-start gap-2 sm:col-span-2">
-                    <input
-                        type="checkbox"
-                        className="mt-1 size-4 accent-(--brotero-primaria)"
-                        checked={form.data.is_librarian}
-                        onChange={(e) => form.setData('is_librarian', e.target.checked)}
-                    />
-                    <span className="text-sm leading-snug text-(--brotero-texto)">
-                        Cartão de bibliotecária/o: ao entrar no quiosque, escolhe modo de sessão
-                    </span>
-                </label>
+                <div className="space-y-1 sm:col-span-2">
+                    <label className="text-sm font-medium" htmlFor={`role-${pedidoId}`}>
+                        Perfil
+                    </label>
+                    <select
+                        id={`role-${pedidoId}`}
+                        className="border-input bg-background w-full rounded-md border px-3 py-2 text-sm"
+                        value={form.data.role}
+                        onChange={(e) => form.setData('role', e.target.value as 'student' | 'teacher' | 'staff')}
+                    >
+                        <option value="student">Aluno/a</option>
+                        <option value="teacher">Professor/a</option>
+                        <option value="staff">Funcionária/o da biblioteca</option>
+                    </select>
+                    {form.errors.role ? (
+                        <p className="text-destructive text-xs">{form.errors.role}</p>
+                    ) : null}
+                </div>
             </div>
             <div className="mt-3">
                 <Button type="button" size="sm" disabled={form.processing} onClick={() => form.post(staffPatrons.store.url(), { preserveScroll: true })}>

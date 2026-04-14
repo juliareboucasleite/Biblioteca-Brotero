@@ -117,4 +117,6 @@ export type BookApi = {
     category_recommendations?: BookRecommendationApi[] | null;
     /** Outros livros recentes no catálogo (exclui o atual e os já listados acima). */
     fallback_recommendations?: BookRecommendationApi[] | null;
+    /** Recomendações escolares por idade/ano/disciplina. */
+    school_recommendations?: BookRecommendationApi[] | null;
 };

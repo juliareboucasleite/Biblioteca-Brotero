@@ -18,7 +18,16 @@ class PatronLibrarianBookController extends Controller
 {
     public function create(Request $request): Response
     {
-        return Inertia::render('biblioteca/conta/livro-novo');
+        return Inertia::render('biblioteca/conta/livro-novo', [
+            'availableCategories' => Category::query()
+                ->select(['id', 'name'])
+                ->orderBy('name')
+                ->get()
+                ->map(fn (Category $category): array => [
+                    'id' => $category->id,
+                    'name' => $category->name,
+                ]),
+        ]);
     }
 
     public function store(Request $request): RedirectResponse
@@ -42,7 +51,8 @@ class PatronLibrarianBookController extends Controller
             'language' => ['nullable', 'string', 'max:32'],
             'publisher' => ['nullable', 'string', 'max:255'],
             'authors_input' => ['nullable', 'string', 'max:2000'],
-            'categories_input' => ['nullable', 'string', 'max:2000'],
+            'category_ids' => ['nullable', 'array'],
+            'category_ids.*' => ['integer', Rule::exists('categories', 'id')],
             'cover' => ['nullable', 'image', 'max:5120'],
             'ebook' => ['nullable', 'file', 'max:51200', 'mimes:pdf,epub'],
         ]);
@@ -54,9 +64,13 @@ class PatronLibrarianBookController extends Controller
         }
 
         $authors = $this->splitNames($data['authors_input'] ?? null);
-        $categories = $this->splitNames($data['categories_input'] ?? null);
+        $categoryIds = collect($data['category_ids'] ?? [])
+            ->map(fn (mixed $id): int => (int) $id)
+            ->unique()
+            ->values()
+            ->all();
 
-        $book = DB::transaction(function () use ($data, $coverUrl, $authors, $categories): Book {
+        $book = DB::transaction(function () use ($data, $coverUrl, $authors, $categoryIds): Book {
             $book = Book::query()->create([
                 'title' => $data['title'],
                 'description' => $data['description'] ?? null,
@@ -72,9 +86,8 @@ class PatronLibrarianBookController extends Controller
                 $book->authors()->syncWithoutDetaching([$author->id]);
             }
 
-            foreach ($categories as $name) {
-                $category = Category::query()->firstOrCreate(['name' => $name]);
-                $book->categories()->syncWithoutDetaching([$category->id]);
+            if ($categoryIds !== []) {
+                $book->categories()->syncWithoutDetaching($categoryIds);
             }
 
             if (! empty($data['publisher'])) {

@@ -10,18 +10,18 @@ use App\Services\BookFineCalculator;
 use Illuminate\Console\Command;
 
 /**
- * Atualiza multas e envia lembretes (2 dias antes / em atraso) para requisições ativas.
+ * Atualiza multas e envia lembretes (véspera / em atraso) para requisições ativas.
  */
 class CheckBookDeadlines extends Command
 {
     protected $signature = 'books:check-deadlines';
 
-    protected $description = 'Atualiza multas e notifica leitores sobre prazos de devolução (2 dias antes / em atraso)';
+    protected $description = 'Atualiza multas e notifica leitores sobre prazos de devolução (véspera / em atraso)';
 
     public function handle(BookFineCalculator $fineCalculator): int
     {
         $today = now()->startOfDay();
-        $inTwoDays = $today->copy()->addDays(2);
+        $onNextDay = $today->copy()->addDay();
 
         $updatedFines = 0;
         $dueSoon = 0;
@@ -31,7 +31,7 @@ class CheckBookDeadlines extends Command
             ->where('status', 'created')
             ->whereNull('returned_at')
             ->whereNotNull('return_deadline')
-            ->chunkById(100, function ($requests) use ($fineCalculator, $today, $inTwoDays, &$updatedFines, &$dueSoon, &$overdue): void {
+            ->chunkById(100, function ($requests) use ($fineCalculator, $today, $onNextDay, &$updatedFines, &$dueSoon, &$overdue): void {
                 foreach ($requests as $request) {
                     $fineBefore = (float) $request->fine_amount;
                     $fineCalculator->persistFine($request);
@@ -53,7 +53,7 @@ class CheckBookDeadlines extends Command
 
                     if (
                         $deadlineDay->greaterThan($today)
-                        && $deadlineDay->equalTo($inTwoDays)
+                        && $deadlineDay->equalTo($onNextDay)
                         && $request->notified_due_soon_at === null
                     ) {
                         $patron->notify(new BookDueSoonNotification($request));
@@ -73,7 +73,7 @@ class CheckBookDeadlines extends Command
                 }
             });
 
-        $this->info("Linhas com multa alterada: {$updatedFines}. Avisos «faltam 2 dias»: {$dueSoon}. Avisos atraso: {$overdue}.");
+        $this->info("Linhas com multa alterada: {$updatedFines}. Avisos «vence amanhã»: {$dueSoon}. Avisos atraso: {$overdue}.");
 
         return self::SUCCESS;
     }

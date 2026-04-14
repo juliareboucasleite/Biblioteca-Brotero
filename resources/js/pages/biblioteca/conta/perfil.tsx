@@ -51,7 +51,7 @@ export default function BibliotecaContaPerfil({ perfil }: Props) {
                     .
                 </p>
                 <p className="mt-[12px] mb-0 text-[13px] text-(--brotero-texto-cinza)">
-                    Para atualizar estes dados ou repor a senha de acesso, contacte a biblioteca brotero.
+                    Para atualizar estes dados ou repor a palavra-passe de acesso, contacte a Biblioteca Brotero.
                 </p>
             </div>
         </BibliotecaContaLayout>

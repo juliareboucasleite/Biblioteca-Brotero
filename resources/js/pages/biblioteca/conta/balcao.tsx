@@ -266,7 +266,7 @@ export default function BibliotecaContaBalcao({ pedidos }: Props) {
 
             {pedidos.length === 0 ? (
                 <p className="rounded-(--raio) border border-dashed border-(--brotero-borda) bg-(--brotero-branco) p-[16px] text-(--brotero-texto-cinza)">
-                    Painel de pedidos activos cada requisição feita pelos leitores aparece aqui para gestão e a lista actualiza em tempo real.
+                    Este painel apresenta todas as requisições para gestão. A lista é atualizada em tempo real.
                 </p>
             ) : null}
 
@@ -621,7 +621,7 @@ export default function BibliotecaContaBalcao({ pedidos }: Props) {
                     <DialogHeader>
                         <DialogTitle className="text-xl font-bold text-(--brotero-texto)">Cancelar pedido</DialogTitle>
                         <DialogDescription className="text-[14px] leading-relaxed text-(--brotero-texto-cinza)">
-                            O livro volta ao catálogo se a requisição estiver activa. Esta acção não pode ser desfeita aqui.
+                            O livro volta ao catálogo se a requisição estiver ativa. Esta ação não pode ser desfeita aqui.
                         </DialogDescription>
                     </DialogHeader>
                     {cancelRow ? (

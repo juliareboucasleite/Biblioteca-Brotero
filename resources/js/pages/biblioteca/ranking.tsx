@@ -29,7 +29,7 @@ export default function BibliotecaRanking({ ranking }: Props) {
                             className="m-0 rounded-[14px] border border-dashed border-(--brotero-borda) bg-(--brotero-branco) p-[18px] text-[15px] text-(--brotero-texto-cinza)"
                             role="status"
                         >
-                            Soma pontos ao requisitar (+10) e ao devolver no prazo (+20). Segue o ranking para ver a
+                            Soma pontos ao requisitar (+10) e ao devolver no prazo (+20). Acompanhe o ranking para ver a
                             comunidade em movimento.
                         </p>
                     ) : (

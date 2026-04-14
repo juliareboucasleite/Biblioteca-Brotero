@@ -61,10 +61,10 @@ export default function BibliotecaContaMensagens({ conversas }: Props) {
                     Conversas
                 </h1>
                 <p className="m-0 mt-[10px] max-w-[52ch] text-[15px] leading-relaxed text-(--brotero-texto-cinza)">
-                    Os teus chats com outros leitores. Primeiro envia um pedido quando ambos aceitarem, as mensagens ficam aqui.
+                    As suas conversas com outros leitores. Envie primeiro um pedido; quando ambos aceitarem, as mensagens ficarão disponíveis aqui.
                 </p>
                 <p className="m-0 mt-[12px] text-[12px] leading-snug text-(--brotero-texto-cinza) opacity-90">
-                    Em <Link href="/biblioteca/descobertas">Descobertas</Link>, usa «Mensagem privada» para pedir conversa a quem partilhou um livro.
+                    Em <Link href="/biblioteca/descobertas">Descobertas</Link>, use «Mensagem privada» para pedir conversa a quem partilhou um livro.
                 </p>
             </header>
 
@@ -77,7 +77,7 @@ export default function BibliotecaContaMensagens({ conversas }: Props) {
                     <Link href="/biblioteca/descobertas" className="font-semibold text-(--brotero-texto-link)">
                         Descobertas
                     </Link>{' '}
-                    envia «Mensagem privada» a quem partilhou um livro.
+                    envie «Mensagem privada» a quem partilhou um livro.
                 </p>
             ) : (
                 <ul className="m-0 flex list-none flex-col gap-[10px] p-0">

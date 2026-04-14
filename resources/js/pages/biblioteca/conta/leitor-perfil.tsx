@@ -26,7 +26,7 @@ export default function BibliotecaContaLeitorPerfil({ leitor }: Props) {
             <div className="max-w-[480px] rounded-[18px] border border-(--brotero-borda-suave) bg-(--brotero-branco) p-[22px] shadow-[0_8px_28px_rgba(42,38,48,0.06)]">
                 <h1 className="m-0 mb-[6px] text-[1.35rem] font-bold text-(--brotero-texto)">{leitor.label}</h1>
                 <p className="m-0 mb-[16px] text-[14px] text-(--brotero-texto-cinza)">
-                    Só vê este perfil porque têm uma conversa privada aceite na plataforma. Os dados são
+                    Só pode ver este perfil porque têm uma conversa privada aceite na plataforma. Os dados são
                     limitados para proteger a privacidade.
                 </p>
                 <dl className="m-0 grid gap-[12px] text-[15px]">

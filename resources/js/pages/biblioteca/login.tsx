@@ -22,7 +22,7 @@ export default function BibliotecaLogin({ status }: Props) {
                             Entrar na sua conta
                         </h1>
                         <p className="m-0 text-[15px] leading-snug text-(--brotero-texto-cinza)">
-                            Introduza o número do cartão da biblioteca e a senha. Formato corrido, só algarismos:{' '}
+                            Introduza o número do cartão da biblioteca e a palavra-passe. Formato corrido, só algarismos:{' '}
                             <strong>DDMMAA</strong> (6) ou <strong>DDMMAAAA</strong> (8), sem barras nem hífens.
                         </p>
                     </header>
@@ -48,7 +48,7 @@ export default function BibliotecaLogin({ status }: Props) {
                                 </div>
 
                                 <div className="grid gap-2">
-                                    <Label htmlFor="password">Senha:</Label>
+                                    <Label htmlFor="password">Palavra-passe:</Label>
                                     <PasswordInput
                                         id="password"
                                         name="password"

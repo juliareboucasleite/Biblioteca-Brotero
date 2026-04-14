@@ -308,7 +308,7 @@ export default function Library({
                     ) : (
                         <div className="grid grid-cols-[repeat(auto-fill,minmax(160px,1fr))] gap-[16px] max-[768px]:grid-cols-[repeat(auto-fill,minmax(130px,1fr))] max-[768px]:gap-[12px]">
                             <BibliotecaSectionPlaceholder>
-                                Vê o que mais circula entre leitores: abre
+                                Veja o que mais circula entre leitores: abra
                                 «Ver mais» ou o ranking para descobrir títulos
                                 em destaque na comunidade.
                             </BibliotecaSectionPlaceholder>

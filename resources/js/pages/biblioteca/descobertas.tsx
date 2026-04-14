@@ -56,7 +56,7 @@ export default function BibliotecaDescobertas({ descobertas }: Props) {
                         Descobertas
                     </h1>
                     <p className="m-0 mt-[10px] max-w-[52ch] text-[15px] leading-relaxed text-(--brotero-texto-cinza)">
-                        Recomendações dos leitores. Na ficha podes requisitar o exemplar ou abrir o e-book, se
+                        Recomendações dos leitores. Na ficha, pode requisitar o exemplar ou abrir o e-book, se
                         existir.
                     </p>
                 </header>
@@ -66,7 +66,7 @@ export default function BibliotecaDescobertas({ descobertas }: Props) {
                         className="m-0 rounded-[14px] border border-dashed border-(--brotero-borda) bg-(--brotero-branco) px-[18px] py-[22px] text-[15px] leading-relaxed text-(--brotero-texto-cinza)"
                         role="status"
                     >
-                        Partilha o que estás a ler: na ficha do livro, usa «Recomendar à comunidade» para
+                        Partilhe o que está a ler: na ficha do livro, use «Recomendar à comunidade» para
                         aparecer nesta linha do tempo.
                     </p>
                 ) : (

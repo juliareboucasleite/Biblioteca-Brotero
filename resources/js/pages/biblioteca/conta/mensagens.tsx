@@ -86,8 +86,8 @@ export default function BibliotecaContaMensagens({ conversas }: Props) {
                             <Link
                                 href={`/biblioteca/conta/mensagens/${encodeURIComponent(c.id)}`}
                                 className={cn(
-                                    'flex flex-col gap-[10px] rounded-[16px] border border-(--brotero-borda-suave) bg-(--brotero-branco) p-[14px_16px] no-underline shadow-[0_6px_22px_rgba(42,38,48,0.06)] transition-[transform,box-shadow,border-color]',
-                                    'hover:-translate-y-px hover:border-(--brotero-primaria-claro) hover:bg-(--brotero-fundo) hover:shadow-[0_10px_28px_rgba(77,107,122,0.12)]',
+                                    'flex flex-col gap-[10px] rounded-[16px] border border-(--brotero-borda-suave) bg-(--brotero-branco) p-[14px_16px] text-(--brotero-texto) no-underline shadow-[0_6px_22px_rgba(42,38,48,0.06)] transition-[transform,box-shadow,border-color,background-color]',
+                                    'hover:-translate-y-px hover:border-(--brotero-primaria-claro) hover:bg-[#f7f9fc] hover:text-(--brotero-texto) hover:shadow-[0_10px_28px_rgba(77,107,122,0.12)]',
                                     'focus-visible:outline-2 focus-visible:outline-(--brotero-primaria) focus-visible:-outline-offset-2',
                                 )}
                                 preserveScroll

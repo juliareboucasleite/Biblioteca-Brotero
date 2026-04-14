@@ -1,33 +1,13 @@
-# Biblioteca Brotero
+# Biblioteca Brotero Online
 
-Este projeto é uma aplicação web para o catálogo e requisições da **Biblioteca Escolar**, desenvolvido no âmbito de estágio. Futuramente, caso a Escola Secundária Brotero tenha interesse em adquiri-lo oficialmente, pode entrar em contacto para mais informações.
+Este projeto foi desenvolvido entre março e abril de 2026, no contexto da FCT, com o objetivo de modernizar a biblioteca digital da Escola Secundária Avelar Brotero. A intervenção centrou-se na melhoria da experiência de utilização, da organização da informação e da eficiência dos processos de pesquisa, requisição e gestão interna.
 
-Este projeto foi desenvolvido utilizando Laravel 12 e PHP 8.2 ou superior no backend. O frontend utiliza React 19 em conjunto com Inertia.js e Tailwind CSS. Para autenticação, são usados o Fortify para os utilizadores web e o guard `patron`, que permite acesso pelo quiosque através do número do cartão e a data de nascimento.
+A solução foi construída com Laravel no backend e React com Inertia no frontend, recorrendo a Tailwind CSS para a componente visual. O trabalho partiu de uma análise do sistema original, onde foram identificadas limitações de usabilidade, navegação e atualização de conteúdos, especialmente relevantes para um ambiente escolar.
 
-Entre as principais funcionalidades: catálogo público em `/biblioteca` com pesquisa e filtros; conta do leitor (pedidos, histórico, favoritos, perfil); **Descobertas** (recomendações entre leitores) e **mensagens** entre leitores quando a conversa é aceite; modo bibliotecário no quiosque (balcão, novos livros, edição); painel de staff para aprovação de pedidos e e-mails configuráveis.
+Foram implementadas melhorias estruturais na interface, com uma apresentação mais clara, moderna e intuitiva, acompanhadas por um sistema de pesquisa reforçado e filtros mais úteis para o dia a dia dos utilizadores. O catálogo foi reorganizado para destacar a informação essencial dos livros e reduzir a complexidade técnica que dificultava a interação.
 
-Para executar a aplicação, é necessário ter PHP 8.2 ou superior com Composer para as dependências, Node.js com npm para compilar os assets, e uma base de dados compatível com Laravel, como MySQL ou SQLite.
+No fluxo funcional, a plataforma passou a oferecer um processo de requisição mais direto, com acompanhamento de estados e histórico. Foram também introduzidas funcionalidades sociais, como descobertas e conversas com consentimento, promovendo uma utilização mais participativa da biblioteca.
 
-## Arranque rápido
+A dimensão pedagógica foi reforçada com funcionalidades distintas por perfil. Os alunos podem criar listas e acompanhar progresso de leitura. Os professores podem criar listas por turma ou tema, partilhar conteúdos e reservar exemplares para atividades letivas. A equipa da biblioteca passou a dispor de uma área operacional com visão de pedidos, métricas, ações rápidas de balcão e exportação de informação.
 
-```bash
-composer install
-cp .env.example .env
-php artisan key:generate
-php artisan migrate
-php artisan storage:link   # capas de livros em público
-
-npm install
-npm run build   # ou npm run dev
-php artisan serve
-```
-
-Configure variáveis em `.env` (base de dados, `APP_URL`, opções em `config/biblioteca.php` quando aplicável).
-
-## Interface
-
-O visual é entregue por **Inertia + React** e **Tailwind**; muda ao longo do desenvolvimento. Este README **não inclui capturas de ecrã**, para não ficarem desactualizadas face ao produto actual.
-
-## Licença
-
-MIT (conforme indicado no projeto base Laravel).
+O projeto inclui ainda suporte para e-books, notificações de prazos, mecanismos de segurança por perfil e base para auditoria de ações sensíveis. No seu conjunto, esta solução transforma a plataforma original num sistema mais atual, mais acessível e mais alinhado com as necessidades reais de uma escola de ensino secundário.

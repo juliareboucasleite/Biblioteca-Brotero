@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Models\Book;
 use App\Models\BookRequest;
 use App\Models\LibraryPatron;
+use App\Models\PatronReadingList;
 use App\Support\SchoolLocationNormalizer;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -15,6 +16,22 @@ use Inertia\Response;
 
 class BibliotecaContaController extends Controller
 {
+    private function ensureDefaultStudentLists(LibraryPatron $patron): void
+    {
+        if ($patron->role() !== LibraryPatron::ROLE_STUDENT) {
+            return;
+        }
+
+        $patron->readingLists()->firstOrCreate(
+            ['type' => PatronReadingList::TYPE_READ_LATER],
+            ['name' => 'Ler depois', 'visibility' => 'private'],
+        );
+        $patron->readingLists()->firstOrCreate(
+            ['type' => PatronReadingList::TYPE_READING_NOW],
+            ['name' => 'Em leitura', 'visibility' => 'private'],
+        );
+    }
+
     private function patron(Request $request): LibraryPatron
     {
         /** @var LibraryPatron $patron */
@@ -121,26 +138,43 @@ class BibliotecaContaController extends Controller
     public function favoritos(Request $request): Response
     {
         $patron = $this->patron($request);
+        $this->ensureDefaultStudentLists($patron);
 
-        $livros = $patron->favoriteBooks()
-            ->with(['authors'])
-            ->orderByPivot('created_at', 'desc')
-            ->limit(200)
+        $listas = $patron->readingLists()
+            ->with([
+                'books' => fn ($q) => $q->with('authors')->orderBy('patron_reading_list_books.created_at', 'desc'),
+            ])
+            ->orderBy('name')
             ->get()
-            ->map(function (Book $book): array {
+            ->map(function (PatronReadingList $list): array {
                 return [
-                    'id' => (string) $book->id,
-                    'titulo' => (string) ($book->title ?? ''),
-                    'autor' => $book->authors?->pluck('name')->filter()->implode(', ') ?: 'Autor desconhecido',
-                    'desc' => (string) ($book->description ?? ''),
-                    'capa' => $book->cover_image ? (string) $book->cover_image : null,
+                    'id' => $list->id,
+                    'name' => $list->name,
+                    'type' => $list->type ?? PatronReadingList::TYPE_CUSTOM,
+                    'classroom' => $list->classroom,
+                    'theme' => $list->theme,
+                    'share_code' => $list->share_code,
+                    'share_token' => $list->share_token,
+                    'books' => $list->books->map(function (Book $book): array {
+                        return [
+                            'id' => (string) $book->id,
+                            'titulo' => (string) ($book->title ?? ''),
+                            'autor' => $book->authors?->pluck('name')->filter()->implode(', ') ?: 'Autor desconhecido',
+                            'desc' => (string) ($book->description ?? ''),
+                            'capa' => $book->cover_image ? (string) $book->cover_image : null,
+                            'progress_percent' => (int) ($book->pivot?->progress_percent ?? 0),
+                            'current_page' => $book->pivot?->current_page !== null ? (int) $book->pivot->current_page : null,
+                            'reading_status' => (string) ($book->pivot?->reading_status ?? 'not_started'),
+                        ];
+                    })->values()->all(),
                 ];
             })
             ->values()
             ->all();
 
         return Inertia::render('biblioteca/conta/favoritos', [
-            'livros' => $livros,
+            'listas' => $listas,
+            'patronRole' => $patron->role(),
         ]);
     }
 }

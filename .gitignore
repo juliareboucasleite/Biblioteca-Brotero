@@ -27,3 +27,28 @@ yarn-error.log
 /.vscode
 /.zed
 /database/database.sqlite
+
+# Logs locais e ficheiros temporários de execução
+/storage/logs/*.log
+/storage/logs/*.log.*
+*.tmp
+*.temp
+
+# Backups locais e dumps
+*.bak
+*.old
+*.orig
+*.sql
+*.sqlite-shm
+*.sqlite-wal
+
+# Artefactos de testes e cobertura
+/coverage
+/playwright-report
+/test-results
+
+# Ficheiros temporários de editor/sistema
+*.swp
+*.swo
+*~
+Thumbs.db

@@ -138,7 +138,7 @@ class BookController extends Controller
         return $query->limit($limit)->get();
     }
 
-    public function show(int $id)
+    public function show(Request $request, int $id)
     {
         $book = Book::with(['authors', 'categories', 'details'])->findOrFail($id);
         $recommendedByAuthor = $this->recommendationsBySharedAuthors($book, 12);

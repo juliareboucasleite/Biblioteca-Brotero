@@ -1,4 +1,4 @@
-import { Link, router, useForm } from '@inertiajs/react';
+import { Link, router, useForm, usePage } from '@inertiajs/react';
 import type { FormEvent } from 'react';
 import { BibliotecaContaLayout } from '@/components/biblioteca/BibliotecaContaLayout';
 import { CardLivro } from '@/components/CardLivro';
@@ -23,6 +23,7 @@ type Props = {
 };
 
 export default function BibliotecaContaFavoritos({ listas, patronRole }: Props) {
+    const { flash } = usePage().props as { flash?: { success?: string; error?: string } };
     const form = useForm({
         name: '',
         type: 'custom',
@@ -50,8 +51,18 @@ export default function BibliotecaContaFavoritos({ listas, patronRole }: Props) 
         <BibliotecaContaLayout title="As minhas listas" secao="favoritos">
             <h2 className="m-0 mb-[8px] text-[1.15rem] font-bold text-(--brotero-texto)">As minhas listas</h2>
             <p className="m-0 mb-[16px] text-[13px] text-(--brotero-texto-cinza)">
-                Crie listas com o nome que preferir, como «Ler mais tarde» ou «Geografia».
+                Crie listas com o nome que preferir, como «Ler depois» ou «Geografia».
             </p>
+            {flash?.success ? (
+                <p className="mb-[10px] rounded-(--raio) border border-emerald-200 bg-emerald-50 px-[10px] py-[8px] text-[13px] text-emerald-900">
+                    {flash.success}
+                </p>
+            ) : null}
+            {flash?.error ? (
+                <p className="mb-[10px] rounded-(--raio) border border-red-200 bg-red-50 px-[10px] py-[8px] text-[13px] text-red-900">
+                    {flash.error}
+                </p>
+            ) : null}
             {patronRole !== 'staff' ? (
                 <form
                     onSubmit={(e) => {
@@ -80,9 +91,10 @@ export default function BibliotecaContaFavoritos({ listas, patronRole }: Props) 
                     </label>
                     <button
                         type="submit"
+                        disabled={importForm.processing}
                         className="cursor-pointer rounded-(--raio) border border-(--brotero-borda) bg-(--brotero-fundo) px-[12px] py-[8px] text-[13px] font-semibold text-(--brotero-texto)"
                     >
-                        Importar lista partilhada
+                        {importForm.processing ? 'A importar...' : 'Importar lista partilhada'}
                     </button>
                 </form>
             ) : null}
@@ -94,7 +106,7 @@ export default function BibliotecaContaFavoritos({ listas, patronRole }: Props) 
                         className="min-w-[220px] rounded-(--raio) border border-(--brotero-borda) bg-(--brotero-branco) px-[10px] py-[8px] text-[14px]"
                         value={form.data.name}
                         onChange={(e) => form.setData('name', e.target.value)}
-                        placeholder="ex.: Ler mais tarde"
+                        placeholder="ex.: Ler depois"
                         maxLength={120}
                         required
                     />
@@ -120,7 +132,7 @@ export default function BibliotecaContaFavoritos({ listas, patronRole }: Props) 
                                         className="min-w-[160px] rounded-(--raio) border border-(--brotero-borda) bg-(--brotero-branco) px-[10px] py-[8px] text-[14px]"
                                         value={form.data.classroom}
                                         onChange={(e) => form.setData('classroom', e.target.value)}
-                                        placeholder="ex.: 8.ºB"
+                                        placeholder="ex.: 10.ºB"
                                     />
                                 </label>
                                 <label className="grid gap-[6px] text-[13px] font-semibold text-(--brotero-texto)">

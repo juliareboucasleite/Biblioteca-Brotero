@@ -23,6 +23,7 @@ return Application::configure(basePath: dirname(__DIR__))
     ->withSchedule(function (Schedule $schedule): void {
         $schedule->command('books:check-deadlines')->hourly();
         $schedule->command('book-requests:expire')->daily();
+        $schedule->command('privacy:purge-old-data')->weekly();
     })
     ->withMiddleware(function (Middleware $middleware): void {
         $middleware->redirectGuestsTo(function (Request $request): string {

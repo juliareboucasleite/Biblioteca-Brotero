@@ -45,6 +45,7 @@ Route::post('/books/isbn', [BookController::class, 'storeFromIsbn']);
 Route::get('/books/{id}/details', [BookController::class, 'showDetails']);
 Route::post('/biblioteca/requisitar', [BookRequestController::class, 'store'])
     ->withoutMiddleware([VerifyCsrfToken::class])
+    ->middleware('throttle:20,1')
     ->name('biblioteca.requisitar');
 
 /*
@@ -55,17 +56,17 @@ Route::post('/biblioteca/requisitar', [BookRequestController::class, 'store'])
 Route::middleware('guest:patron')->group(function (): void {
     Route::get('/biblioteca/entrar', [LibraryPatronAuthController::class, 'create'])
         ->name('biblioteca.login');
-    Route::post('/biblioteca/entrar', [LibraryPatronAuthController::class, 'store']);
+    Route::post('/biblioteca/entrar', [LibraryPatronAuthController::class, 'store'])->middleware('throttle:10,1');
     Route::get('/biblioteca/entrar/modo', [LibraryPatronAuthController::class, 'choosePortalMode'])
         ->name('biblioteca.login.portal');
-    Route::post('/biblioteca/entrar/modo', [LibraryPatronAuthController::class, 'completePortalMode']);
+    Route::post('/biblioteca/entrar/modo', [LibraryPatronAuthController::class, 'completePortalMode'])->middleware('throttle:12,1');
 });
 
 Route::post('/biblioteca/sair', [LibraryPatronAuthController::class, 'destroy'])
     ->middleware('auth:patron')
     ->name('biblioteca.logout');
 Route::post('/biblioteca/modo', [LibraryPatronAuthController::class, 'switchPortalMode'])
-    ->middleware('auth:patron')
+    ->middleware(['auth:patron', 'throttle:20,1'])
     ->name('biblioteca.portal-mode.switch');
 
 Route::middleware('auth:patron')->group(function (): void {
@@ -119,7 +120,7 @@ Route::middleware('auth:patron')
                 );
 
                 Route::get('/mensagens', [PatronChatController::class, 'index'])->name('mensagens.index');
-                Route::post('/mensagens/abrir', [PatronChatController::class, 'open'])->name('mensagens.open');
+                Route::post('/mensagens/abrir', [PatronChatController::class, 'open'])->middleware('throttle:20,1')->name('mensagens.open');
                 Route::get('/mensagens/{patron_conversation}/livros-pesquisa', [PatronChatController::class, 'searchBooksForShare'])->name(
                     'mensagens.livros-pesquisa',
                 );
@@ -129,7 +130,7 @@ Route::middleware('auth:patron')
                 Route::get('/mensagens/{patron_conversation}', [PatronChatController::class, 'show'])->name(
                     'mensagens.show',
                 );
-                Route::post('/mensagens/{patron_conversation}', [PatronChatController::class, 'store'])->name(
+                Route::post('/mensagens/{patron_conversation}', [PatronChatController::class, 'store'])->middleware('throttle:40,1')->name(
                     'mensagens.store',
                 );
                 Route::post('/mensagens/{patron_conversation}/aceitar', [PatronChatController::class, 'accept'])->name(
@@ -197,7 +198,7 @@ Route::middleware(['auth:patron', 'patron.role:staff', 'patron.librarian.desk'])
         Route::post('/pedidos/{bookRequest}/ocultar', [PatronLibrarianDeskController::class, 'hideFromDesk'])->name(
             'hide',
         );
-        Route::post('/scan', [PatronLibrarianDeskController::class, 'quickScan'])->name('scan');
+        Route::post('/scan', [PatronLibrarianDeskController::class, 'quickScan'])->middleware('throttle:80,1')->name('scan');
         Route::get('/exportar', [PatronLibrarianDeskController::class, 'exportCsv'])->name('export');
         Route::get('/livros/novo', [PatronLibrarianBookController::class, 'create'])->name('livros.create');
         Route::post('/livros', [PatronLibrarianBookController::class, 'store'])->name('livros.store');

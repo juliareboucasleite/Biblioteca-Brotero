@@ -66,12 +66,12 @@ function NavItem({ href, title, icon: Icon, label, active }: NavItemProps) {
             href={href}
             title={title}
             className={cn(
-                'group flex min-w-[4.5rem] shrink-0 flex-col items-center justify-center gap-[6px] rounded-[18px] px-[8px] py-[11px] no-underline transition-[background-color,color,box-shadow,transform] duration-200 motion-reduce:transition-none',
-                'lg:min-w-[5.25rem] lg:px-[10px] lg:py-[13px]',
+                'group flex min-w-18 shrink-0 flex-col items-center justify-center gap-[6px] rounded-[18px] px-[8px] py-[11px] no-underline transition-[background-color,color,box-shadow,transform] duration-200 motion-reduce:transition-none',
+                'lg:min-w-21 lg:px-[10px] lg:py-[13px]',
                 active
                     ? 'bg-(--brotero-primaria)/14 text-(--brotero-primaria) shadow-[inset_0_1px_0_rgba(255,255,255,0.65)]'
                     : 'text-(--brotero-texto-cinza) hover:bg-(--brotero-borda-suave)/55 hover:text-(--brotero-texto)',
-                'focus-visible:outline focus-visible:outline-2 focus-visible:outline-(--brotero-primaria) focus-visible:outline-offset-2',
+                'focus-visible:outline-2 focus-visible:outline-(--brotero-primaria) focus-visible:outline-offset-2',
             )}
         >
             <span
@@ -84,7 +84,7 @@ function NavItem({ href, title, icon: Icon, label, active }: NavItemProps) {
             >
                 <Icon className="size-[21px] shrink-0" strokeWidth={1.65} aria-hidden />
             </span>
-            <span className="max-w-[5.5rem] text-center text-[10px] font-semibold leading-snug tracking-wide lg:text-[11px]">
+            <span className="max-w-22 text-center text-[10px] font-semibold leading-snug tracking-wide lg:text-[11px]">
                 {label}
             </span>
         </a>

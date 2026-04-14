@@ -1,3 +1,4 @@
+import { Link } from '@inertiajs/react';
 import { BibliotecaContaLayout } from '@/components/biblioteca/BibliotecaContaLayout';
 import { formatDt } from '@/lib/format';
 import { cn } from '@/lib/utils';
@@ -58,9 +59,19 @@ export default function BibliotecaContaHistorico({ historico }: Props) {
                 Histórico de requisições
             </h2>
             {historico.length === 0 ? (
-                <p className="m-0 p-[16px] bg-(--brotero-branco) border border-dashed border-(--brotero-borda) rounded-(--raio) text-(--brotero-texto-cinza)">
-                    O histórico reúne pedidos concluídos ou encerrados. Continue a explorar o catálogo para novas requisições.
-                </p>
+                <div className="rounded-(--raio) border border-dashed border-(--brotero-borda) bg-(--brotero-branco) p-[16px] text-(--brotero-texto-cinza)">
+                    <p className="m-0">
+                        O histórico reúne pedidos concluídos ou encerrados. Continue a explorar o catálogo para novas
+                        requisições.
+                    </p>
+                    <p className="m-0 mt-[8px] text-[13px]">
+                        O que fazer agora: abra o{' '}
+                        <Link href="/biblioteca" className="font-semibold text-(--brotero-texto-link) hover:underline">
+                            catálogo
+                        </Link>{' '}
+                        e escolha a próxima leitura.
+                    </p>
+                </div>
             ) : (
                 <ul className="m-0 p-0 list-none flex flex-col gap-[12px]">
                     {historico.map((p) => (

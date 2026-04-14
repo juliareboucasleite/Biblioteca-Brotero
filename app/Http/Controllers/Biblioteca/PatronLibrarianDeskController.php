@@ -9,6 +9,7 @@ use App\Models\LibraryPatron;
 use App\Services\BookFineCalculator;
 use App\Services\BookRequestApprovalService;
 use App\Services\BookReturnService;
+use App\Support\AuditLogger;
 use App\Support\SchoolLocationNormalizer;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -205,6 +206,10 @@ class PatronLibrarianDeskController extends Controller
             return back()->with('error', $e->getMessage());
         }
 
+        AuditLogger::log($request, 'desk.approve_request', BookRequest::class, (int) $bookRequest->id, [
+            'status' => $bookRequest->status,
+        ]);
+
         return back()->with('success', 'Pedido aprovado.');
     }
 
@@ -224,6 +229,10 @@ class PatronLibrarianDeskController extends Controller
             return back()->with('error', $e->getMessage());
         }
 
+        AuditLogger::log($request, 'desk.reject_request', BookRequest::class, (int) $bookRequest->id, [
+            'reason' => $data['reason'] ?? null,
+        ]);
+
         return back()->with('success', 'Pedido recusado.');
     }
 
@@ -234,6 +243,7 @@ class PatronLibrarianDeskController extends Controller
         }
 
         $bookRequest->forceFill(['status' => 'cancelled'])->save();
+        AuditLogger::log($request, 'desk.cancel_request', BookRequest::class, (int) $bookRequest->id);
 
         return back()->with('success', 'Pedido cancelado.');
     }
@@ -303,6 +313,7 @@ class PatronLibrarianDeskController extends Controller
         }
 
         $returns->markReturned($bookRequest, null);
+        AuditLogger::log($request, 'desk.mark_returned', BookRequest::class, (int) $bookRequest->id);
 
         return back()->with('success', 'Marcado como devolvido.');
     }
@@ -318,6 +329,7 @@ class PatronLibrarianDeskController extends Controller
         }
 
         $bookRequest->forceFill(['hidden_from_librarian_desk_at' => now()])->save();
+        AuditLogger::log($request, 'desk.hide_request', BookRequest::class, (int) $bookRequest->id);
 
         return back()->with('success', 'Pedido ocultado do balcão.');
     }

@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Models\BookRequest;
 use App\Models\LibraryPatron;
 use App\Services\BookRequestApprovalService;
+use App\Support\AuditLogger;
 use App\Support\SchoolLocationNormalizer;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -63,6 +64,8 @@ class StaffPedidosController extends Controller
             return back()->with('error', $e->getMessage());
         }
 
+        AuditLogger::log($request, 'staff.approve_request', BookRequest::class, (int) $bookRequest->id);
+
         return back()->with('success', 'Pedido aprovado. O aluno já pode ver prazos e instruções na área «Os meus pedidos».');
     }
 
@@ -81,6 +84,10 @@ class StaffPedidosController extends Controller
         } catch (\InvalidArgumentException $e) {
             return back()->with('error', $e->getMessage());
         }
+
+        AuditLogger::log($request, 'staff.reject_request', BookRequest::class, (int) $bookRequest->id, [
+            'reason' => $data['reason'] ?? null,
+        ]);
 
         return back()->with('success', 'Pedido recusado.');
     }

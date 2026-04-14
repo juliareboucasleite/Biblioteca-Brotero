@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Biblioteca;
 
 use App\Http\Controllers\Controller;
 use App\Models\LibraryPatron;
+use App\Support\AuditLogger;
 use App\Support\BirthDateParser;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -38,6 +39,10 @@ class LibraryPatronAuthController extends Controller
             ->first();
 
         if ($patron === null) {
+            AuditLogger::log($request, 'auth.login_failed', LibraryPatron::class, null, [
+                'reason' => 'card_not_found',
+                'card_number' => (string) $validated['card_number'],
+            ]);
             throw ValidationException::withMessages([
                 'card_number' => 'Número de cartão não encontrado.',
             ]);
@@ -46,6 +51,9 @@ class LibraryPatronAuthController extends Controller
         $parsed = BirthDateParser::parse($validated['password']);
 
         if ($parsed === null || ! $patron->birth_date->isSameDay($parsed)) {
+            AuditLogger::log($request, 'auth.login_failed', LibraryPatron::class, (int) $patron->id, [
+                'reason' => 'invalid_password',
+            ]);
             throw ValidationException::withMessages([
                 'password' => 'Senha incorreta.',
             ]);
@@ -54,6 +62,7 @@ class LibraryPatronAuthController extends Controller
         if ($patron->isStaff()) {
             $request->session()->put(self::SESSION_CANDIDATE_KEY, $patron->id);
             $request->session()->put('patron_login_remember', $request->boolean('remember'));
+            AuditLogger::log($request, 'auth.login_staff_choose_mode', LibraryPatron::class, (int) $patron->id);
 
             return redirect()->route('biblioteca.login.portal');
         }
@@ -61,6 +70,7 @@ class LibraryPatronAuthController extends Controller
         Auth::guard('patron')->login($patron, $request->boolean('remember'));
         $request->session()->put(self::SESSION_PORTAL_MODE_KEY, 'comunidade');
         $request->session()->regenerate();
+        AuditLogger::log($request, 'auth.login_success', LibraryPatron::class, (int) $patron->id);
 
         return redirect()->intended(route('biblioteca.conta.pedidos'));
     }
@@ -113,6 +123,9 @@ class LibraryPatronAuthController extends Controller
         Auth::guard('patron')->login($patron, $remember);
         $request->session()->put(self::SESSION_PORTAL_MODE_KEY, $data['portal_mode']);
         $request->session()->regenerate();
+        AuditLogger::log($request, 'auth.login_success', LibraryPatron::class, (int) $patron->id, [
+            'portal_mode' => $data['portal_mode'],
+        ]);
 
         return redirect()->intended(route('biblioteca.conta.pedidos'));
     }
@@ -120,6 +133,7 @@ class LibraryPatronAuthController extends Controller
     public function destroy(Request $request): RedirectResponse
     {
         Auth::guard('patron')->logout();
+        AuditLogger::log($request, 'auth.logout');
 
         $request->session()->forget(self::SESSION_PORTAL_MODE_KEY);
         $request->session()->forget(self::SESSION_CANDIDATE_KEY);
@@ -146,6 +160,9 @@ class LibraryPatronAuthController extends Controller
         ]);
 
         $request->session()->put(self::SESSION_PORTAL_MODE_KEY, $data['portal_mode']);
+        AuditLogger::log($request, 'auth.switch_mode', LibraryPatron::class, (int) $patron->id, [
+            'portal_mode' => $data['portal_mode'],
+        ]);
 
         $targetRoute = $data['portal_mode'] === 'bibliotecaria'
             ? 'biblioteca.conta.balcao.index'

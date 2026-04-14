@@ -14,6 +14,10 @@ export default function BibliotecaContaLivroImport() {
             <p className="m-0 mb-[12px] text-[13px] text-(--brotero-texto-cinza)">
                 Cole ISBNs (um por linha) ou envie CSV simples para acelerar cadastro via API.
             </p>
+            <p className="m-0 mb-[12px] rounded-(--raio) border border-(--brotero-borda) bg-(--brotero-fundo) px-[10px] py-[8px] text-[12px] text-(--brotero-texto-cinza)">
+                Exemplo de CSV: coluna única com ISBN (sem cabeçalho obrigatório). Apenas anos do secundário (10, 11, 12)
+                devem ser usados no catálogo escolar.
+            </p>
             {flash?.success ? (
                 <p className="mb-[10px] rounded-(--raio) border border-emerald-200 bg-emerald-50 px-[10px] py-[8px] text-[13px] text-emerald-900">
                     {flash.success}
@@ -52,6 +56,12 @@ export default function BibliotecaContaLivroImport() {
                         {form.processing ? 'A importar...' : 'Importar livros'}
                     </button>
                 </div>
+                {form.errors.isbns_text ? (
+                    <p className="m-0 text-[12px] text-red-800">{form.errors.isbns_text}</p>
+                ) : null}
+                {form.errors.csv_file ? (
+                    <p className="m-0 text-[12px] text-red-800">{form.errors.csv_file}</p>
+                ) : null}
             </form>
         </BibliotecaContaLayout>
     );

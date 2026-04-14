@@ -7,6 +7,7 @@ use App\Models\Category;
 use App\Services\BookFineCalculator;
 use App\Services\BookReturnService;
 use App\Services\GoogleBooksService;
+use App\Models\PatronConversationMessage;
 use App\Support\BookCatalogLanguage;
 use App\Support\BookSynopsisPatches;
 use App\Support\CatalogTaxonomyNormalizer;
@@ -294,3 +295,22 @@ Artisan::command('book-requests:normalize-school-locations', function () {
 
     $this->info("Registos de pedidos atualizados (campo escola): {$n}.");
 })->purpose('Corrigir caracteres incorrectos em book_requests.school_location (ex.: ? em vez de acentos)');
+
+Artisan::command('privacy:purge-old-data {--messages-days=365} {--requests-days=1460}', function () {
+    $messagesDays = max((int) $this->option('messages-days'), 30);
+    $requestsDays = max((int) $this->option('requests-days'), 180);
+
+    $msgCutoff = now()->subDays($messagesDays);
+    $reqCutoff = now()->subDays($requestsDays);
+
+    $deletedMessages = PatronConversationMessage::query()
+        ->where('created_at', '<', $msgCutoff)
+        ->delete();
+
+    $deletedRequests = BookRequest::query()
+        ->whereIn('status', ['returned', 'cancelled', 'rejected', 'expired'])
+        ->where('created_at', '<', $reqCutoff)
+        ->delete();
+
+    $this->info("Limpeza concluída. Mensagens removidas: {$deletedMessages}. Pedidos históricos removidos: {$deletedRequests}.");
+})->purpose('Aplicar retenção de dados (mensagens e histórico concluído)');

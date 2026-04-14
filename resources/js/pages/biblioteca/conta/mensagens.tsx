@@ -69,16 +69,29 @@ export default function BibliotecaContaMensagens({ conversas }: Props) {
             </header>
 
             {conversas.length === 0 ? (
-                <p
-                    className="m-0 rounded-[16px] border border-dashed border-(--brotero-borda) bg-(--brotero-branco)/80 p-[22px] text-center text-[15px] leading-relaxed text-(--brotero-texto-cinza)"
+                <div
+                    className="rounded-[16px] border border-dashed border-(--brotero-borda) bg-(--brotero-branco)/80 p-[22px] text-center text-[15px] leading-relaxed text-(--brotero-texto-cinza)"
                     role="status"
                 >
-                    Conversa com outros leitores: em{' '}
-                    <Link href="/biblioteca/descobertas" className="font-semibold text-(--brotero-texto-link)">
-                        Descobertas
-                    </Link>{' '}
-                    envie «Mensagem privada» a quem partilhou um livro.
-                </p>
+                    <p className="m-0">
+                        Ainda não tem conversas ativas.
+                    </p>
+                    <p className="m-0 mt-[8px]">
+                        Em{' '}
+                        <Link href="/biblioteca/descobertas" className="font-semibold text-(--brotero-texto-link)">
+                            Descobertas
+                        </Link>{' '}
+                        envie «Mensagem privada» a quem partilhou um livro.
+                    </p>
+                    <p className="m-0 mt-[12px]">
+                        <Link
+                            href="/biblioteca/descobertas"
+                            className="inline-flex rounded-(--raio) border border-(--brotero-borda) bg-(--brotero-fundo) px-[12px] py-[7px] text-[13px] font-semibold text-(--brotero-texto) no-underline hover:bg-(--brotero-laranja-hover)"
+                        >
+                            Ir para Descobertas
+                        </Link>
+                    </p>
+                </div>
             ) : (
                 <ul className="m-0 flex list-none flex-col gap-[10px] p-0">
                     {conversas.map((c) => (

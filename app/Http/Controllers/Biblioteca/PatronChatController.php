@@ -10,6 +10,7 @@ use App\Models\PatronConversation;
 use App\Models\PatronConversationMember;
 use App\Models\PatronConversationMessage;
 use App\Models\PatronPeerBookShare;
+use App\Support\AuditLogger;
 use App\Support\PatronLabel;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
@@ -280,6 +281,7 @@ class PatronChatController extends Controller
             'library_patron_id' => $patron->id,
             'body' => $body,
         ]);
+        AuditLogger::log($request, 'chat.send_message', PatronConversation::class, (int) $patron_conversation->id);
 
         $patron_conversation->touch();
         $this->markRead($patron_conversation, $patron);

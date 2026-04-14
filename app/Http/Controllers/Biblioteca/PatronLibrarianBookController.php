@@ -118,7 +118,7 @@ class PatronLibrarianBookController extends Controller
             'language' => ['nullable', 'string', 'max:32'],
             'publisher' => ['nullable', 'string', 'max:255'],
             'school_subject' => ['nullable', 'string', 'max:120'],
-            'school_year' => ['nullable', 'string', 'max:40'],
+            'school_year' => ['nullable', Rule::in(['10', '11', '12'])],
             'target_age_min' => ['nullable', 'integer', 'min:3', 'max:25'],
             'target_age_max' => ['nullable', 'integer', 'min:3', 'max:25'],
             'authors_input' => ['nullable', 'string', 'max:2000'],
@@ -131,7 +131,7 @@ class PatronLibrarianBookController extends Controller
         $coverUrl = null;
         if ($request->hasFile('cover')) {
             $path = $request->file('cover')->store('book-covers', 'public');
-            $coverUrl = Storage::disk('public')->url($path);
+            $coverUrl = Storage::url($path);
         }
 
         $authors = $this->splitNames($data['authors_input'] ?? null);
@@ -232,7 +232,7 @@ class PatronLibrarianBookController extends Controller
             'language' => ['nullable', 'string', 'max:32'],
             'publisher' => ['nullable', 'string', 'max:255'],
             'school_subject' => ['nullable', 'string', 'max:120'],
-            'school_year' => ['nullable', 'string', 'max:40'],
+            'school_year' => ['nullable', Rule::in(['10', '11', '12'])],
             'target_age_min' => ['nullable', 'integer', 'min:3', 'max:25'],
             'target_age_max' => ['nullable', 'integer', 'min:3', 'max:25'],
             'authors_input' => ['nullable', 'string', 'max:2000'],
@@ -261,7 +261,7 @@ class PatronLibrarianBookController extends Controller
 
             if ($request->hasFile('cover')) {
                 $path = $request->file('cover')->store('book-covers', 'public');
-                $attrs['cover_image'] = Storage::disk('public')->url($path);
+                $attrs['cover_image'] = Storage::url($path);
             }
 
             $book->update($attrs);

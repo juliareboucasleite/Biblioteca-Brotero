@@ -216,9 +216,16 @@ export default function BibliotecaContaPedidos({ pedidos }: Props) {
                 À aguardar aprovação
             </h2>
             {pendentes.length === 0 ? (
-                <p className="m-0 mb-[28px] rounded-(--raio) border border-dashed border-(--brotero-borda) bg-(--brotero-branco) p-[16px] text-(--brotero-texto-cinza)">
-                    Não tem pedidos pendentes de validação.
-                </p>
+                <div className="mb-[28px] rounded-(--raio) border border-dashed border-(--brotero-borda) bg-(--brotero-branco) p-[16px] text-(--brotero-texto-cinza)">
+                    <p className="m-0">Não tem pedidos pendentes de validação.</p>
+                    <p className="m-0 mt-[8px] text-[13px]">
+                        Próximo passo: explore o{' '}
+                        <Link href="/biblioteca" className="font-semibold text-(--brotero-texto-link) hover:underline">
+                            catálogo
+                        </Link>{' '}
+                        e peça um novo livro.
+                    </p>
+                </div>
             ) : (
                 <ul className="m-0 mb-[28px] flex list-none flex-col gap-[12px] p-0">
                     {pendentes.map(renderPedidoCard)}

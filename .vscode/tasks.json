@@ -1,0 +1,21 @@
+{
+	"version": "2.0.0",
+	"tasks": [
+		{
+			"label": "sqlproj: Build biblioteca",
+			"type": "process",
+			"command": "dotnet",
+			"args": [
+				"build",
+				"c:/apps/laravel/Biblioteca-Brotero/biblioteca/biblioteca.sqlproj"
+			],
+			"problemMatcher": "$sqlproj-problem-matcher",
+			"isBackground": true,
+			"group": {
+				"kind": "build",
+				"isDefault": true
+			},
+			"detail": "Builds the biblioteca SQL project"
+		}
+	]
+}

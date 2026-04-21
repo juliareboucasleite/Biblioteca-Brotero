@@ -27,6 +27,12 @@ package-lock.json
 # Build files
 /public/build/
 /public/hot
+/public/storage/
+
+# Generated files
+/resources/js/actions/
+/resources/js/routes/
+/resources/js/wayfinder/
 
 # Compiled files
 *.o

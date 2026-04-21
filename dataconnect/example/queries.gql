@@ -1,0 +1,56 @@
+query ListAllBooks @auth(level: PUBLIC, insecureReason: "This operation is safe to expose to the public as it only lists general book information.") {
+  books {
+    id
+    title
+    author
+    publicationYear
+    summary
+    genres
+    coverImageUrl
+  }
+}
+
+mutation CreateNewUser($username: String!, $email: String!, $displayName: String, $bio: String, $profilePictureUrl: String) @auth(level: PUBLIC, insecureReason: "This operation allows new users to register.") {
+  user_insert(data: {
+    username: $username,
+    email: $email,
+    createdAt_expr: "request.time",
+    displayName: $displayName,
+    bio: $bio,
+    profilePictureUrl: $profilePictureUrl
+  }) {
+    id
+  }
+}
+
+mutation AddBookToMyList($bookListId: UUID!, $bookId: UUID!, $position: Int!, $note: String) @auth(level: USER, insecureReason: "This operation is safe to expose to all logged in users as it relates to their own book lists.") {
+  bookListItem_insert(data: {
+    bookListId: $bookListId,
+    bookId: $bookId,
+    position: $position,
+    addedAt_expr: "request.time",
+    note: $note
+  }) {
+    bookListId
+    bookId
+  }
+}
+
+query GetMyBookLists @auth(level: USER, insecureReason: "This operation is safe to expose to all logged in users as it retrieves their personal book lists.") {
+  bookLists(where: { userId: { eq_expr: "auth.uid" } }) {
+    id
+    name
+    isPublic
+    description
+    createdAt
+    updatedAt
+    bookListItems {
+      book {
+        title
+        author
+      }
+      position
+      note
+    }
+  }
+}

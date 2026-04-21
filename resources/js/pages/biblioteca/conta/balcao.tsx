@@ -112,7 +112,7 @@ function estadoLabel(status: string): string {
         case 'pending':
             return 'Pendente';
         case 'created':
-            return 'Ativo';
+            return 'Activo';
         case 'rejected':
             return 'Recusado';
         case 'cancelled':
@@ -346,7 +346,7 @@ export default function BibliotecaContaBalcao({ pedidos, metrics }: Props) {
                     <p className="m-0 mt-0.5 text-[20px] font-bold text-(--brotero-texto)">{metrics?.pendentes ?? 0}</p>
                 </div>
                 <div className="rounded-(--raio) border border-(--brotero-borda) bg-(--brotero-branco) px-2.5 py-2">
-                    <p className="m-0 text-[11px] font-semibold uppercase tracking-wide text-(--brotero-texto-cinza)">Ativos</p>
+                    <p className="m-0 text-[11px] font-semibold uppercase tracking-wide text-(--brotero-texto-cinza)">Activos</p>
                     <p className="m-0 mt-0.5 text-[20px] font-bold text-(--brotero-texto)">{metrics?.ativos ?? 0}</p>
                 </div>
                 <div className="rounded-(--raio) border border-red-200 bg-red-50 px-2.5 py-2">
@@ -384,7 +384,7 @@ export default function BibliotecaContaBalcao({ pedidos, metrics }: Props) {
                     href="/biblioteca/conta/balcao/exportar?scope=active"
                     className="rounded-(--raio) border border-(--brotero-borda) bg-(--brotero-branco) px-3 py-2 text-[13px] font-semibold text-(--brotero-texto) no-underline"
                 >
-                    Exportar CSV (ativos)
+                    Exportar CSV (activos)
                 </a>
                 <a
                     href="/biblioteca/conta/balcao/exportar?scope=overdue"

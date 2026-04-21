@@ -621,30 +621,30 @@ export default function BibliotecaContaMensagensConversa({
                                 className="min-w-52 border border-(--brotero-borda) bg-(--brotero-branco) p-[6px] text-(--brotero-texto) shadow-lg"
                             >
                                 {conversa.mostrar_perfil_peer && peerBase ? (
-                                    <DropdownMenuItem asChild className="cursor-pointer rounded-[8px] text-[14px] focus:bg-(--brotero-fundo) data-[highlighted]:bg-(--brotero-fundo)">
+                                    <DropdownMenuItem asChild className="cursor-pointer rounded-[8px] text-[14px] focus:bg-(--brotero-fundo) data-highlighted:bg-(--brotero-fundo)">
                                         <Link href={peerBase}>Ver perfil</Link>
                                     </DropdownMenuItem>
                                 ) : null}
                                 <DropdownMenuItem
-                                    className="cursor-pointer rounded-[8px] text-[14px] focus:bg-(--brotero-fundo) data-[highlighted]:bg-(--brotero-fundo)"
+                                    className="cursor-pointer rounded-[8px] text-[14px] focus:bg-(--brotero-fundo) data-highlighted:bg-(--brotero-fundo)"
                                     onSelect={() => setReportOpen(true)}
                                 >
                                     Denunciar…
                                 </DropdownMenuItem>
                                 <DropdownMenuItem
-                                    className="cursor-pointer rounded-[8px] text-[14px] focus:bg-(--brotero-fundo) data-[highlighted]:bg-(--brotero-fundo)"
+                                    className="cursor-pointer rounded-[8px] text-[14px] focus:bg-(--brotero-fundo) data-highlighted:bg-(--brotero-fundo)"
                                     onSelect={() => setClearOpen(true)}
                                 >
                                     Limpar conversa
                                 </DropdownMenuItem>
                                 <DropdownMenuItem
-                                    className="cursor-pointer rounded-[8px] text-[14px] text-red-800 focus:bg-(--brotero-fundo) focus:text-red-900 data-[highlighted]:bg-(--brotero-fundo) data-[highlighted]:text-red-900"
+                                    className="cursor-pointer rounded-[8px] text-[14px] text-red-800 focus:bg-(--brotero-fundo) focus:text-red-900 data-highlighted:bg-(--brotero-fundo) data-highlighted:text-red-900"
                                     onSelect={() => setDestroyOpen(true)}
                                 >
                                     Apagar conversa
                                 </DropdownMenuItem>
                                 <DropdownMenuItem
-                                    className="cursor-pointer rounded-[8px] text-[14px] text-red-800 focus:bg-(--brotero-fundo) focus:text-red-900 data-[highlighted]:bg-(--brotero-fundo) data-[highlighted]:text-red-900"
+                                    className="cursor-pointer rounded-[8px] text-[14px] text-red-800 focus:bg-(--brotero-fundo) focus:text-red-900 data-highlighted:bg-(--brotero-fundo) data-highlighted:text-red-900"
                                     onSelect={() => setBlockOpen(true)}
                                 >
                                     Bloquear leitor
@@ -675,7 +675,7 @@ export default function BibliotecaContaMensagensConversa({
                                 <Form action={`${basePath}/cancelar-pedido`} method="post" className="m-0 mt-[10px]">
                                     <button
                                         type="submit"
-                                        className="btn-brotero btn-brotero-secondary btn-sm !text-[12px]"
+                                        className="btn-brotero btn-brotero-secondary btn-sm text-[12px]!"
                                     >
                                         Cancelar pedido
                                     </button>
@@ -895,7 +895,7 @@ export default function BibliotecaContaMensagensConversa({
                                 />
                                 <button
                                     type="submit"
-                                    className="btn-brotero btn-brotero-primary !size-[44px] !rounded-full !p-0"
+                                    className="btn-brotero btn-brotero-primary size-[44px]! rounded-full! p-0!"
                                     aria-label="Enviar mensagem"
                                 >
                                     <Send className="size-[20px]" aria-hidden strokeWidth={2} />

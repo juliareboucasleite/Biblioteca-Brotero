@@ -232,7 +232,7 @@ export default function BibliotecaContaPedidos({ pedidos }: Props) {
                 </ul>
             )}
 
-            <h2 className="m-0 mb-4 text-[1.15rem] font-bold text-(--brotero-texto)">Pedidos ativos</h2>
+            <h2 className="m-0 mb-4 text-[1.15rem] font-bold text-(--brotero-texto)">Pedidos activos</h2>
             {ativos.length === 0 ? (
                 <p className="m-0 p-4 bg-(--brotero-branco) border border-dashed border-(--brotero-borda) rounded-(--raio) text-(--brotero-texto-cinza)">
                     Não tem requisições em curso. Explore o{' '}

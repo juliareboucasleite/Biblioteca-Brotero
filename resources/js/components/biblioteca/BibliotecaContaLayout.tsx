@@ -116,7 +116,7 @@ export function BibliotecaContaLayout({
                             </>
                         ) : null}
                         <Link href="/biblioteca/conta/pedidos" className={active('pedidos')} preserveScroll>
-                            Pedidos ativos
+                            Pedidos activos
                         </Link>
                         <Link href="/biblioteca/conta/historico" className={active('historico')} preserveScroll>
                             Histórico

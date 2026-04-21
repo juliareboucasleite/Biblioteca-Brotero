@@ -215,7 +215,7 @@ export default function LibraryAll({
                             <section className="mb-6">
                                 {livrosMaisPedidosCategoria.length > 0 ? (
                                     <>
-                                        <BookSectionHeader title="Bestsellers" />
+                                        <BookSectionHeader title="Mais pedidos" />
                                         <div className="flex items-center gap-2.5 mb-3">
                                             <div className="hidden items-center gap-1 sm:flex">
                                                 <button
@@ -239,7 +239,7 @@ export default function LibraryAll({
                                         <div
                                             ref={bestsellersScrollRef}
                                             className="flex cursor-grab snap-x snap-proximity gap-4 overflow-x-auto pb-2 select-none [-ms-overflow-style:none] [scrollbar-width:none] active:cursor-grabbing [&::-webkit-scrollbar]:hidden"
-                                            aria-label="Bestsellers da categoria"
+                                            aria-label="Mais pedidos da categoria"
                                             onMouseDown={bestsellersOnMouseDown}
                                             onClickCapture={bestsellersOnClickCapture}
                                             onDragStart={(e) => e.preventDefault()}
@@ -255,10 +255,10 @@ export default function LibraryAll({
                                     </>
                                 ) : (
                                     <>
-                                        <BookSectionHeader title="Bestsellers" />
+                                        <BookSectionHeader title="Mais pedidos" />
                                         <div className="grid grid-cols-[repeat(auto-fill,minmax(160px,1fr))] gap-4 max-[768px]:grid-cols-[repeat(auto-fill,minmax(130px,1fr))] max-[768px]:gap-3">
                                             <BibliotecaSectionPlaceholder>
-                                                Ainda não há bestsellers suficientes nesta categoria.
+                                                Ainda não há livros mais pedidos suficientes nesta categoria.
                                             </BibliotecaSectionPlaceholder>
                                         </div>
                                     </>

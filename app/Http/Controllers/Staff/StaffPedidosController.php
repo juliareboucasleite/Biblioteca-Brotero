@@ -55,7 +55,7 @@ class StaffPedidosController extends Controller
         }
 
         if (! LibraryPatron::query()->where('card_number', $bookRequest->card_number)->exists()) {
-            return back()->with('error', 'Cadastre o leitor com este número de cartão antes de aprovar o pedido.');
+            return back()->with('error', 'Registe o leitor com este número de cartão antes de aprovar o pedido.');
         }
 
         try {

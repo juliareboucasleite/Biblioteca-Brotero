@@ -83,7 +83,7 @@ class BibliotecaContaController extends Controller
     }
 
     /**
-     * O leitor cancela um pedido ainda ativo (status created). O livro volta a ficar disponível.
+     * O leitor cancela um pedido ainda activo (status created). O livro volta a ficar disponível.
      */
     public function cancelPedido(Request $request, BookRequest $bookRequest): RedirectResponse
     {

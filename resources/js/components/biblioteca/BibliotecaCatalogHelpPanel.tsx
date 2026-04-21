@@ -54,11 +54,11 @@ export function BibliotecaCatalogHelpPanel() {
             let response = "Peço desculpa, ainda estou a aprender. Pode reformular a sua pergunta ou contactar a biblioteca por e-mail?";
 
             if (query.includes('requisitar') || query.includes('pedir') || query.includes('livro')) {
-                response = "Para requisitar um livro, basta abrir a página da obra e clicar em 'take it'. Se estiver disponível, o staff irá preparar o livro para entrega.";
-            } else if (query.includes('entrar') || query.includes('cartão') || query.includes('senha') || query.includes('passe')) {
-                response = "Use o seu número de cartão (5 algarismos) e a senha no formato data (DDMMAA ou DDMMAAAA).";
+                response = "Para requisitar um livro, abra a página da obra e clique em «Requisitar». Se estiver disponível, a equipa da biblioteca prepara o livro para entrega.";
+            } else if (query.includes('entrar') || query.includes('cartão') || query.includes('palavra-passe') || query.includes('passe')) {
+                response = "Use o seu número de cartão (5 algarismos) e a palavra-passe no formato de data (DDMMAA ou DDMMAAAA).";
             } else if (query.includes('ranking') || query.includes('quem')) {
-                response = "O nosso ranking destaca os leitores com mais requisições concluídas. Visite a página 'Ranking' para ver os líderes!";
+                response = "O nosso ranking destaca os leitores com mais requisições concluídas. Consulte a página «Ranking» para ver os líderes.";
             } else if (query.includes('ola') || query.includes('oi') || query.includes('bom dia')) {
                 response = "Olá! Como posso ajudar na sua jornada de leitura hoje?";
             }
@@ -127,7 +127,7 @@ export function BibliotecaCatalogHelpPanel() {
                                 <button
                                     type="button"
                                     onClick={close}
-                                    className="btn-brotero btn-brotero-ghost !rounded-full !p-2 !text-white hover:!bg-white/15"
+                                    className="btn-brotero btn-brotero-ghost rounded-full! p-2! text-white! hover:bg-white/15!"
                                     aria-label="Fechar ajuda"
                                 >
                                     <X className="size-5" />
@@ -189,7 +189,7 @@ export function BibliotecaCatalogHelpPanel() {
                                 <button
                                     type="submit"
                                     disabled={!input.trim()}
-                                    className="btn-brotero btn-brotero-primary !size-10 !rounded-full !p-0"
+                                    className="btn-brotero btn-brotero-primary size-10! rounded-full! p-0!"
                                 >
                                     <Send className="size-5" />
                                 </button>

@@ -55,7 +55,7 @@ class LibraryPatronAuthController extends Controller
                 'reason' => 'invalid_password',
             ]);
             throw ValidationException::withMessages([
-                'password' => 'Senha incorreta.',
+                'password' => 'Palavra-passe incorreta.',
             ]);
         }
 

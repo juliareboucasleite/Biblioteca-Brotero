@@ -11,7 +11,7 @@ use Illuminate\Validation\Rule;
 class StaffPatronController extends Controller
 {
     /**
-     * Cadastro de leitor (cartão) pelo pessoal da biblioteca.
+     * Registo de leitor (cartão) pelo pessoal da biblioteca.
      */
     public function store(Request $request): RedirectResponse
     {
@@ -36,6 +36,6 @@ class StaffPatronController extends Controller
             'is_librarian' => $isStaff,
         ]);
 
-        return back()->with('success', 'Leitor cadastrado. Pode aprovar o pedido associado a este cartão.');
+        return back()->with('success', 'Leitor registado. Pode aprovar o pedido associado a este cartão.');
     }
 }

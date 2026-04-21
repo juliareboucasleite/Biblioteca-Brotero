@@ -12,7 +12,7 @@ export default function BibliotecaContaLivroImport() {
         <BibliotecaContaLayout title="Importação de livros" secao="livro-novo">
             <h2 className="m-0 mb-[8px] text-[1.15rem] font-bold text-(--brotero-texto)">Importação em lote</h2>
             <p className="m-0 mb-[12px] text-[13px] text-(--brotero-texto-cinza)">
-                Cole ISBNs (um por linha) ou envie CSV simples para acelerar cadastro via API.
+                Cole ISBNs (um por linha) ou envie um CSV simples para acelerar o registo via API.
             </p>
             <p className="m-0 mb-[12px] rounded-(--raio) border border-(--brotero-borda) bg-(--brotero-fundo) px-[10px] py-[8px] text-[12px] text-(--brotero-texto-cinza)">
                 Exemplo de CSV: coluna única com ISBN (sem cabeçalho obrigatório). Apenas anos do secundário (10, 11, 12)

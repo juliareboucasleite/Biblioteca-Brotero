@@ -115,7 +115,7 @@ export function CardLivro({ livro, className }: CardLivroProps) {
                                 : { left: '50%', top: '50%' }
                         }
                     >
-                        take it
+                        Requisitar
                     </div>
                 </a>
                 {livro.tem_ebook ? (

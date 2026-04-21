@@ -96,10 +96,10 @@ class PatronLibrarianDeskController extends Controller
                 ->count();
 
             if ($count === 0) {
-                return back()->with('error', "Cartão {$digitsOnly} lido, sem pedidos ativos/pendentes.");
+                return back()->with('error', "Cartão {$digitsOnly} lido, sem pedidos activos/pendentes.");
             }
 
-            return back()->with('success', "Cartão {$digitsOnly} lido. Pedidos ativos/pendentes: {$count}.");
+            return back()->with('success', "Cartão {$digitsOnly} lido. Pedidos activos/pendentes: {$count}.");
         }
 
         // ISBN pode vir com hífens/espaços e ISBN-10 pode terminar em X.
@@ -111,10 +111,10 @@ class PatronLibrarianDeskController extends Controller
                 ->count();
 
             if ($count === 0) {
-                return back()->with('error', "ISBN {$isbnNormalized} lido, sem pedidos ativos/pendentes.");
+                return back()->with('error', "ISBN {$isbnNormalized} lido, sem pedidos activos/pendentes.");
             }
 
-            return back()->with('success', "ISBN {$isbnNormalized} lido. Pedidos ativos/pendentes: {$count}.");
+            return back()->with('success', "ISBN {$isbnNormalized} lido. Pedidos activos/pendentes: {$count}.");
         }
 
         $pedidoDigits = preg_replace('/\D+/', '', $raw) ?? '';
@@ -216,7 +216,7 @@ class PatronLibrarianDeskController extends Controller
         }
 
         if (! LibraryPatron::query()->where('card_number', $bookRequest->card_number)->exists()) {
-            return back()->with('error', 'Cadastre o leitor com este número de cartão antes de aprovar.');
+            return back()->with('error', 'Registe o leitor com este número de cartão antes de aprovar.');
         }
 
         try {
@@ -258,7 +258,7 @@ class PatronLibrarianDeskController extends Controller
     public function cancel(Request $request, BookRequest $bookRequest): RedirectResponse
     {
         if (! in_array($bookRequest->status, ['pending', 'created'], true)) {
-            return back()->with('error', 'Só é possível cancelar pedidos pendentes ou ativos.');
+            return back()->with('error', 'Só é possível cancelar pedidos pendentes ou activos.');
         }
 
         $bookRequest->forceFill(['status' => 'cancelled'])->save();
@@ -290,7 +290,7 @@ class PatronLibrarianDeskController extends Controller
         ]);
 
         if ($bookRequest->status !== 'created') {
-            return back()->with('error', 'Só pode ajustar multa em requisições ativas.');
+            return back()->with('error', 'Só pode ajustar multa em requisições activas.');
         }
 
         if ($bookRequest->returned_at !== null) {
@@ -308,7 +308,7 @@ class PatronLibrarianDeskController extends Controller
     public function recalcFine(Request $request, BookRequest $bookRequest, BookFineCalculator $calculator): RedirectResponse
     {
         if ($bookRequest->status !== 'created') {
-            return back()->with('error', 'Só pode recalcular em requisições ativas.');
+            return back()->with('error', 'Só pode recalcular em requisições activas.');
         }
 
         if ($bookRequest->returned_at !== null) {
@@ -324,7 +324,7 @@ class PatronLibrarianDeskController extends Controller
     public function markReturned(Request $request, BookRequest $bookRequest, BookReturnService $returns): RedirectResponse
     {
         if ($bookRequest->status !== 'created') {
-            return back()->with('error', 'Só pode marcar devolução em requisições ativas.');
+            return back()->with('error', 'Só pode marcar devolução em requisições activas.');
         }
 
         if ($bookRequest->returned_at !== null) {

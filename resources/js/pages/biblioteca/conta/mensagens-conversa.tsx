@@ -162,7 +162,7 @@ function SugerirLivroInline({
                 />
                 <button
                     type="button"
-                    className="cursor-pointer rounded-[12px] border-0 bg-(--brotero-primaria) px-[14px] py-[9px] text-[13px] font-semibold text-white hover:opacity-95 disabled:cursor-not-allowed disabled:opacity-50"
+                    className={`btn-brotero btn-brotero-primary btn-sm${loading ? ' btn-loading' : ''}`}
                     disabled={loading}
                     onClick={() => void pesquisar()}
                 >
@@ -228,7 +228,7 @@ function SugerirLivroInline({
                     </label>
                     <button
                         type="submit"
-                        className="w-fit cursor-pointer rounded-[10px] border-0 bg-emerald-700 px-[14px] py-[8px] text-[13px] font-semibold text-white hover:bg-emerald-800"
+                        className="btn-brotero btn-brotero-primary btn-sm w-fit"
                     >
                         Enviar sugestão
                     </button>
@@ -363,14 +363,14 @@ export default function BibliotecaContaMensagensConversa({
                             <DialogFooter className="gap-[8px] sm:justify-end">
                                 <button
                                     type="button"
-                                    className="rounded-[10px] border border-(--brotero-borda) bg-(--brotero-branco) px-[14px] py-[8px] text-[14px] font-semibold"
+                                    className="btn-brotero btn-brotero-secondary btn-sm"
                                     onClick={() => setReportOpen(false)}
                                 >
                                     Cancelar
                                 </button>
                                 <button
                                     type="submit"
-                                    className="rounded-[10px] border-0 bg-(--brotero-primaria) px-[14px] py-[8px] text-[14px] font-semibold text-white"
+                                    className="btn-brotero btn-brotero-primary btn-sm"
                                 >
                                     Enviar denúncia
                                 </button>
@@ -392,7 +392,7 @@ export default function BibliotecaContaMensagensConversa({
                     <DialogFooter className="gap-[8px] sm:justify-end">
                         <button
                             type="button"
-                            className="rounded-[10px] border border-(--brotero-borda) bg-(--brotero-branco) px-[14px] py-[8px] text-[14px] font-semibold"
+                            className="btn-brotero btn-brotero-secondary btn-sm"
                             onClick={() => setBlockOpen(false)}
                         >
                             Cancelar
@@ -406,7 +406,7 @@ export default function BibliotecaContaMensagensConversa({
                             >
                                 <button
                                     type="submit"
-                                    className="rounded-[10px] border-0 bg-red-700 px-[14px] py-[8px] text-[14px] font-semibold text-white hover:bg-red-800"
+                                    className="btn-brotero btn-brotero-danger btn-sm"
                                 >
                                     Bloquear
                                 </button>
@@ -485,7 +485,7 @@ export default function BibliotecaContaMensagensConversa({
                                 <Form action={`${basePath}/cancelar-pedido`} method="post" className="m-0 mt-[10px]">
                                     <button
                                         type="submit"
-                                        className="cursor-pointer rounded-[10px] border border-(--brotero-borda) bg-(--brotero-branco) px-[12px] py-[6px] text-[12px] font-semibold text-(--brotero-texto) hover:bg-(--brotero-fundo)"
+                                        className="btn-brotero btn-brotero-secondary btn-sm !text-[12px]"
                                     >
                                         Cancelar pedido
                                     </button>
@@ -503,7 +503,7 @@ export default function BibliotecaContaMensagensConversa({
                                 <Form action={`${basePath}/aceitar`} method="post" className="m-0">
                                     <button
                                         type="submit"
-                                        className="cursor-pointer rounded-[10px] border-0 bg-emerald-700 px-[14px] py-[8px] text-[13px] font-semibold text-white hover:bg-emerald-800"
+                                        className="btn-brotero btn-brotero-primary btn-sm"
                                     >
                                         Aceitar
                                     </button>
@@ -512,7 +512,7 @@ export default function BibliotecaContaMensagensConversa({
                                     <Form action={`${basePath}/recusar`} method="post" className="m-0">
                                         <button
                                             type="submit"
-                                            className="cursor-pointer rounded-[10px] border border-(--brotero-borda) bg-(--brotero-branco) px-[14px] py-[8px] text-[13px] font-semibold text-(--brotero-texto) hover:bg-(--brotero-branco)"
+                                            className="btn-brotero btn-brotero-secondary btn-sm"
                                         >
                                             Recusar
                                         </button>
@@ -672,7 +672,7 @@ export default function BibliotecaContaMensagensConversa({
                                 />
                                 <button
                                     type="submit"
-                                    className="inline-flex size-[44px] shrink-0 cursor-pointer items-center justify-center rounded-full border-0 bg-(--brotero-primaria) text-white shadow-sm transition-[transform,opacity] hover:opacity-95 active:scale-[0.97] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-(--brotero-primaria)"
+                                    className="btn-brotero btn-brotero-primary !size-[44px] !rounded-full !p-0"
                                     aria-label="Enviar mensagem"
                                 >
                                     <Send className="size-[20px]" aria-hidden strokeWidth={2} />

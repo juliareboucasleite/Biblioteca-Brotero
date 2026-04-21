@@ -6,10 +6,10 @@ type Props = {
 };
 
 const sessaoBtnPrimaryClass =
-    'w-full rounded-(--raio) border-0 bg-(--brotero-primaria) px-[18px] py-[16px] text-left text-[15px] font-semibold leading-snug text-white shadow-[0_1px_3px_rgba(0,0,0,0.12)] transition-opacity hover:opacity-92 focus:outline-none focus-visible:ring-2 focus-visible:ring-(--brotero-primaria) focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50';
+    'btn-brotero btn-brotero-primary btn-full !text-left !py-[16px] !px-[18px] !text-[15px] !leading-snug';
 
 const sessaoBtnSecondaryClass =
-    'w-full rounded-(--raio) border-2 border-(--brotero-primaria) bg-(--brotero-branco) px-[18px] py-[16px] text-left text-[15px] font-semibold leading-snug text-(--brotero-texto) shadow-[0_1px_2px_rgba(0,0,0,0.06)] transition-colors hover:bg-(--brotero-fundo) focus:outline-none focus-visible:ring-2 focus-visible:ring-(--brotero-primaria)/50 focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50';
+    'btn-brotero btn-brotero-secondary btn-full !text-left !py-[16px] !px-[18px] !text-[15px] !leading-snug !border-2 !border-(--brotero-primaria)';
 
 export default function BibliotecaLoginPortal({ greeting_name }: Props) {
     const label =

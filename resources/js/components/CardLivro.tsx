@@ -183,7 +183,7 @@ export function CardLivro({ livro, className }: CardLivroProps) {
                             <button
                                 type="button"
                                 disabled={isSavingList}
-                                className="cursor-pointer rounded-(--raio) border border-(--brotero-borda) bg-(--brotero-branco) px-[12px] py-[8px] text-[13px] font-semibold text-(--brotero-texto)"
+                                className="btn-brotero btn-brotero-secondary btn-sm"
                                 onClick={() => setIsListModalOpen(false)}
                             >
                                 Cancelar
@@ -191,7 +191,7 @@ export function CardLivro({ livro, className }: CardLivroProps) {
                             <button
                                 type="button"
                                 disabled={isSavingList || (selectedListId === '' && listName.trim() === '')}
-                                className="cursor-pointer rounded-(--raio) border-0 bg-(--brotero-primaria) px-[12px] py-[8px] text-[13px] font-semibold text-white"
+                                className={clsx('btn-brotero btn-brotero-primary btn-sm', isSavingList && 'btn-loading')}
                                 onClick={onConfirmSaveToList}
                             >
                                 {isSavingList ? 'A guardar...' : 'Guardar'}

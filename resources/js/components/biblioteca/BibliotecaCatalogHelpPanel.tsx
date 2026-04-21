@@ -127,7 +127,7 @@ export function BibliotecaCatalogHelpPanel() {
                                 <button
                                     type="button"
                                     onClick={close}
-                                    className="rounded-full p-2 hover:bg-white/10 transition-colors"
+                                    className="btn-brotero btn-brotero-ghost !rounded-full !p-2 !text-white hover:!bg-white/15"
                                     aria-label="Fechar ajuda"
                                 >
                                     <X className="size-5" />
@@ -189,7 +189,7 @@ export function BibliotecaCatalogHelpPanel() {
                                 <button
                                     type="submit"
                                     disabled={!input.trim()}
-                                    className="flex size-10 items-center justify-center rounded-full bg-(--brotero-primaria) text-white hover:bg-(--brotero-primaria-escuro) disabled:opacity-50 disabled:grayscale transition-all"
+                                    className="btn-brotero btn-brotero-primary !size-10 !rounded-full !p-0"
                                 >
                                     <Send className="size-5" />
                                 </button>

@@ -112,11 +112,7 @@ export default function Library({
     const scrollMaisPedidos = (delta: number) => {
         maisPedidosScrollRef.current?.scrollBy({ left: delta, behavior: 'smooth' });
     };
-    const carrosselArrowBtnClass = cn(
-        'inline-flex size-[36px] items-center justify-center rounded-full border border-(--brotero-borda) bg-(--brotero-branco) text-(--brotero-texto) shadow-sm transition-colors',
-        'hover:border-(--brotero-primaria-claro) hover:text-(--brotero-primaria)',
-        'focus-visible:outline-2 focus-visible:outline-(--brotero-primaria)',
-    );
+    const carrosselArrowBtnClass = 'btn-brotero btn-brotero-icon btn-sm';
     const carrosselCardClass =
         'w-[160px] flex-[0_0_160px] snap-start rounded-[18px] border-(--brotero-borda-suave) shadow-[0_8px_22px_rgba(42,38,48,0.06)]';
 

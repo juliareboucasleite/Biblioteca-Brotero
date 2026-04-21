@@ -31,6 +31,237 @@
     --brotero-glass: rgba(30, 30, 40, 0.6);
 }
 
+/* --- Botões Premium Brotero --- */
+/* Base partilhada */
+.btn-brotero {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    font-weight: 600;
+    font-size: 14px;
+    line-height: 1.2;
+    border-radius: 14px;
+    padding: 12px 22px;
+    border: none;
+    cursor: pointer;
+    text-decoration: none;
+    white-space: nowrap;
+    position: relative;
+    overflow: hidden;
+    isolation: isolate;
+    transition:
+        background 0.25s cubic-bezier(0.4, 0, 0.2, 1),
+        color 0.25s ease,
+        box-shadow 0.3s cubic-bezier(0.4, 0, 0.2, 1),
+        transform 0.2s cubic-bezier(0.34, 1.56, 0.64, 1),
+        border-color 0.25s ease,
+        opacity 0.2s ease;
+}
+
+.btn-brotero:focus-visible {
+    outline: 2px solid var(--brotero-primaria);
+    outline-offset: 3px;
+}
+
+.btn-brotero:disabled,
+.btn-brotero[aria-disabled="true"] {
+    pointer-events: none;
+    opacity: 0.5;
+    filter: grayscale(0.3);
+}
+
+/* ---- Primário ---- */
+.btn-brotero-primary {
+    background: linear-gradient(135deg, var(--brotero-primaria-claro), var(--brotero-primaria), var(--brotero-primaria-escuro));
+    background-size: 200% 200%;
+    color: #fff;
+    box-shadow:
+        0 4px 14px -3px oklch(0.45 0.18 263 / 0.35),
+        0 1px 3px rgba(0, 0, 0, 0.1),
+        inset 0 1px 0 rgba(255, 255, 255, 0.15);
+}
+
+.btn-brotero-primary:hover {
+    background-position: 100% 100%;
+    transform: translateY(-2px);
+    box-shadow:
+        0 8px 24px -4px oklch(0.45 0.18 263 / 0.45),
+        0 2px 6px rgba(0, 0, 0, 0.12),
+        inset 0 1px 0 rgba(255, 255, 255, 0.2);
+}
+
+.btn-brotero-primary:active {
+    transform: translateY(0px) scale(0.97);
+    box-shadow:
+        0 2px 8px -2px oklch(0.45 0.18 263 / 0.3),
+        inset 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+/* Brilho animado no hover */
+.btn-brotero-primary::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(
+        120deg,
+        transparent 30%,
+        rgba(255, 255, 255, 0.15) 50%,
+        transparent 70%
+    );
+    transform: translateX(-100%);
+    transition: transform 0.6s ease;
+    z-index: 1;
+    pointer-events: none;
+}
+
+.btn-brotero-primary:hover::after {
+    transform: translateX(100%);
+}
+
+/* ---- Secundário ---- */
+.btn-brotero-secondary {
+    background: var(--brotero-branco);
+    color: var(--brotero-texto);
+    border: 1.5px solid var(--brotero-borda);
+    box-shadow:
+        0 2px 8px -2px rgba(0, 0, 0, 0.06),
+        0 1px 2px rgba(0, 0, 0, 0.04);
+}
+
+.btn-brotero-secondary:hover {
+    border-color: var(--brotero-primaria-claro);
+    color: var(--brotero-primaria);
+    background: oklch(0.55 0.18 263 / 0.06);
+    transform: translateY(-1px);
+    box-shadow:
+        0 4px 14px -3px oklch(0.55 0.18 263 / 0.15),
+        0 1px 3px rgba(0, 0, 0, 0.06);
+}
+
+.btn-brotero-secondary:active {
+    transform: translateY(0px) scale(0.97);
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.06);
+}
+
+/* ---- Ghost ---- */
+.btn-brotero-ghost {
+    background: transparent;
+    color: var(--brotero-texto-cinza);
+    border: none;
+    padding: 10px 16px;
+}
+
+.btn-brotero-ghost:hover {
+    background: oklch(0.55 0.18 263 / 0.08);
+    color: var(--brotero-primaria);
+    transform: translateY(-1px);
+}
+
+.btn-brotero-ghost:active {
+    transform: translateY(0px) scale(0.97);
+    background: oklch(0.55 0.18 263 / 0.12);
+}
+
+/* ---- Ícone (circular) ---- */
+.btn-brotero-icon {
+    width: 40px;
+    height: 40px;
+    padding: 0;
+    border-radius: 50%;
+    background: var(--brotero-branco);
+    color: var(--brotero-texto);
+    border: 1.5px solid var(--brotero-borda);
+    box-shadow: 0 2px 8px -2px rgba(0, 0, 0, 0.08);
+}
+
+.btn-brotero-icon:hover {
+    border-color: var(--brotero-primaria-claro);
+    color: var(--brotero-primaria);
+    background: oklch(0.55 0.18 263 / 0.06);
+    transform: translateY(-1px) scale(1.06);
+    box-shadow:
+        0 4px 14px -3px oklch(0.55 0.18 263 / 0.18),
+        0 1px 3px rgba(0, 0, 0, 0.06);
+}
+
+.btn-brotero-icon:active {
+    transform: translateY(0px) scale(0.94);
+}
+
+/* Tamanho compacto (sm) */
+.btn-brotero-icon.btn-sm {
+    width: 36px;
+    height: 36px;
+}
+
+/* ---- Destrutivo (cancelar/apagar) ---- */
+.btn-brotero-danger {
+    background: linear-gradient(135deg, #ef4444, #dc2626);
+    color: #fff;
+    box-shadow:
+        0 4px 14px -3px rgba(220, 38, 38, 0.35),
+        0 1px 3px rgba(0, 0, 0, 0.1),
+        inset 0 1px 0 rgba(255, 255, 255, 0.12);
+}
+
+.btn-brotero-danger:hover {
+    transform: translateY(-2px);
+    box-shadow:
+        0 8px 24px -4px rgba(220, 38, 38, 0.45),
+        0 2px 6px rgba(0, 0, 0, 0.12);
+}
+
+.btn-brotero-danger:active {
+    transform: translateY(0px) scale(0.97);
+}
+
+/* ---- Tamanhos ---- */
+.btn-brotero.btn-sm {
+    font-size: 13px;
+    padding: 8px 16px;
+    border-radius: 12px;
+    gap: 6px;
+}
+
+.btn-brotero.btn-lg {
+    font-size: 16px;
+    padding: 16px 28px;
+    border-radius: 16px;
+    gap: 10px;
+}
+
+.btn-brotero.btn-full {
+    width: 100%;
+}
+
+/* ---- Loading state ---- */
+@keyframes brotero-btn-shimmer {
+    0% { background-position: -200% center; }
+    100% { background-position: 200% center; }
+}
+
+.btn-brotero.btn-loading {
+    pointer-events: none;
+    opacity: 0.7;
+}
+
+.btn-brotero.btn-loading::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(
+        90deg,
+        transparent 35%,
+        rgba(255, 255, 255, 0.2) 50%,
+        transparent 65%
+    );
+    background-size: 200% 100%;
+    animation: brotero-btn-shimmer 1.6s ease infinite;
+    z-index: 2;
+    pointer-events: none;
+}
+
 .brotero-scope {
     background: var(--brotero-fundo);
     color: var(--brotero-texto);
@@ -123,18 +354,25 @@
 .header-search-btn {
     padding: 0 24px;
     border: none;
-    background: var(--brotero-primaria);
+    background: linear-gradient(135deg, var(--brotero-primaria-claro), var(--brotero-primaria), var(--brotero-primaria-escuro));
+    background-size: 200% 200%;
     color: #fff;
     cursor: pointer;
-    transition: all 0.2s ease;
+    transition: all 0.3s ease;
     display: flex;
     align-items: center;
     justify-content: center;
+    position: relative;
+    overflow: hidden;
 }
 
 .header-search-btn:hover {
-    background: var(--brotero-primaria-escuro);
-    transform: scale(1.02);
+    background-position: 100% 100%;
+    box-shadow: inset 0 0 20px rgba(255, 255, 255, 0.1);
+}
+
+.header-search-btn:active {
+    transform: scale(0.97);
 }
 
 /* --- Layout principal --- */
@@ -624,21 +862,50 @@
 }
 
 .pagina-livro-submit {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
     width: 100%;
     margin-top: 12px;
-    padding: 12px 20px;
+    padding: 14px 24px;
     border: none;
-    border-radius: var(--raio);
-    background: var(--brotero-primaria);
+    border-radius: 14px;
+    background: linear-gradient(135deg, var(--brotero-primaria-claro), var(--brotero-primaria), var(--brotero-primaria-escuro));
+    background-size: 200% 200%;
     color: #fff;
     font-size: 15px;
-    font-weight: 600;
+    font-weight: 700;
     cursor: pointer;
-    transition: opacity 0.15s ease;
+    position: relative;
+    overflow: hidden;
+    box-shadow:
+        0 4px 14px -3px oklch(0.45 0.18 263 / 0.35),
+        0 1px 3px rgba(0, 0, 0, 0.1),
+        inset 0 1px 0 rgba(255, 255, 255, 0.15);
+    transition:
+        background-position 0.4s ease,
+        transform 0.2s cubic-bezier(0.34, 1.56, 0.64, 1),
+        box-shadow 0.3s ease;
 }
 
 .pagina-livro-submit:hover {
-    opacity: 0.9;
+    background-position: 100% 100%;
+    transform: translateY(-2px);
+    box-shadow:
+        0 8px 24px -4px oklch(0.45 0.18 263 / 0.45),
+        0 2px 6px rgba(0, 0, 0, 0.12),
+        inset 0 1px 0 rgba(255, 255, 255, 0.2);
+}
+
+.pagina-livro-submit:active {
+    transform: translateY(0px) scale(0.97);
+}
+
+.pagina-livro-submit:disabled {
+    opacity: 0.5;
+    pointer-events: none;
+    filter: grayscale(0.3);
 }
 
 @media (max-width: 900px) {

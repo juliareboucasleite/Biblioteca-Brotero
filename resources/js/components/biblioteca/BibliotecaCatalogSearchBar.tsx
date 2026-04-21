@@ -60,7 +60,7 @@ export function BibliotecaCatalogSearchBar({
             />
             <button
                 type="submit"
-                className="shrink-0 cursor-pointer rounded-full border-0 bg-(--brotero-primaria) px-[24px] py-[12px] text-[15px] font-bold text-white shadow-lg transition-all duration-200 hover:bg-(--brotero-primaria-escuro) hover:shadow-xl hover:-translate-y-0.5 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-(--brotero-primaria) active:scale-[0.96]"
+                className="btn-brotero btn-brotero-primary shrink-0 !rounded-full !px-[24px] !py-[12px] !text-[15px] !font-bold"
             >
                 Pesquisar
             </button>

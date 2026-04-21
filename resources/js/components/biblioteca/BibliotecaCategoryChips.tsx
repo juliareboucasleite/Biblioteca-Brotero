@@ -420,11 +420,7 @@ function buildUrl(
     return query ? `${basePath}?${query}` : basePath;
 }
 
-const arrowBtnClass = cn(
-    'inline-flex size-[36px] items-center justify-center rounded-full border border-(--brotero-borda) bg-(--brotero-branco) text-(--brotero-texto) shadow-sm transition-colors',
-    'hover:border-(--brotero-primaria-claro) hover:text-(--brotero-primaria)',
-    'focus-visible:outline-2 focus-visible:outline-(--brotero-primaria)',
-);
+const arrowBtnClass = 'btn-brotero btn-brotero-icon btn-sm';
 
 type IconSlotProps = {
     src: string;

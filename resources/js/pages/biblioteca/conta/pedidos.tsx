@@ -182,7 +182,7 @@ export default function BibliotecaContaPedidos({ pedidos }: Props) {
                 <div className="flex shrink-0 justify-center sm:justify-end sm:self-center">
                     <button
                         type="button"
-                        className="px-[12px] py-[6px] text-[13px] font-semibold rounded-(--raio) border border-(--brotero-borda) bg-(--brotero-branco) text-(--brotero-texto) cursor-pointer hover:bg-(--brotero-laranja-hover) whitespace-nowrap disabled:cursor-not-allowed disabled:opacity-60"
+                        className="btn-brotero btn-brotero-secondary btn-sm"
                         disabled={isBusy}
                         onClick={() => setConfirmPedido(p)}
                     >
@@ -268,7 +268,7 @@ export default function BibliotecaContaPedidos({ pedidos }: Props) {
                     <DialogFooter className="gap-2 sm:gap-2">
                         <button
                             type="button"
-                            className="px-[12px] py-[6px] text-[13px] font-semibold rounded-(--raio) border border-(--brotero-borda) bg-(--brotero-branco) text-(--brotero-texto) cursor-pointer hover:bg-(--brotero-laranja-hover) disabled:cursor-not-allowed disabled:opacity-60"
+                            className="btn-brotero btn-brotero-secondary btn-sm"
                             disabled={isBusy}
                             onClick={() => setConfirmPedido(null)}
                         >
@@ -276,7 +276,7 @@ export default function BibliotecaContaPedidos({ pedidos }: Props) {
                         </button>
                         <button
                             type="button"
-                            className="inline-flex items-center justify-center gap-2 px-[12px] py-[6px] text-[13px] font-semibold rounded-(--raio) border border-(--brotero-primaria) bg-(--brotero-primaria) text-white cursor-pointer hover:bg-(--brotero-primaria-escuro) disabled:cursor-not-allowed disabled:opacity-60"
+                            className={`btn-brotero btn-brotero-danger btn-sm${isBusy ? ' btn-loading' : ''}`}
                             disabled={isBusy}
                             onClick={handleConfirmCancel}
                         >

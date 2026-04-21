@@ -72,7 +72,7 @@ export default function BibliotecaLogin({ status }: Props) {
                                 <button
                                     type="submit"
                                     disabled={processing}
-                                    className="w-full cursor-pointer rounded-(--raio) border-0 bg-(--brotero-primaria) px-4 py-3.5 text-[15px] font-semibold text-white shadow-[0_1px_3px_rgba(0,0,0,0.14)] transition-opacity hover:opacity-92 focus:outline-none focus-visible:ring-2 focus-visible:ring-(--brotero-primaria) focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-55"
+                                    className={`btn-brotero btn-brotero-primary btn-lg btn-full${processing ? ' btn-loading' : ''}`}
                                 >
                                     {processing ? 'A entrar…' : 'Entrar'}
                                 </button>

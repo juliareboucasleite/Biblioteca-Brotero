@@ -130,14 +130,14 @@ export default function BibliotecaDescobertas({ descobertas }: Props) {
                                             <div className="mt-[14px] flex flex-wrap items-center gap-x-[10px] gap-y-[8px] border-t border-(--brotero-borda-suave) pt-[14px] text-[15px]">
                                                 <Link
                                                     href={livroHref(item.livro.id)}
-                                                    className="inline-flex min-h-[40px] items-center rounded-[10px] bg-(--brotero-primaria) px-[16px] text-[15px] font-semibold text-white no-underline transition-opacity hover:opacity-90"
+                                                    className="btn-brotero btn-brotero-primary btn-sm no-underline"
                                                 >
                                                     Ver ficha
                                                 </Link>
                                                 {item.livro.tem_ebook ? (
                                                     <Link
                                                         href={`${livroHref(item.livro.id)}/ler`}
-                                                        className="inline-flex min-h-[40px] items-center rounded-[10px] border border-(--brotero-borda) bg-(--brotero-branco) px-[14px] text-[15px] font-medium text-(--brotero-texto) no-underline hover:border-(--brotero-primaria-claro) hover:bg-(--brotero-fundo)"
+                                                        className="btn-brotero btn-brotero-secondary btn-sm no-underline"
                                                     >
                                                         E-book
                                                     </Link>
@@ -155,7 +155,7 @@ export default function BibliotecaDescobertas({ descobertas }: Props) {
                                                         />
                                                         <button
                                                             type="submit"
-                                                            className="inline-flex min-h-[40px] cursor-pointer items-center rounded-[10px] border border-transparent px-[10px] text-[15px] font-medium text-(--brotero-texto-link) underline decoration-(--brotero-borda-suave) underline-offset-4 hover:decoration-(--brotero-texto-link)"
+                                                            className="btn-brotero btn-brotero-ghost btn-sm"
                                                         >
                                                             Mensagem ao leitor
                                                         </button>

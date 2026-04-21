@@ -121,7 +121,7 @@ export function BibliotecaContaLayout({
                         <Link href="/biblioteca/conta/historico" className={active('historico')} preserveScroll>
                             Histórico
                         </Link>
-                        {!modoBiblioteca && patronRole !== 'staff' ? (
+                        {!modoBiblioteca ? (
                             <>
                                 <Link href="/biblioteca/conta/favoritos" className={active('favoritos')} preserveScroll>
                                     Listas

@@ -3,9 +3,11 @@
 use App\Models\LibraryPatron;
 use App\Models\PatronConversation;
 use App\Models\PatronConversationMessage;
+use function Pest\Laravel\actingAs;
+use function Pest\Laravel\get;
 
 it('redirects guests from the messages inbox to the patron login', function (): void {
-    $this->get(route('biblioteca.conta.mensagens.index'))
+    get(route('biblioteca.conta.mensagens.index'))
         ->assertRedirect(route('biblioteca.login'));
 });
 
@@ -13,7 +15,7 @@ it('creates a pending conversation when opening a chat', function (): void {
     $a = LibraryPatron::factory()->create();
     $b = LibraryPatron::factory()->create();
 
-    $this->actingAs($a, 'patron')
+    actingAs($a, 'patron')
         ->post(route('biblioteca.conta.mensagens.open'), [
             'library_patron_id' => $b->id,
         ])
@@ -32,7 +34,7 @@ it('forbids messaging until the recipient accepts', function (): void {
     $b = LibraryPatron::factory()->create();
     $conv = PatronConversation::findOrCreateDirect($a, $b);
 
-    $this->actingAs($a, 'patron')
+    actingAs($a, 'patron')
         ->from(route('biblioteca.conta.mensagens.show', $conv))
         ->post(route('biblioteca.conta.mensagens.store', $conv), [
             'body' => 'Olá',
@@ -42,13 +44,13 @@ it('forbids messaging until the recipient accepts', function (): void {
 
     expect(PatronConversationMessage::query()->count())->toBe(0);
 
-    $this->actingAs($b, 'patron')
+    actingAs($b, 'patron')
         ->post(route('biblioteca.conta.mensagens.accept', $conv))
         ->assertRedirect(route('biblioteca.conta.mensagens.show', $conv));
 
     expect($conv->fresh()->status)->toBe(PatronConversation::STATUS_ACTIVE);
 
-    $this->actingAs($a, 'patron')
+    actingAs($a, 'patron')
         ->post(route('biblioteca.conta.mensagens.store', $conv), [
             'body' => 'Olá',
         ])
@@ -62,13 +64,13 @@ it('allows the recipient to decline and blocks further messaging', function (): 
     $b = LibraryPatron::factory()->create();
     $conv = PatronConversation::findOrCreateDirect($a, $b);
 
-    $this->actingAs($b, 'patron')
+    actingAs($b, 'patron')
         ->post(route('biblioteca.conta.mensagens.decline', $conv))
         ->assertRedirect(route('biblioteca.conta.mensagens.index'));
 
     expect($conv->fresh()->status)->toBe(PatronConversation::STATUS_DECLINED);
 
-    $this->actingAs($a, 'patron')
+    actingAs($a, 'patron')
         ->from(route('biblioteca.conta.mensagens.show', $conv))
         ->post(route('biblioteca.conta.mensagens.store', $conv), [
             'body' => 'Não devia passar',
@@ -83,13 +85,13 @@ it('forbids outsiders from the thread', function (): void {
     $c = LibraryPatron::factory()->create();
     $conv = PatronConversation::findOrCreateDirect($a, $b);
 
-    $this->actingAs($b, 'patron')->post(route('biblioteca.conta.mensagens.accept', $conv));
+    actingAs($b, 'patron')->post(route('biblioteca.conta.mensagens.accept', $conv));
 
-    $this->actingAs($c, 'patron')
+    actingAs($c, 'patron')
         ->get(route('biblioteca.conta.mensagens.show', $conv))
         ->assertForbidden();
 
-    $this->actingAs($c, 'patron')
+    actingAs($c, 'patron')
         ->post(route('biblioteca.conta.mensagens.store', $conv), [
             'body' => 'Intrusion',
         ])

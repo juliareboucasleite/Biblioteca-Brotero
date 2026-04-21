@@ -108,7 +108,7 @@ Route::middleware('auth:patron')
         Route::get('/historico', [BibliotecaContaController::class, 'historico'])->name('historico');
         Route::get('/perfil', [BibliotecaContaController::class, 'perfil'])->name('perfil');
         Route::middleware('patron.community.mode')->group(function (): void {
-            Route::middleware('patron.role:student,teacher')->group(function (): void {
+            Route::middleware('patron.role:student,teacher,staff')->group(function (): void {
                 Route::get('/favoritos', [BibliotecaContaController::class, 'favoritos'])->name('favoritos');
 
                 Route::get('/leitores/{library_patron}', [PatronPeerProfileController::class, 'show'])->name('leitor.perfil');

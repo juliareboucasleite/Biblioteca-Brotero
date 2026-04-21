@@ -3,9 +3,11 @@
 use App\Models\Book;
 use App\Models\BookShare;
 use App\Models\LibraryPatron;
+use function Pest\Laravel\actingAs;
+use function Pest\Laravel\get;
 
 it('shows the descobertas page for guests', function (): void {
-    $this->get(route('biblioteca.descobertas.index'))->assertOk();
+    get(route('biblioteca.descobertas.index'))->assertOk();
 });
 
 it('allows a patron to publish a recommendation', function (): void {
@@ -15,7 +17,7 @@ it('allows a patron to publish a recommendation', function (): void {
         'description' => 'Descrição',
     ]);
 
-    $this->actingAs($patron, 'patron')
+    actingAs($patron, 'patron')
         ->post(route('biblioteca.descobertas.store'), [
             'book_id' => $book->id,
             'message' => 'Muito bom para a turma.',
@@ -36,7 +38,7 @@ it('forbids removing another patrons share', function (): void {
         'message' => 'ok',
     ]);
 
-    $this->actingAs($b, 'patron')
+    actingAs($b, 'patron')
         ->delete(route('biblioteca.descobertas.destroy', $share))
         ->assertForbidden();
 });

@@ -13,6 +13,7 @@ use App\Support\AuditLogger;
 use App\Support\SchoolLocationNormalizer;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Str;
 use Symfony\Component\HttpFoundation\StreamedResponse;
 use Inertia\Inertia;
 use Inertia\Response;
@@ -86,26 +87,44 @@ class PatronLibrarianDeskController extends Controller
             return back()->with('error', 'Leitura vazia.');
         }
 
-        if (preg_match('/^[0-9]{5}$/', $raw) === 1) {
+        // Permite cartão "12345" ou com ruído visual ("cartão 12345").
+        $digitsOnly = preg_replace('/\D+/', '', $raw) ?? '';
+        if (preg_match('/^[0-9]{5}$/', $digitsOnly) === 1) {
             $count = BookRequest::query()
-                ->where('card_number', $raw)
+                ->where('card_number', $digitsOnly)
                 ->whereIn('status', ['pending', 'created'])
                 ->count();
 
-            return back()->with('success', "Cartão {$raw} lido. Pedidos ativos/pendentes: {$count}.");
+            if ($count === 0) {
+                return back()->with('error', "Cartão {$digitsOnly} lido, sem pedidos ativos/pendentes.");
+            }
+
+            return back()->with('success', "Cartão {$digitsOnly} lido. Pedidos ativos/pendentes: {$count}.");
         }
 
-        if (preg_match('/^[0-9]{10,13}$/', $raw) === 1) {
+        // ISBN pode vir com hífens/espaços e ISBN-10 pode terminar em X.
+        $isbnNormalized = strtoupper(preg_replace('/[^0-9Xx]+/', '', $raw) ?? '');
+        if (preg_match('/^(?:[0-9]{13}|[0-9]{9}[0-9X])$/', $isbnNormalized) === 1) {
             $count = BookRequest::query()
-                ->where('isbn', $raw)
+                ->whereRaw('REPLACE(REPLACE(UPPER(isbn), "-", ""), " ", "") = ?', [$isbnNormalized])
                 ->whereIn('status', ['pending', 'created'])
                 ->count();
 
-            return back()->with('success', "ISBN {$raw} lido. Pedidos ativos/pendentes: {$count}.");
+            if ($count === 0) {
+                return back()->with('error', "ISBN {$isbnNormalized} lido, sem pedidos ativos/pendentes.");
+            }
+
+            return back()->with('success', "ISBN {$isbnNormalized} lido. Pedidos ativos/pendentes: {$count}.");
         }
 
-        if (preg_match('/^#?([0-9]{1,8})$/', $raw, $m) === 1) {
-            $id = (int) $m[1];
+        $pedidoDigits = preg_replace('/\D+/', '', $raw) ?? '';
+        $rawLower = Str::lower($raw);
+        $hasPedidoHint = str_contains($raw, '#') || str_contains($rawLower, 'pedido');
+        if (
+            ($hasPedidoHint && preg_match('/^[0-9]{1,8}$/', $pedidoDigits) === 1)
+            || preg_match('/^#?([0-9]{1,8})$/', $raw, $m) === 1
+        ) {
+            $id = isset($m[1]) ? (int) $m[1] : (int) $pedidoDigits;
             $pedido = BookRequest::query()->find($id);
             if ($pedido === null) {
                 return back()->with('error', "Pedido #{$id} não encontrado.");

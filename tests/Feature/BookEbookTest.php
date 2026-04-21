@@ -3,6 +3,8 @@
 use App\Models\Book;
 use App\Models\LibraryPatron;
 use Illuminate\Support\Facades\Storage;
+use function Pest\Laravel\actingAs;
+use function Pest\Laravel\get;
 
 it('redirects guests from the ebook stream to the patron login', function (): void {
     Storage::fake('local');
@@ -17,7 +19,7 @@ it('redirects guests from the ebook stream to the patron login', function (): vo
 
     Storage::disk('local')->put('ebooks/x.pdf', '%PDF fake');
 
-    $this->get(route('biblioteca.livro.ebook', $book))->assertRedirect(route('biblioteca.login'));
+    get(route('biblioteca.livro.ebook', $book))->assertRedirect(route('biblioteca.login'));
 });
 
 it('allows an authenticated patron to stream an ebook', function (): void {
@@ -34,7 +36,7 @@ it('allows an authenticated patron to stream an ebook', function (): void {
 
     Storage::disk('local')->put('ebooks/doc.pdf', '%PDF-1.4 fake');
 
-    $res = $this->actingAs($patron, 'patron')->get(route('biblioteca.livro.ebook', $book));
+    $res = actingAs($patron, 'patron')->get(route('biblioteca.livro.ebook', $book));
 
     $res->assertOk();
     expect((string) $res->headers->get('content-type'))->toContain('application/pdf');
@@ -55,7 +57,7 @@ it('redirects to ebook download when registar-download is posted as a normal for
 
     Storage::disk('local')->put('ebooks/form.pdf', '%PDF-1.4 fake');
 
-    $this->actingAs($patron, 'patron')
+    actingAs($patron, 'patron')
         ->post(route('biblioteca.livro.ebook.registar-download', $book))
         ->assertRedirect(route('biblioteca.livro.ebook', $book).'?download=1');
 
@@ -73,7 +75,7 @@ it('increments ebook download count when registar-download is posted', function 
         'ebook_downloads_count' => 0,
     ]);
 
-    $res = $this->actingAs($patron, 'patron')->postJson(
+    $res = actingAs($patron, 'patron')->postJson(
         route('biblioteca.livro.ebook.registar-download', $book),
     );
 
@@ -98,7 +100,7 @@ it('serves attachment disposition when download query is set', function (): void
 
     Storage::disk('local')->put('ebooks/d.pdf', '%PDF-1.4 fake');
 
-    $res = $this->actingAs($patron, 'patron')->get(
+    $res = actingAs($patron, 'patron')->get(
         route('biblioteca.livro.ebook', ['book' => $book, 'download' => '1']),
     );
 
@@ -116,7 +118,7 @@ it('redirects reader page when the book has no recognised ebook format', functio
         'ebook_mime' => 'application/octet-stream',
     ]);
 
-    $this->actingAs($patron, 'patron')
+    actingAs($patron, 'patron')
         ->get(route('biblioteca.livro.ler', $book))
         ->assertRedirect(route('biblioteca.livro.show', $book));
 });

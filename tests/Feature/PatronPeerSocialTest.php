@@ -6,6 +6,7 @@ use App\Models\PatronBlock;
 use App\Models\PatronConversation;
 use App\Models\PatronPeerBookShare;
 use App\Models\PatronPeerReport;
+use function Pest\Laravel\actingAs;
 
 it('forbids opening a chat when blocked', function (): void {
     $a = LibraryPatron::factory()->create();
@@ -16,7 +17,7 @@ it('forbids opening a chat when blocked', function (): void {
         'blocked_library_patron_id' => $a->id,
     ]);
 
-    $this->actingAs($a, 'patron')
+    actingAs($a, 'patron')
         ->post(route('biblioteca.conta.mensagens.open'), [
             'library_patron_id' => $b->id,
         ])
@@ -28,14 +29,14 @@ it('allows sharing a catalog book after the conversation is active', function ()
     $b = LibraryPatron::factory()->create();
     $conv = PatronConversation::findOrCreateDirect($a, $b);
 
-    $this->actingAs($b, 'patron')->post(route('biblioteca.conta.mensagens.accept', $conv));
+    actingAs($b, 'patron')->post(route('biblioteca.conta.mensagens.accept', $conv));
 
     $book = Book::query()->create([
         'title' => 'Livro partilhável',
         'description' => 'X',
     ]);
 
-    $this->actingAs($a, 'patron')
+    actingAs($a, 'patron')
         ->post(route('biblioteca.conta.mensagens.partilhar-livro', $conv), [
             'book_id' => $book->id,
             'note' => 'Leia isto!',
@@ -50,7 +51,7 @@ it('stores a peer report', function (): void {
     $b = LibraryPatron::factory()->create();
     PatronConversation::findOrCreateDirect($a, $b);
 
-    $this->actingAs($a, 'patron')
+    actingAs($a, 'patron')
         ->post(route('biblioteca.conta.leitor.denunciar', $b), [
             'category' => 'spam',
             'details' => 'Mensagens em excesso.',
@@ -65,7 +66,7 @@ it('forbids viewing peer profile without an active conversation', function (): v
     $b = LibraryPatron::factory()->create();
     PatronConversation::findOrCreateDirect($a, $b);
 
-    $this->actingAs($a, 'patron')
+    actingAs($a, 'patron')
         ->get(route('biblioteca.conta.leitor.perfil', $b))
         ->assertForbidden();
 });
@@ -75,9 +76,9 @@ it('allows viewing peer profile with an active conversation', function (): void 
     $b = LibraryPatron::factory()->create();
     $conv = PatronConversation::findOrCreateDirect($a, $b);
 
-    $this->actingAs($b, 'patron')->post(route('biblioteca.conta.mensagens.accept', $conv));
+    actingAs($b, 'patron')->post(route('biblioteca.conta.mensagens.accept', $conv));
 
-    $this->actingAs($a, 'patron')
+    actingAs($a, 'patron')
         ->get(route('biblioteca.conta.leitor.perfil', $b))
         ->assertOk();
 });

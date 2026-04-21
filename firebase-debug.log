@@ -1,0 +1,23 @@
+[debug] [2026-04-21T13:11:19.780Z] ----------------------------------------------------------------------
+[debug] [2026-04-21T13:11:19.783Z] Command:       C:\Program Files\nodejs\node.exe C:\Users\julia\AppData\Roaming\npm\node_modules\firebase-tools\lib\bin\firebase.js init
+[debug] [2026-04-21T13:11:19.783Z] CLI Version:   15.15.0
+[debug] [2026-04-21T13:11:19.783Z] Platform:      win32
+[debug] [2026-04-21T13:11:19.783Z] Node Version:  v22.19.0
+[debug] [2026-04-21T13:11:19.784Z] Time:          Tue Apr 21 2026 14:11:19 GMT+0100 (Hora de verão da Europa Ocidental)
+[debug] [2026-04-21T13:11:19.784Z] ----------------------------------------------------------------------
+[debug] 
+[info] 
+     ######## #### ########  ######## ########     ###     ######  ########
+     ##        ##  ##     ## ##       ##     ##  ##   ##  ##       ##
+     ######    ##  ########  ######   ########  #########  ######  ######
+     ##        ##  ##    ##  ##       ##     ## ##     ##       ## ##
+     ##       #### ##     ## ######## ########  ##     ##  ######  ########
+
+You're about to initialize a Firebase project in this directory:
+
+  C:\apps\laravel\Biblioteca-Brotero
+
+Before we get started, keep in mind:
+
+  * You are currently outside your home directory
+

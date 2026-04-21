@@ -5,6 +5,7 @@ import { createRoot } from 'react-dom/client';
 import { TooltipProvider } from '@/components/ui/tooltip';
 import '../css/app.css';
 import { initializeTheme } from '@/hooks/use-appearance';
+import { getFirebaseAnalytics } from '@/lib/firebase';
 
 const appName = 'Biblioteca Brotero - Biblioteca Online';
 
@@ -45,3 +46,6 @@ createInertiaApp({
 });
 
 initializeTheme();
+
+// Inicializa Analytics no browser (opcional).
+void getFirebaseAnalytics();

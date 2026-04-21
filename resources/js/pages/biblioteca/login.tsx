@@ -16,7 +16,7 @@ export default function BibliotecaLogin({ status }: Props) {
             <Head title="Entrar · Leitor" />
 
             <BibliotecaCatalogShell>
-                <div className="mx-auto w-full max-w-[440px] pt-[4px] lg:pt-0">
+                <div className="mx-auto flex min-h-[calc(100vh-160px)] w-full max-w-[460px] flex-col justify-center py-[18px]">
                     <header className="mb-[20px]">
                         <h1 className="m-0 mb-[8px] text-[1.5rem] font-bold leading-tight text-(--brotero-texto)">
                             Entrar na sua conta
@@ -72,7 +72,7 @@ export default function BibliotecaLogin({ status }: Props) {
                                 <button
                                     type="submit"
                                     disabled={processing}
-                                    className={`btn-brotero btn-brotero-primary btn-lg btn-full${processing ? ' btn-loading' : ''}`}
+                                    className={`inline-flex h-[44px] w-full items-center justify-center rounded-[12px] border border-(--brotero-primaria) bg-(--brotero-primaria) px-[16px] text-[15px] font-semibold text-white shadow-[0_10px_24px_rgba(71,94,114,0.28)] transition duration-150 hover:brightness-[0.96] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-(--brotero-primaria)/35 disabled:cursor-not-allowed disabled:opacity-65${processing ? ' btn-loading' : ''}`}
                                 >
                                     {processing ? 'A entrar…' : 'Entrar'}
                                 </button>

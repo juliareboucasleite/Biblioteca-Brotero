@@ -6,10 +6,10 @@ type Props = {
 };
 
 const sessaoBtnPrimaryClass =
-    'btn-brotero btn-brotero-primary btn-full !text-left !py-[16px] !px-[18px] !text-[15px] !leading-snug';
+    'inline-flex w-full flex-col items-start rounded-[12px] border border-(--brotero-primaria) bg-(--brotero-primaria) px-[18px] py-[16px] text-left text-[15px] leading-snug text-white shadow-[0_10px_24px_rgba(71,94,114,0.28)] transition duration-150 hover:brightness-[0.96] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-(--brotero-primaria)/35 disabled:cursor-not-allowed disabled:opacity-65';
 
 const sessaoBtnSecondaryClass =
-    'btn-brotero btn-brotero-secondary btn-full !text-left !py-[16px] !px-[18px] !text-[15px] !leading-snug !border-2 !border-(--brotero-primaria)';
+    'inline-flex w-full flex-col items-start rounded-[12px] border-2 border-(--brotero-primaria) bg-(--brotero-branco) px-[18px] py-[16px] text-left text-[15px] leading-snug text-(--brotero-texto) transition duration-150 hover:bg-(--brotero-fundo) focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-(--brotero-primaria)/30 disabled:cursor-not-allowed disabled:opacity-65';
 
 export default function BibliotecaLoginPortal({ greeting_name }: Props) {
     const label =
@@ -22,7 +22,7 @@ export default function BibliotecaLoginPortal({ greeting_name }: Props) {
             <Head title="Modo de sessão · Leitor" />
 
             <BibliotecaCatalogShell>
-                <div className="mx-auto w-full max-w-[520px] pt-[4px] lg:pt-0">
+                <div className="mx-auto flex min-h-[calc(100vh-160px)] w-full max-w-[520px] flex-col justify-center py-[18px]">
                     <div className="rounded-[18px] border border-(--brotero-borda-suave) bg-(--brotero-branco) px-[22px] py-[26px] shadow-[0_8px_28px_rgba(42,38,48,0.06)] sm:px-[26px] sm:py-[30px]">
                         <h1 className="m-0 mb-[10px] text-[1.45rem] font-bold leading-tight tracking-tight text-(--brotero-texto)">
                             Entrada · biblioteca

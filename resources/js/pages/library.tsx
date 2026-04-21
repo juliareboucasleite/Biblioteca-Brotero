@@ -12,7 +12,6 @@ import { BookSectionHeader } from '@/components/biblioteca/BookSectionHeader';
 import { CardLivro } from '@/components/CardLivro';
 import { useBibliotecaLivrosPolling } from '@/hooks/useBibliotecaLivrosPolling';
 import { useHorizontalDragScroll } from '@/hooks/useHorizontalDragScroll';
-import { cn } from '@/lib/utils';
 import type { Category, LivroCatalogo } from '@/types';
 
 type LibraryProps = {
@@ -23,6 +22,8 @@ type LibraryProps = {
     recomendadoAutorNome?: string | null;
     /** Ordenados por número de requisições (desc). */
     livrosMaisPedidos?: LivroCatalogo[];
+    /** Livros com progresso para retomar leitura. */
+    livrosEmLeitura?: LivroCatalogo[];
     categorias: Category[];
     categoriaSelecionada?: string | null;
     q?: string | null;
@@ -54,6 +55,7 @@ export default function Library({
     livrosRecomendados = [],
     recomendadoAutorNome,
     livrosMaisPedidos = [],
+    livrosEmLeitura = [],
     categorias,
     categoriaSelecionada,
     q,
@@ -72,6 +74,11 @@ export default function Library({
         scrollRef: maisPedidosScrollRef,
         onMouseDown: maisPedidosOnMouseDown,
         onClickCapture: maisPedidosOnClickCapture,
+    } = useHorizontalDragScroll();
+    const {
+        scrollRef: emLeituraScrollRef,
+        onMouseDown: emLeituraOnMouseDown,
+        onClickCapture: emLeituraOnClickCapture,
     } = useHorizontalDragScroll();
     const lista = useBibliotecaLivrosPolling(livros, {
         categoriaSelecionada,
@@ -105,12 +112,17 @@ export default function Library({
         ? `Recomendado para si · ${recomendadoAutorNome.trim()}`
         : 'Recomendado para si';
 
+    const showMaisPedidosHome = !categoriaSelecionada || categoriaSelecionada.trim() === '';
+    const temEmLeitura = livrosEmLeitura.length > 0;
     const temMaisPedidos = livrosMaisPedidos.length > 0;
     const scrollNovos = (delta: number) => {
         novosScrollRef.current?.scrollBy({ left: delta, behavior: 'smooth' });
     };
     const scrollMaisPedidos = (delta: number) => {
         maisPedidosScrollRef.current?.scrollBy({ left: delta, behavior: 'smooth' });
+    };
+    const scrollEmLeitura = (delta: number) => {
+        emLeituraScrollRef.current?.scrollBy({ left: delta, behavior: 'smooth' });
     };
     const carrosselArrowBtnClass = 'btn-brotero btn-brotero-icon btn-sm';
     const carrosselCardClass =
@@ -121,7 +133,7 @@ export default function Library({
             <Head title="Biblioteca Brotero" />
 
             <BibliotecaCatalogShell>
-                <div className="mb-[22px] flex flex-col gap-[18px] pt-[14px] lg:pt-0">
+                <div className="mb-5.5 flex flex-col gap-4.5 pt-3.5 lg:pt-0">
                     <BibliotecaCatalogSearchBar
                         formAction="/biblioteca"
                         defaultQuery={q}
@@ -137,7 +149,7 @@ export default function Library({
                         lingua={lingua}
                         authorId={authorSelecionado}
                         ano={ano}
-                        basePath="/biblioteca"
+                        basePath="/biblioteca/livros"
                     />
                 </div>
 
@@ -152,12 +164,79 @@ export default function Library({
                     autoSubmitLingua
                 />
 
-                <section className="mb-[28px]">
+                {showMaisPedidosHome ? (
+                    <section className="mb-6">
+                        <BookSectionHeader
+                            title="Mais pedidos na comunidade"
+                            action={
+                                <div className="flex items-center gap-2.5">
+                                    <div className="hidden items-center gap-1 sm:flex">
+                                        <button
+                                            type="button"
+                                            onClick={() => scrollMaisPedidos(-280)}
+                                            className={carrosselArrowBtnClass}
+                                            aria-label="Deslocar mais pedidos para a esquerda"
+                                        >
+                                            <ChevronLeft
+                                                className="size-5"
+                                                aria-hidden
+                                            />
+                                        </button>
+                                        <button
+                                            type="button"
+                                            onClick={() => scrollMaisPedidos(280)}
+                                            className={carrosselArrowBtnClass}
+                                            aria-label="Deslocar mais pedidos para a direita"
+                                        >
+                                            <ChevronRight
+                                                className="size-5"
+                                                aria-hidden
+                                            />
+                                        </button>
+                                    </div>
+                                    <a
+                                        href={`/biblioteca/livros?${query}`}
+                                        className="text-[13px] whitespace-nowrap text-(--brotero-texto-link) hover:text-(--brotero-texto-link-hover) hover:underline"
+                                    >
+                                        Ver mais
+                                    </a>
+                                </div>
+                            }
+                        />
+                        {temMaisPedidos ? (
+                            <div
+                                ref={maisPedidosScrollRef}
+                                className="flex cursor-grab snap-x snap-proximity gap-4 overflow-x-auto pb-1.5 select-none [-ms-overflow-style:none] [scrollbar-width:none] active:cursor-grabbing [&::-webkit-scrollbar]:hidden"
+                                aria-label="Mais pedidos na comunidade"
+                                onMouseDown={maisPedidosOnMouseDown}
+                                onClickCapture={maisPedidosOnClickCapture}
+                                onDragStart={(e) => e.preventDefault()}
+                            >
+                                {livrosMaisPedidos.map((livro) => (
+                                    <CardLivro
+                                        key={livro.id}
+                                        livro={livro}
+                                        className={carrosselCardClass}
+                                    />
+                                ))}
+                            </div>
+                        ) : (
+                            <div className="grid grid-cols-[repeat(auto-fill,minmax(160px,1fr))] gap-4 max-[768px]:grid-cols-[repeat(auto-fill,minmax(130px,1fr))] max-[768px]:gap-3">
+                                <BibliotecaSectionPlaceholder>
+                                    Veja os livros mais pedidos da comunidade
+                                    em «Ver mais» ou no ranking.
+                                </BibliotecaSectionPlaceholder>
+                            </div>
+                        )}
+                    </section>
+                ) : null}
+
+                <section className="mb-7">
                     <BookSectionHeader
                         title="Novos livros adicionados"
                         action={
-                            <div className="flex items-center gap-[10px]">
-                                <div className="hidden items-center gap-[4px] sm:flex">
+                            <div className="flex items-center gap-2.5">
+                                <div className="hidden items-center gap-1 sm:flex">
                                     <button
                                         type="button"
                                         onClick={() => scrollNovos(-280)}
@@ -165,7 +244,7 @@ export default function Library({
                                         aria-label="Deslocar lista para a esquerda"
                                     >
                                         <ChevronLeft
-                                            className="size-[20px]"
+                                            className="size-5"
                                             aria-hidden
                                         />
                                     </button>
@@ -176,7 +255,7 @@ export default function Library({
                                         aria-label="Deslocar lista para a direita"
                                     >
                                         <ChevronRight
-                                            className="size-[20px]"
+                                            className="size-5"
                                             aria-hidden
                                         />
                                     </button>
@@ -192,7 +271,7 @@ export default function Library({
                     />
                     <div
                         ref={novosScrollRef}
-                        className="flex cursor-grab snap-x snap-proximity gap-[16px] overflow-x-auto pb-[8px] select-none [-ms-overflow-style:none] [scrollbar-width:none] active:cursor-grabbing [&::-webkit-scrollbar]:hidden"
+                        className="flex cursor-grab snap-x snap-proximity gap-4 overflow-x-auto pb-2 select-none [-ms-overflow-style:none] [scrollbar-width:none] active:cursor-grabbing [&::-webkit-scrollbar]:hidden"
                         aria-label="Lista de livros recentes"
                         onMouseDown={novosOnMouseDown}
                         onClickCapture={novosOnClickCapture}
@@ -208,7 +287,65 @@ export default function Library({
                     </div>
                 </section>
 
-                <section className="mb-[24px]">
+                <section className="mb-6">
+                    <BookSectionHeader
+                        title="A ler agora (retomar)"
+                        action={
+                            <div className="flex items-center gap-2.5">
+                                <div className="hidden items-center gap-1 sm:flex">
+                                    <button
+                                        type="button"
+                                        onClick={() => scrollEmLeitura(-280)}
+                                        className={carrosselArrowBtnClass}
+                                        aria-label="Deslocar leitura atual para a esquerda"
+                                    >
+                                        <ChevronLeft className="size-5" aria-hidden />
+                                    </button>
+                                    <button
+                                        type="button"
+                                        onClick={() => scrollEmLeitura(280)}
+                                        className={carrosselArrowBtnClass}
+                                        aria-label="Deslocar leitura atual para a direita"
+                                    >
+                                        <ChevronRight className="size-5" aria-hidden />
+                                    </button>
+                                </div>
+                                <a
+                                    href="/biblioteca/conta/favoritos"
+                                    className="text-[13px] whitespace-nowrap text-(--brotero-texto-link) hover:text-(--brotero-texto-link-hover) hover:underline"
+                                >
+                                    Ver listas
+                                </a>
+                            </div>
+                        }
+                    />
+                    {temEmLeitura ? (
+                        <div
+                            ref={emLeituraScrollRef}
+                            className="flex cursor-grab snap-x snap-proximity gap-4 overflow-x-auto pb-1.5 select-none [-ms-overflow-style:none] [scrollbar-width:none] active:cursor-grabbing [&::-webkit-scrollbar]:hidden"
+                            aria-label="Livros para retomar leitura"
+                            onMouseDown={emLeituraOnMouseDown}
+                            onClickCapture={emLeituraOnClickCapture}
+                            onDragStart={(e) => e.preventDefault()}
+                        >
+                            {livrosEmLeitura.map((livro) => (
+                                <CardLivro
+                                    key={livro.id}
+                                    livro={livro}
+                                    className={carrosselCardClass}
+                                />
+                            ))}
+                        </div>
+                    ) : (
+                        <div className="grid grid-cols-[repeat(auto-fill,minmax(160px,1fr))] gap-4 max-[768px]:grid-cols-[repeat(auto-fill,minmax(130px,1fr))] max-[768px]:gap-3">
+                            <BibliotecaSectionPlaceholder>
+                                Quando começar livros nas suas listas, eles aparecem aqui para retomar leitura.
+                            </BibliotecaSectionPlaceholder>
+                        </div>
+                    )}
+                </section>
+
+                <section className="mb-6">
                     <BookSectionHeader
                         title={tituloRecomendados}
                         action={
@@ -226,7 +363,7 @@ export default function Library({
                     />
                     {temRecomendados ? (
                         <div
-                            className="flex snap-x snap-proximity gap-[16px] overflow-x-auto pb-[6px]"
+                            className="flex snap-x snap-proximity gap-4 overflow-x-auto pb-1.5"
                             aria-label="Livros recomendados por autor em destaque"
                         >
                             {livrosRecomendados.map((livro) => (
@@ -238,75 +375,9 @@ export default function Library({
                             ))}
                         </div>
                     ) : (
-                        <div className="grid grid-cols-[repeat(auto-fill,minmax(160px,1fr))] gap-[16px] max-[768px]:grid-cols-[repeat(auto-fill,minmax(130px,1fr))] max-[768px]:gap-[12px]">
+                        <div className="grid grid-cols-[repeat(auto-fill,minmax(160px,1fr))] gap-4 max-[768px]:grid-cols-[repeat(auto-fill,minmax(130px,1fr))] max-[768px]:gap-3">
                             <BibliotecaSectionPlaceholder>
                                 Liga novidades a mais obras do mesmo autor: explora o catálogo em «Ver mais».
-                            </BibliotecaSectionPlaceholder>
-                        </div>
-                    )}
-                </section>
-
-                <section className="mb-[24px]">
-                    <BookSectionHeader
-                        title="Os mais pedidos"
-                        action={
-                            <div className="flex items-center gap-[10px]">
-                                <div className="hidden items-center gap-[4px] sm:flex">
-                                    <button
-                                        type="button"
-                                        onClick={() => scrollMaisPedidos(-280)}
-                                        className={carrosselArrowBtnClass}
-                                        aria-label="Deslocar mais pedidos para a esquerda"
-                                    >
-                                        <ChevronLeft
-                                            className="size-[20px]"
-                                            aria-hidden
-                                        />
-                                    </button>
-                                    <button
-                                        type="button"
-                                        onClick={() => scrollMaisPedidos(280)}
-                                        className={carrosselArrowBtnClass}
-                                        aria-label="Deslocar mais pedidos para a direita"
-                                    >
-                                        <ChevronRight
-                                            className="size-[20px]"
-                                            aria-hidden
-                                        />
-                                    </button>
-                                </div>
-                                <a
-                                    href={`/biblioteca/livros?${query}`}
-                                    className="text-[13px] whitespace-nowrap text-(--brotero-texto-link) hover:text-(--brotero-texto-link-hover) hover:underline"
-                                >
-                                    Ver mais
-                                </a>
-                            </div>
-                        }
-                    />
-                    {temMaisPedidos ? (
-                        <div
-                            ref={maisPedidosScrollRef}
-                            className="flex cursor-grab snap-x snap-proximity gap-[16px] overflow-x-auto pb-[6px] select-none [-ms-overflow-style:none] [scrollbar-width:none] active:cursor-grabbing [&::-webkit-scrollbar]:hidden"
-                            aria-label="Livros mais requisitados"
-                            onMouseDown={maisPedidosOnMouseDown}
-                            onClickCapture={maisPedidosOnClickCapture}
-                            onDragStart={(e) => e.preventDefault()}
-                        >
-                            {livrosMaisPedidos.map((livro) => (
-                                <CardLivro
-                                    key={livro.id}
-                                    livro={livro}
-                                    className={carrosselCardClass}
-                                />
-                            ))}
-                        </div>
-                    ) : (
-                        <div className="grid grid-cols-[repeat(auto-fill,minmax(160px,1fr))] gap-[16px] max-[768px]:grid-cols-[repeat(auto-fill,minmax(130px,1fr))] max-[768px]:gap-[12px]">
-                            <BibliotecaSectionPlaceholder>
-                                Veja o que mais circula entre leitores: abra
-                                «Ver mais» ou o ranking para descobrir títulos
-                                em destaque na comunidade.
                             </BibliotecaSectionPlaceholder>
                         </div>
                     )}

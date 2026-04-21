@@ -81,6 +81,41 @@ class PatronReadingListController extends Controller
         return back()->with('success', 'Lista criada.');
     }
 
+    public function update(Request $request, PatronReadingList $readingList): RedirectResponse
+    {
+        /** @var LibraryPatron $patron */
+        $patron = Auth::guard('patron')->user();
+        if ($readingList->library_patron_id !== $patron->id) {
+            abort(403);
+        }
+
+        if (! in_array($readingList->type, [PatronReadingList::TYPE_CUSTOM, PatronReadingList::TYPE_CLASSROOM], true)) {
+            return back()->with('error', 'Só listas criadas por si podem ser renomeadas.');
+        }
+
+        $data = $request->validate([
+            'name' => ['required', 'string', 'max:120'],
+        ]);
+
+        $name = trim((string) $data['name']);
+        if ($name === '') {
+            return back()->with('error', 'Indique um nome para a lista.');
+        }
+
+        $exists = $patron->readingLists()
+            ->whereKeyNot($readingList->id)
+            ->whereRaw('LOWER(name) = ?', [mb_strtolower($name)])
+            ->exists();
+
+        if ($exists) {
+            return back()->with('error', 'Já existe uma lista com esse nome.');
+        }
+
+        $readingList->forceFill(['name' => $name])->save();
+
+        return back()->with('success', 'Nome da lista atualizado.');
+    }
+
     public function storeBook(Request $request, Book $book): RedirectResponse
     {
         /** @var LibraryPatron $patron */

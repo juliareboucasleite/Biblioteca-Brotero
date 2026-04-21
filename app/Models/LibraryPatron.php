@@ -80,12 +80,10 @@ class LibraryPatron extends Authenticatable
 
     public function role(): string
     {
-        if (Schema::hasColumn($this->getTable(), 'role')) {
-            $role = is_string($this->role) ? strtolower(trim($this->role)) : '';
+        $role = is_string($this->role) ? strtolower(trim($this->role)) : '';
 
-            if (in_array($role, self::validRoles(), true)) {
-                return $role;
-            }
+        if (in_array($role, self::validRoles(), true)) {
+            return $role;
         }
 
         $cards = config('biblioteca.librarian_card_numbers', []);
@@ -116,10 +114,6 @@ class LibraryPatron extends Authenticatable
 
         if ($this->isStaff()) {
             return true;
-        }
-
-        if (! Schema::hasColumn($this->getTable(), 'is_librarian')) {
-            return false;
         }
 
         return (bool) $this->is_librarian;

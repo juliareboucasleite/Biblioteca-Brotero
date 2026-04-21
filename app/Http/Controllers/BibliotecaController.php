@@ -11,6 +11,7 @@ use App\Services\PatronRankingService;
 use App\Support\CategoryLabel;
 use Illuminate\Http\Request;
 use Illuminate\Support\Collection;
+use Illuminate\Support\Facades\DB;
 use Inertia\Inertia;
 use Inertia\Response;
 
@@ -31,7 +32,15 @@ class BibliotecaController extends Controller
         $anoEscolar = trim((string) $request->query('ano_escolar', ''));
 
         if ($categoriaId !== '') {
-            $query->forCatalogCategory($categoriaId);
+            if ($this->categoryIdIsBestsellersListing($categoriaId)) {
+                $query->withCount('bookRequests as requisicoes_count')
+                    ->having('requisicoes_count', '>', 0)
+                    ->reorder()
+                    ->orderByDesc('requisicoes_count')
+                    ->orderByDesc('id');
+            } else {
+                $query->forCatalogCategory($categoriaId);
+            }
             if (Book::categoryIdIsRecentBooksListing($categoriaId)) {
                 $query->reorder()->orderByDesc('created_at')->orderByDesc('id');
             }
@@ -106,12 +115,12 @@ class BibliotecaController extends Controller
      *
      * @return list<array{id: string, name: string, slug: string|null}>
      */
-    private function categoriasParaCatalogo(): array
+    private function categoriasParaCatalogo(?LibraryPatron $patron = null): array
     {
         /** @var list<string> $order */
         $order = config('biblioteca_canonical_categories.order', []);
 
-        return Category::query()
+        $categorias = Category::query()
             ->get(['id', 'name', 'slug'])
             ->map(fn (Category $c): array => [
                 'id' => (string) $c->id,
@@ -132,10 +141,54 @@ class BibliotecaController extends Controller
             }, SORT_NATURAL)
             ->values()
             ->all();
+
+        if (! $patron instanceof LibraryPatron) {
+            return $categorias;
+        }
+
+        $preferidas = $this->categoriaIdsPreferidasDoPatron($patron);
+        if ($preferidas === []) {
+            return $categorias;
+        }
+
+        $preferidasPos = array_flip($preferidas);
+        usort($categorias, static function (array $a, array $b) use ($preferidasPos): int {
+            $pa = $preferidasPos[$a['id']] ?? null;
+            $pb = $preferidasPos[$b['id']] ?? null;
+
+            if ($pa !== null && $pb !== null) {
+                return $pa <=> $pb;
+            }
+
+            if ($pa !== null) {
+                return -1;
+            }
+
+            if ($pb !== null) {
+                return 1;
+            }
+
+            return strcmp((string) $a['name'], (string) $b['name']);
+        });
+
+        return array_values($categorias);
+    }
+
+    private function categoryIdIsBestsellersListing(string $categoryId): bool
+    {
+        if (ctype_digit($categoryId) && (int) $categoryId === 67) {
+            return true;
+        }
+
+        $category = Category::query()->find($categoryId);
+
+        return $category !== null && $category->slug === 'bestsellers';
     }
 
     public function index(Request $request, PatronRankingService $rankingService): Response
     {
+        /** @var LibraryPatron|null $patron */
+        $patron = $request->user('patron');
         $livrosQuery = Book::query()
             ->with(['authors'])
             ->latest('id');
@@ -155,23 +208,35 @@ class BibliotecaController extends Controller
                 ->values()
                 ->all();
 
-            [$livrosRecomendados, $recomendadoAutorNome] = $this->livrosRecomendadosPorAutorEmDestaque(
-                $booksFeatured,
-                12,
-            );
+            if ($patron instanceof LibraryPatron) {
+                $excludeIds = $booksFeatured->pluck('id')->filter()->map(static fn ($id): int => (int) $id)->all();
+                $livrosRecomendados = $this->livrosRecomendadosParaPatron($patron, $excludeIds, 12);
+                $recomendadoAutorNome = $livrosRecomendados !== [] ? 'Com base nos seus guardados' : null;
+            }
+
+            if ($livrosRecomendados === []) {
+                [$livrosRecomendados, $recomendadoAutorNome] = $this->livrosRecomendadosPorAutorEmDestaque(
+                    $booksFeatured,
+                    12,
+                );
+            }
         }
 
         $livrosMaisPedidos = $this->livrosMaisPedidosPorRequisicao(12);
+        $livrosEmLeitura = $patron instanceof LibraryPatron
+            ? $this->livrosEmLeituraParaPatron($patron, 12)
+            : [];
 
         $rankingCatalogo = $rankingService->topEntries(10);
 
-        $categorias = $this->categoriasParaCatalogo();
+        $categorias = $this->categoriasParaCatalogo($patron);
 
         return Inertia::render('library', [
             'livros' => $livros,
             'livrosRecomendados' => $livrosRecomendados,
             'recomendadoAutorNome' => $recomendadoAutorNome,
             'livrosMaisPedidos' => $livrosMaisPedidos,
+            'livrosEmLeitura' => $livrosEmLeitura,
             'categorias' => $categorias,
             'categoriaSelecionada' => $categoriaId ? (string) $categoriaId : null,
             'q' => $q,
@@ -185,6 +250,8 @@ class BibliotecaController extends Controller
 
     public function livros(Request $request): Response
     {
+        /** @var LibraryPatron|null $patron */
+        $patron = $request->user('patron');
         $livrosQuery = Book::query()
             ->with(['authors'])
             ->latest('id');
@@ -201,7 +268,64 @@ class BibliotecaController extends Controller
             $livros = $this->livrosEmDestaque();
         }
 
-        $categorias = $this->categoriasParaCatalogo();
+        $categorias = $this->categoriasParaCatalogo($patron);
+
+        $livrosRecentesCategoria = [];
+        $livrosMaisPedidosCategoria = [];
+        $livrosRecomendadosCategoria = [];
+
+        if ($categoriaId !== null) {
+            $cid = (string) $categoriaId;
+
+            $livrosRecentesCategoria = Book::query()
+                ->with(['authors'])
+                ->forCatalogCategory($cid)
+                ->orderByDesc('created_at')
+                ->orderByDesc('id')
+                ->limit(12)
+                ->get()
+                ->map($this->mapearLivroParaFrontend(...))
+                ->values()
+                ->all();
+
+            $livrosMaisPedidosCategoria = $this->categoryIdIsBestsellersListing($cid)
+                ? $this->livrosMaisPedidosPorRequisicao(12)
+                : Book::query()
+                    ->with(['authors'])
+                    ->withCount('bookRequests as requisicoes_count')
+                    ->forCatalogCategory($cid)
+                    ->having('requisicoes_count', '>', 0)
+                    ->orderByDesc('requisicoes_count')
+                    ->orderByDesc('id')
+                    ->limit(12)
+                    ->get()
+                    ->map(function (Book $book): array {
+                        $row = $this->mapearLivroParaFrontend($book);
+                        $row['requisicoes_count'] = (int) ($book->requisicoes_count ?? 0);
+
+                        return $row;
+                    })
+                    ->values()
+                    ->all();
+
+            $excludeIdsCategoria = array_map(static fn (array $row): int => (int) ($row['id'] ?? 0), $livrosRecentesCategoria);
+            $livrosRecomendadosCategoria = $patron instanceof LibraryPatron
+                ? $this->livrosRecomendadosCategoriaParaPatron($patron, $cid, $excludeIdsCategoria, 12)
+                : [];
+
+            if ($livrosRecomendadosCategoria === []) {
+                $livrosRecomendadosCategoria = Book::query()
+                    ->with(['authors'])
+                    ->forCatalogCategory($cid)
+                    ->whereNotIn('id', $excludeIdsCategoria)
+                    ->inRandomOrder()
+                    ->limit(12)
+                    ->get()
+                    ->map($this->mapearLivroParaFrontend(...))
+                    ->values()
+                    ->all();
+            }
+        }
 
         return Inertia::render('library-all', [
             'livros' => $livros,
@@ -212,6 +336,9 @@ class BibliotecaController extends Controller
             'autores' => $this->autoresParaFiltro(),
             'authorSelecionado' => $authorId ? (string) $authorId : null,
             'ano' => $ano ? (string) $ano : null,
+            'livrosRecentesCategoria' => $livrosRecentesCategoria,
+            'livrosMaisPedidosCategoria' => $livrosMaisPedidosCategoria,
+            'livrosRecomendadosCategoria' => $livrosRecomendadosCategoria,
         ]);
     }
 
@@ -268,14 +395,7 @@ class BibliotecaController extends Controller
 
     private function livrosEmDestaque(): array
     {
-        return [
-            [
-                'id' => '01',
-                'titulo' => 'Os livros aparecerão aqui',
-                'autor' => 'Pesquise para ver resultados',
-                'desc' => 'Quando houver resultados de pesquisa, a descrição do livro será mostrada aqui.',
-            ],
-        ];
+        return [];
     }
 
     /**
@@ -381,5 +501,190 @@ class BibliotecaController extends Controller
             })
             ->values()
             ->all();
+    }
+
+    /**
+     * Livros com progresso de leitura para mostrar "retomar".
+     *
+     * @return array<int, array<string, mixed>>
+     */
+    private function livrosEmLeituraParaPatron(LibraryPatron $patron, int $limit = 12): array
+    {
+        $cap = min(max($limit, 1), 50);
+
+        $bookIds = DB::table('patron_reading_list_books as prlb')
+            ->join('patron_reading_lists as prl', 'prl.id', '=', 'prlb.patron_reading_list_id')
+            ->where('prl.library_patron_id', $patron->id)
+            ->where('prlb.progress_percent', '>', 0)
+            ->where('prlb.progress_percent', '<', 100)
+            ->orderByDesc('prlb.updated_at')
+            ->orderByDesc('prlb.id')
+            ->limit($cap * 2)
+            ->pluck('prlb.book_id')
+            ->map(static fn ($id): int => (int) $id)
+            ->values()
+            ->all();
+
+        if ($bookIds === []) {
+            return [];
+        }
+
+        $bookIds = array_values(array_unique($bookIds));
+
+        $books = Book::query()
+            ->with(['authors'])
+            ->whereIn('id', $bookIds)
+            ->get()
+            ->keyBy('id');
+
+        $rows = [];
+        foreach ($bookIds as $bookId) {
+            $book = $books->get($bookId);
+            if (! $book instanceof Book) {
+                continue;
+            }
+
+            $rows[] = $this->mapearLivroParaFrontend($book);
+            if (count($rows) >= $cap) {
+                break;
+            }
+        }
+
+        return $rows;
+    }
+
+    /**
+     * IDs de categorias mais presentes em livros guardados/progresso do leitor.
+     *
+     * @return list<string>
+     */
+    private function categoriaIdsPreferidasDoPatron(LibraryPatron $patron, int $limit = 8): array
+    {
+        $bookIds = $this->bookIdsSinalDoPatron($patron, 120);
+        if ($bookIds === []) {
+            return [];
+        }
+
+        return Category::query()
+            ->select('categories.id')
+            ->join('book_category', 'book_category.category_id', '=', 'categories.id')
+            ->whereIn('book_category.book_id', $bookIds)
+            ->groupBy('categories.id')
+            ->orderByRaw('COUNT(*) DESC')
+            ->orderBy('categories.id')
+            ->limit(min(max($limit, 1), 20))
+            ->pluck('categories.id')
+            ->map(static fn ($id): string => (string) $id)
+            ->values()
+            ->all();
+    }
+
+    /**
+     * Recomendações gerais para home por preferência de categorias do leitor.
+     *
+     * @param  list<int>  $excludeBookIds
+     * @return array<int, array<string, mixed>>
+     */
+    private function livrosRecomendadosParaPatron(LibraryPatron $patron, array $excludeBookIds = [], int $limit = 12): array
+    {
+        $categoryIds = $this->categoriaIdsPreferidasDoPatron($patron, 5);
+        if ($categoryIds === []) {
+            return [];
+        }
+
+        $bookIdsSinal = $this->bookIdsSinalDoPatron($patron, 120);
+        $excludeIds = array_values(array_unique(array_filter(array_merge($excludeBookIds, $bookIdsSinal))));
+
+        return Book::query()
+            ->with(['authors'])
+            ->whereHas('categories', function ($q) use ($categoryIds): void {
+                $q->whereIn('categories.id', $categoryIds);
+            })
+            ->when($excludeIds !== [], static function ($q) use ($excludeIds): void {
+                $q->whereNotIn('books.id', $excludeIds);
+            })
+            ->latest('id')
+            ->limit(min(max($limit, 1), 50))
+            ->get()
+            ->map($this->mapearLivroParaFrontend(...))
+            ->values()
+            ->all();
+    }
+
+    /**
+     * Recomendações dentro da categoria atual usando guardados/progresso do leitor.
+     *
+     * @param  list<int>  $excludeBookIds
+     * @return array<int, array<string, mixed>>
+     */
+    private function livrosRecomendadosCategoriaParaPatron(LibraryPatron $patron, string $categoriaId, array $excludeBookIds = [], int $limit = 12): array
+    {
+        $bookIdsSinal = $this->bookIdsSinalDoPatron($patron, 180);
+        if ($bookIdsSinal === []) {
+            return [];
+        }
+
+        $authorIds = Author::query()
+            ->select('authors.id')
+            ->join('book_author', 'book_author.author_id', '=', 'authors.id')
+            ->whereIn('book_author.book_id', $bookIdsSinal)
+            ->groupBy('authors.id')
+            ->orderByRaw('COUNT(*) DESC')
+            ->limit(20)
+            ->pluck('authors.id')
+            ->all();
+
+        return Book::query()
+            ->with(['authors'])
+            ->forCatalogCategory($categoriaId)
+            ->when($excludeBookIds !== [], static function ($q) use ($excludeBookIds): void {
+                $q->whereNotIn('books.id', $excludeBookIds);
+            })
+            ->when($bookIdsSinal !== [], static function ($q) use ($bookIdsSinal): void {
+                $q->whereNotIn('books.id', $bookIdsSinal);
+            })
+            ->when($authorIds !== [], function ($q) use ($authorIds): void {
+                $q->whereHas('authors', function ($q2) use ($authorIds): void {
+                    $q2->whereIn('authors.id', $authorIds);
+                });
+            })
+            ->latest('id')
+            ->limit(min(max($limit, 1), 50))
+            ->get()
+            ->map($this->mapearLivroParaFrontend(...))
+            ->values()
+            ->all();
+    }
+
+    /**
+     * Livros guardados e com interação recente (favoritos + listas com progresso).
+     *
+     * @return list<int>
+     */
+    private function bookIdsSinalDoPatron(LibraryPatron $patron, int $limit = 150): array
+    {
+        $cap = min(max($limit, 1), 400);
+
+        $favoritos = DB::table('book_favorites')
+            ->where('library_patron_id', $patron->id)
+            ->orderByDesc('updated_at')
+            ->orderByDesc('id')
+            ->limit($cap)
+            ->pluck('book_id')
+            ->map(static fn ($id): int => (int) $id)
+            ->all();
+
+        $listas = DB::table('patron_reading_list_books as prlb')
+            ->join('patron_reading_lists as prl', 'prl.id', '=', 'prlb.patron_reading_list_id')
+            ->where('prl.library_patron_id', $patron->id)
+            ->orderByRaw('CASE WHEN prlb.progress_percent > 0 THEN 0 ELSE 1 END')
+            ->orderByDesc('prlb.updated_at')
+            ->orderByDesc('prlb.id')
+            ->limit($cap)
+            ->pluck('prlb.book_id')
+            ->map(static fn ($id): int => (int) $id)
+            ->all();
+
+        return array_values(array_unique(array_merge($favoritos, $listas)));
     }
 }

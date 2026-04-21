@@ -140,7 +140,7 @@ function EstadoBadge({ status }: { status: string }) {
     return (
         <span
             className={cn(
-                'inline-flex shrink-0 rounded-full border px-[8px] py-[2px] text-[11px] font-semibold',
+                'inline-flex shrink-0 rounded-full border px-2 py-0.5 text-[11px] font-semibold',
                 variantClass,
             )}
         >
@@ -309,7 +309,7 @@ export default function BibliotecaContaBalcao({ pedidos, metrics }: Props) {
         }
 
         if (filtroPrazo === 'late') {
-            return prazo.texto === 'Atrasado';
+            return prazo.texto.startsWith('Atrasado');
         }
 
         return prazo.texto === 'Vence hoje';
@@ -319,7 +319,7 @@ export default function BibliotecaContaBalcao({ pedidos, metrics }: Props) {
         <BibliotecaContaLayout title="Balcão · todos os pedidos" secao="balcao">
             {flash?.success ? (
                 <p
-                    className="m-0 mb-[12px] rounded-(--raio) border border-emerald-200 bg-emerald-50 px-[14px] py-[10px] text-[13px] text-emerald-900"
+                    className="m-0 mb-3 rounded-(--raio) border border-emerald-200 bg-emerald-50 px-3.5 py-2.5 text-[13px] text-emerald-900"
                     role="status"
                 >
                     {flash.success}
@@ -327,65 +327,48 @@ export default function BibliotecaContaBalcao({ pedidos, metrics }: Props) {
             ) : null}
             {flash?.error ? (
                 <p
-                    className="m-0 mb-[12px] rounded-(--raio) border border-red-200 bg-red-50 px-[14px] py-[10px] text-[13px] text-red-900"
+                    className="m-0 mb-3 rounded-(--raio) border border-red-200 bg-red-50 px-3.5 py-2.5 text-[13px] text-red-900"
                     role="alert"
                 >
                     {flash.error}
                 </p>
             ) : null}
 
-            <p className="m-0 mb-[16px] text-[14px] text-(--brotero-texto-cinza)">
+            <p className="m-0 mb-4 text-[14px] text-(--brotero-texto-cinza)">
                 Gerir requisições de todos os cartões. As notas são visíveis ao aluno em «Os meus pedidos» e no histórico.
                 Requisições <strong>devolvidas</strong> deixam de aparecer aqui automaticamente ao fim de{' '}
                 <strong>30 dias</strong> após a data de devolução. Em pedidos concluídos pode usar{' '}
                 <strong>Ocultar</strong> para os retirar da lista de imediato (permanecem no histórico do aluno).
             </p>
-            <div className="mb-[12px] grid gap-[8px] sm:grid-cols-2 lg:grid-cols-4">
-                <div className="rounded-(--raio) border border-(--brotero-borda) bg-(--brotero-branco) px-[10px] py-[8px]">
+            <div className="mb-3 grid gap-2 sm:grid-cols-2 lg:grid-cols-4">
+                <div className="rounded-(--raio) border border-(--brotero-borda) bg-(--brotero-branco) px-2.5 py-2">
                     <p className="m-0 text-[11px] font-semibold uppercase tracking-wide text-(--brotero-texto-cinza)">Pendentes</p>
-                    <p className="m-0 mt-[2px] text-[20px] font-bold text-(--brotero-texto)">{metrics?.pendentes ?? 0}</p>
+                    <p className="m-0 mt-0.5 text-[20px] font-bold text-(--brotero-texto)">{metrics?.pendentes ?? 0}</p>
                 </div>
-                <div className="rounded-(--raio) border border-(--brotero-borda) bg-(--brotero-branco) px-[10px] py-[8px]">
+                <div className="rounded-(--raio) border border-(--brotero-borda) bg-(--brotero-branco) px-2.5 py-2">
                     <p className="m-0 text-[11px] font-semibold uppercase tracking-wide text-(--brotero-texto-cinza)">Ativos</p>
-                    <p className="m-0 mt-[2px] text-[20px] font-bold text-(--brotero-texto)">{metrics?.ativos ?? 0}</p>
+                    <p className="m-0 mt-0.5 text-[20px] font-bold text-(--brotero-texto)">{metrics?.ativos ?? 0}</p>
                 </div>
-                <div className="rounded-(--raio) border border-red-200 bg-red-50 px-[10px] py-[8px]">
+                <div className="rounded-(--raio) border border-red-200 bg-red-50 px-2.5 py-2">
                     <p className="m-0 text-[11px] font-semibold uppercase tracking-wide text-red-700">Atrasados</p>
-                    <p className="m-0 mt-[2px] text-[20px] font-bold text-red-900">{metrics?.atrasados ?? 0}</p>
+                    <p className="m-0 mt-0.5 text-[20px] font-bold text-red-900">{metrics?.atrasados ?? 0}</p>
                 </div>
-                <div className="rounded-(--raio) border border-amber-200 bg-amber-50 px-[10px] py-[8px]">
+                <div className="rounded-(--raio) border border-amber-200 bg-amber-50 px-2.5 py-2">
                     <p className="m-0 text-[11px] font-semibold uppercase tracking-wide text-amber-800">Vencem hoje</p>
-                    <p className="m-0 mt-[2px] text-[20px] font-bold text-amber-950">{metrics?.vencem_hoje ?? 0}</p>
+                    <p className="m-0 mt-0.5 text-[20px] font-bold text-amber-950">{metrics?.vencem_hoje ?? 0}</p>
                 </div>
             </div>
-            {metrics?.mais_procurados?.length ? (
-                <div className="mb-[12px] rounded-(--raio) border border-(--brotero-borda) bg-(--brotero-branco) px-[10px] py-[8px]">
-                    <p className="m-0 text-[11px] font-semibold uppercase tracking-wide text-(--brotero-texto-cinza)">
-                        Livros mais procurados
-                    </p>
-                    <div className="mt-[6px] flex flex-wrap gap-[8px]">
-                        {metrics.mais_procurados.map((item) => (
-                            <span
-                                key={item.id}
-                                className="rounded-full border border-(--brotero-borda) bg-(--brotero-fundo) px-[8px] py-[3px] text-[12px] font-semibold text-(--brotero-texto)"
-                            >
-                                {item.title} ({item.requests})
-                            </span>
-                        ))}
-                    </div>
-                </div>
-            ) : null}
             <form
-                className="mb-[12px] flex flex-wrap items-end gap-[8px]"
+                className="mb-3 flex flex-wrap items-end gap-2"
                 onSubmit={(e) => {
                     e.preventDefault();
                     scanForm.post('/biblioteca/conta/balcao/scan', { preserveScroll: true });
                 }}
             >
-                <label className="grid gap-[4px] text-[12px] font-semibold text-(--brotero-texto-cinza)">
+                <label className="grid gap-1 text-[12px] font-semibold text-(--brotero-texto-cinza)">
                     Scan rápido (cartão, ISBN ou #pedido)
                     <input
-                        className="min-w-[260px] rounded-(--raio) border border-(--brotero-borda) bg-(--brotero-branco) px-[10px] py-[8px] text-[14px]"
+                        className="min-w-65 rounded-(--raio) border border-(--brotero-borda) bg-(--brotero-branco) px-2.5 py-2 text-[14px]"
                         value={scanForm.data.scan_value}
                         onChange={(e) => scanForm.setData('scan_value', e.target.value)}
                         placeholder="ex.: 12345 · 978.... · #456"
@@ -393,30 +376,30 @@ export default function BibliotecaContaBalcao({ pedidos, metrics }: Props) {
                 </label>
                 <button
                     type="submit"
-                    className="cursor-pointer rounded-(--raio) border border-(--brotero-borda) bg-(--brotero-fundo) px-[12px] py-[8px] text-[13px] font-semibold text-(--brotero-texto)"
+                    className="cursor-pointer rounded-(--raio) border border-(--brotero-borda) bg-(--brotero-fundo) px-3 py-2 text-[13px] font-semibold text-(--brotero-texto)"
                 >
                     Processar scan
                 </button>
                 <a
                     href="/biblioteca/conta/balcao/exportar?scope=active"
-                    className="rounded-(--raio) border border-(--brotero-borda) bg-(--brotero-branco) px-[12px] py-[8px] text-[13px] font-semibold text-(--brotero-texto) no-underline"
+                    className="rounded-(--raio) border border-(--brotero-borda) bg-(--brotero-branco) px-3 py-2 text-[13px] font-semibold text-(--brotero-texto) no-underline"
                 >
                     Exportar CSV (ativos)
                 </a>
                 <a
                     href="/biblioteca/conta/balcao/exportar?scope=overdue"
-                    className="rounded-(--raio) border border-red-200 bg-red-50 px-[12px] py-[8px] text-[13px] font-semibold text-red-900 no-underline"
+                    className="rounded-(--raio) border border-red-200 bg-red-50 px-3 py-2 text-[13px] font-semibold text-red-900 no-underline"
                 >
                     Exportar CSV (atrasados)
                 </a>
             </form>
 
-            <div className="mb-[12px] flex flex-wrap gap-[8px]">
+            <div className="mb-3 flex flex-wrap gap-2">
                 <button
                     type="button"
                     onClick={() => setFiltroPrazo('all')}
                     className={cn(
-                        'rounded-full border px-[12px] py-[6px] text-[12px] font-semibold',
+                        'rounded-full border px-3 py-1.5 text-[12px] font-semibold',
                         filtroPrazo === 'all'
                             ? 'border-(--brotero-primaria) bg-(--brotero-primaria) text-white'
                             : 'border-(--brotero-borda) bg-(--brotero-branco) text-(--brotero-texto)',
@@ -428,7 +411,7 @@ export default function BibliotecaContaBalcao({ pedidos, metrics }: Props) {
                     type="button"
                     onClick={() => setFiltroPrazo('late')}
                     className={cn(
-                        'rounded-full border px-[12px] py-[6px] text-[12px] font-semibold',
+                        'rounded-full border px-3 py-1.5 text-[12px] font-semibold',
                         filtroPrazo === 'late'
                             ? 'border-red-700 bg-red-700 text-white'
                             : 'border-red-200 bg-red-50 text-red-900',
@@ -440,7 +423,7 @@ export default function BibliotecaContaBalcao({ pedidos, metrics }: Props) {
                     type="button"
                     onClick={() => setFiltroPrazo('due_today')}
                     className={cn(
-                        'rounded-full border px-[12px] py-[6px] text-[12px] font-semibold',
+                        'rounded-full border px-3 py-1.5 text-[12px] font-semibold',
                         filtroPrazo === 'due_today'
                             ? 'border-amber-700 bg-amber-700 text-white'
                             : 'border-amber-200 bg-amber-50 text-amber-900',
@@ -451,14 +434,14 @@ export default function BibliotecaContaBalcao({ pedidos, metrics }: Props) {
             </div>
 
             {pedidosFiltrados.length === 0 ? (
-                <p className="rounded-(--raio) border border-dashed border-(--brotero-borda) bg-(--brotero-branco) p-[16px] text-(--brotero-texto-cinza)">
+                <p className="rounded-(--raio) border border-dashed border-(--brotero-borda) bg-(--brotero-branco) p-4 text-(--brotero-texto-cinza)">
                     {pedidos.length === 0
                         ? 'Este painel apresenta todas as requisições para gestão. A lista é atualizada em tempo real.'
                         : 'Não existem pedidos para o filtro selecionado.'}
                 </p>
             ) : null}
 
-            <div className="flex flex-col gap-[14px]">
+            <div className="flex flex-col gap-3.5">
                 {pedidosFiltrados.map((p) => {
                     const busy = busyId === p.id;
                     const escola = p.request_type === 'escola';
@@ -467,16 +450,16 @@ export default function BibliotecaContaBalcao({ pedidos, metrics }: Props) {
                     return (
                         <div
                             key={p.id}
-                            className="rounded-(--raio) border border-(--brotero-borda) bg-(--brotero-branco) p-[14px] shadow-sm"
+                            className="rounded-(--raio) border border-(--brotero-borda) bg-(--brotero-branco) p-3.5 shadow-sm"
                         >
-                            <div className="mb-[10px] flex flex-wrap items-start justify-between gap-2">
+                            <div className="mb-2.5 flex flex-wrap items-start justify-between gap-2">
                                 <div className="min-w-0 flex-1">
                                     <p className="m-0 text-[15px] font-bold text-(--brotero-texto)">{p.book_title}</p>
-                                    <p className="m-0 mt-[4px] text-[12px] text-(--brotero-texto-cinza)">
+                                    <p className="m-0 mt-1 text-[12px] text-(--brotero-texto-cinza)">
                                         #{p.id} · Cartão{' '}
                                         <span className="font-mono font-semibold">{p.card_number}</span>
                                         {!p.patron_registered ? (
-                                            <span className="ml-2 rounded bg-amber-100 px-[6px] py-[2px] text-[11px] font-semibold text-amber-900">
+                                            <span className="ml-2 rounded bg-amber-100 px-1.5 py-0.5 text-[11px] font-semibold text-amber-900">
                                                 Leitor não registado
                                             </span>
                                         ) : null}
@@ -484,13 +467,13 @@ export default function BibliotecaContaBalcao({ pedidos, metrics }: Props) {
                                 </div>
                                 <EstadoBadge status={p.status} />
                             </div>
-                            <p className="m-0 mb-[8px] text-[13px] text-(--brotero-texto-cinza)">
+                            <p className="m-0 mb-2 text-[13px] text-(--brotero-texto-cinza)">
                                 {escola ? 'Escola' : 'Cacifo'}
                                 {p.school_location ? ` · ${p.school_location}` : ''}
                                 {p.cacifo_code ? ` · Código ${p.cacifo_code}` : ''}
                                 {p.isbn ? ` · ISBN ${p.isbn}` : ''}
                             </p>
-                            <p className="m-0 mb-[8px] text-[13px] text-(--brotero-texto-cinza)">
+                            <p className="m-0 mb-2 text-[13px] text-(--brotero-texto-cinza)">
                                 Pedido: {formatDt(p.created_at)}
                                 {p.status === 'created' ? (
                                     <>
@@ -503,14 +486,14 @@ export default function BibliotecaContaBalcao({ pedidos, metrics }: Props) {
                                     <> · Devolvido: {formatDt(p.returned_at)}</>
                                 ) : null}
                             </p>
-                            <p className="m-0 mb-[10px] text-[13px] font-semibold text-(--brotero-texto)">
+                            <p className="m-0 mb-2.5 text-[13px] font-semibold text-(--brotero-texto)">
                                 Multa: {formatEur(p.fine_amount)}
                             </p>
                             {prazo ? (
-                                <p className="m-0 mb-[10px]">
+                                <p className="m-0 mb-2.5">
                                     <span
                                         className={cn(
-                                            'inline-flex rounded-full border px-[10px] py-[3px] text-[12px] font-semibold',
+                                            'inline-flex rounded-full border px-2.5 py-0.75 text-[12px] font-semibold',
                                             prazo.classe,
                                         )}
                                     >
@@ -519,13 +502,13 @@ export default function BibliotecaContaBalcao({ pedidos, metrics }: Props) {
                                 </p>
                             ) : null}
                             {p.patron_visible_note ? (
-                                <p className="m-0 mb-[10px] border-l-2 border-(--brotero-primaria) pl-[8px] text-[12px] text-(--brotero-texto)">
+                                <p className="m-0 mb-2.5 border-l-2 border-(--brotero-primaria) pl-2 text-[12px] text-(--brotero-texto)">
                                     <span className="font-semibold text-(--brotero-texto-cinza)">Nota ao aluno: </span>
                                     {p.patron_visible_note}
                                 </p>
                             ) : null}
 
-                            <div className="flex flex-wrap gap-[8px]">
+                            <div className="flex flex-wrap gap-2">
                                 {p.status === 'pending' ? (
                                     <>
                                         <button
@@ -536,7 +519,7 @@ export default function BibliotecaContaBalcao({ pedidos, metrics }: Props) {
                                                     ? 'Registe o leitor antes de aprovar.'
                                                     : undefined
                                             }
-                                            className="rounded-(--raio) border border-(--brotero-primaria) bg-(--brotero-primaria) px-[10px] py-[6px] text-[12px] font-semibold text-white disabled:opacity-50"
+                                            className="rounded-(--raio) border border-(--brotero-primaria) bg-(--brotero-primaria) px-2.5 py-1.5 text-[12px] font-semibold text-white disabled:opacity-50"
                                             onClick={() => postAction(p.id, 'aprovar')}
                                         >
                                             {busy ? '…' : 'Aprovar'}
@@ -544,7 +527,7 @@ export default function BibliotecaContaBalcao({ pedidos, metrics }: Props) {
                                         <button
                                             type="button"
                                             disabled={busy}
-                                            className="rounded-(--raio) border border-(--brotero-borda) bg-(--brotero-branco) px-[10px] py-[6px] text-[12px] font-semibold disabled:opacity-50"
+                                            className="rounded-(--raio) border border-(--brotero-borda) bg-(--brotero-branco) px-2.5 py-1.5 text-[12px] font-semibold disabled:opacity-50"
                                             onClick={() => openReject(p)}
                                         >
                                             Recusar
@@ -555,7 +538,7 @@ export default function BibliotecaContaBalcao({ pedidos, metrics }: Props) {
                                     <button
                                         type="button"
                                         disabled={busy}
-                                        className="rounded-(--raio) border border-red-200 bg-red-50 px-[10px] py-[6px] text-[12px] font-semibold text-red-900 disabled:opacity-50"
+                                        className="rounded-(--raio) border border-red-200 bg-red-50 px-2.5 py-1.5 text-[12px] font-semibold text-red-900 disabled:opacity-50"
                                         onClick={() => setCancelRow(p)}
                                     >
                                         Cancelar
@@ -566,7 +549,7 @@ export default function BibliotecaContaBalcao({ pedidos, metrics }: Props) {
                                         <button
                                             type="button"
                                             disabled={busy}
-                                            className="rounded-(--raio) border border-(--brotero-borda) bg-(--brotero-branco) px-[10px] py-[6px] text-[12px] font-semibold disabled:opacity-50"
+                                            className="rounded-(--raio) border border-(--brotero-borda) bg-(--brotero-branco) px-2.5 py-1.5 text-[12px] font-semibold disabled:opacity-50"
                                             onClick={() => openFine(p)}
                                         >
                                             Multa (€)
@@ -574,7 +557,7 @@ export default function BibliotecaContaBalcao({ pedidos, metrics }: Props) {
                                         <button
                                             type="button"
                                             disabled={busy}
-                                            className="rounded-(--raio) border border-(--brotero-borda) bg-(--brotero-branco) px-[10px] py-[6px] text-[12px] font-semibold disabled:opacity-50"
+                                            className="rounded-(--raio) border border-(--brotero-borda) bg-(--brotero-branco) px-2.5 py-1.5 text-[12px] font-semibold disabled:opacity-50"
                                             onClick={() => postAction(p.id, 'recalcular-multa')}
                                         >
                                             Recalc. multa
@@ -582,7 +565,7 @@ export default function BibliotecaContaBalcao({ pedidos, metrics }: Props) {
                                         <button
                                             type="button"
                                             disabled={busy}
-                                            className="rounded-(--raio) border border-emerald-700 bg-emerald-700 px-[10px] py-[6px] text-[12px] font-semibold text-white disabled:opacity-50"
+                                            className="rounded-(--raio) border border-emerald-700 bg-emerald-700 px-2.5 py-1.5 text-[12px] font-semibold text-white disabled:opacity-50"
                                             onClick={() => setReturnRow(p)}
                                         >
                                             Devolvido
@@ -592,7 +575,7 @@ export default function BibliotecaContaBalcao({ pedidos, metrics }: Props) {
                                 <button
                                     type="button"
                                     disabled={busy}
-                                    className="rounded-(--raio) border border-(--brotero-borda) bg-(--brotero-branco) px-[10px] py-[6px] text-[12px] font-semibold disabled:opacity-50"
+                                    className="rounded-(--raio) border border-(--brotero-borda) bg-(--brotero-branco) px-2.5 py-1.5 text-[12px] font-semibold disabled:opacity-50"
                                     onClick={() => openNote(p)}
                                 >
                                     Nota ao aluno
@@ -601,7 +584,7 @@ export default function BibliotecaContaBalcao({ pedidos, metrics }: Props) {
                                     <button
                                         type="button"
                                         disabled={busy}
-                                        className="rounded-(--raio) border border-(--brotero-borda) bg-(--brotero-fundo) px-[10px] py-[6px] text-[12px] font-semibold text-(--brotero-texto-cinza) disabled:opacity-50"
+                                        className="rounded-(--raio) border border-(--brotero-borda) bg-(--brotero-fundo) px-2.5 py-1.5 text-[12px] font-semibold text-(--brotero-texto-cinza) disabled:opacity-50"
                                         title="Retira este pedido da lista do balcão (o aluno continua a ver no histórico)"
                                         onClick={() => setHideRow(p)}
                                     >
@@ -630,7 +613,7 @@ export default function BibliotecaContaBalcao({ pedidos, metrics }: Props) {
                         </DialogDescription>
                     </DialogHeader>
                     <textarea
-                        className={`${balcaoModalFieldClass} min-h-[96px]`}
+                        className={`${balcaoModalFieldClass} min-h-24`}
                         value={rejectForm.data.reason}
                         onChange={(e) => rejectForm.setData('reason', e.target.value)}
                     />
@@ -681,7 +664,7 @@ export default function BibliotecaContaBalcao({ pedidos, metrics }: Props) {
                         </DialogDescription>
                     </DialogHeader>
                     <textarea
-                        className={`${balcaoModalFieldClass} min-h-[128px]`}
+                        className={`${balcaoModalFieldClass} min-h-32`}
                         value={noteForm.data.patron_visible_note}
                         onChange={(e) => noteForm.setData('patron_visible_note', e.target.value)}
                     />

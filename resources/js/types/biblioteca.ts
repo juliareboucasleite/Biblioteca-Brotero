@@ -75,6 +75,7 @@ export type ChatMensagem = {
     id: string;
     body: string;
     created_at: string;
+    updated_at: string;
     minha: boolean;
     remetente_label: string;
 };

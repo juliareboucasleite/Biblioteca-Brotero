@@ -105,25 +105,18 @@ class HandleInertiaRequests extends Middleware
             return [];
         }
 
-        if (Schema::hasTable('patron_reading_list_books') && Schema::hasTable('patron_reading_lists')) {
-            return DB::table('patron_reading_list_books as rb')
-                ->join('patron_reading_lists as rl', 'rl.id', '=', 'rb.patron_reading_list_id')
-                ->where('rl.library_patron_id', $patron->id)
-                ->pluck('rb.book_id')
-                ->map(static fn ($id): string => (string) $id)
-                ->unique()
-                ->values()
-                ->all();
-        }
+        $readingListBooks = DB::table('patron_reading_list_books as rb')
+            ->join('patron_reading_lists as rl', 'rl.id', '=', 'rb.patron_reading_list_id')
+            ->where('rl.library_patron_id', $patron->id)
+            ->pluck('rb.book_id');
 
-        if (! Schema::hasTable('book_favorites')) {
-            return [];
-        }
-
-        return DB::table('book_favorites')
+        $favorites = DB::table('book_favorites')
             ->where('library_patron_id', $patron->id)
-            ->pluck('book_id')
+            ->pluck('book_id');
+
+        return $readingListBooks->concat($favorites)
             ->map(static fn ($id): string => (string) $id)
+            ->unique()
             ->values()
             ->all();
     }
@@ -136,10 +129,6 @@ class HandleInertiaRequests extends Middleware
         $patron = $request->user('patron');
 
         if (! $patron instanceof LibraryPatron) {
-            return [];
-        }
-
-        if (! Schema::hasTable('patron_reading_lists')) {
             return [];
         }
 

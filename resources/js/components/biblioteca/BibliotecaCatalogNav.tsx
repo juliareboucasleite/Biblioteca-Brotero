@@ -160,6 +160,13 @@ export function BibliotecaCatalogNav() {
                     active={isNavActive(url, '/biblioteca/conta/favoritos')}
                 />
                 <NavItem
+                    href="/ranking"
+                    title="Ranking de leitores"
+                    icon={BookMarked}
+                    label="Ranking"
+                    active={isNavActive(url, '/ranking')}
+                />
+                <NavItem
                     href={patron ? '/biblioteca/conta/pedidos' : '/biblioteca/entrar'}
                     title={patron ? 'Minha conta' : 'Entrar'}
                     icon={patron ? User : LogIn}
@@ -167,13 +174,6 @@ export function BibliotecaCatalogNav() {
                     active={
                         patron ? isContaRailSectionActive(url) : isNavActive(url, '/biblioteca/entrar')
                     }
-                />
-                <NavItem
-                    href="/ranking"
-                    title="Ranking de leitores"
-                    icon={BookMarked}
-                    label="Ranking"
-                    active={isNavActive(url, '/ranking')}
                 />
             </div>
         </nav>

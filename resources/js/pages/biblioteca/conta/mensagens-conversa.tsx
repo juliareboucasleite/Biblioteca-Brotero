@@ -1,4 +1,4 @@
-import { Form, Link, usePage } from '@inertiajs/react';
+import { Form, Link, router, useForm, usePage } from '@inertiajs/react';
 import { BookPlus, MoreHorizontal, Send } from 'lucide-react';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { BibliotecaContaLayout } from '@/components/biblioteca/BibliotecaContaLayout';
@@ -248,7 +248,12 @@ export default function BibliotecaContaMensagensConversa({
     const mensagemRef = useRef<HTMLTextAreaElement | null>(null);
     const [reportOpen, setReportOpen] = useState(false);
     const [blockOpen, setBlockOpen] = useState(false);
+    const [clearOpen, setClearOpen] = useState(false);
+    const [destroyOpen, setDestroyOpen] = useState(false);
     const [sugerirLivroAberto, setSugerirLivroAberto] = useState(false);
+    const [editMessage, setEditMessage] = useState<ChatMensagem | null>(null);
+    const [deleteMessage, setDeleteMessage] = useState<ChatMensagem | null>(null);
+    const editForm = useForm({ body: '' });
 
     const timeline = useMemo(
         () => mergeTimeline(mensagens, livros_partilhados),
@@ -300,6 +305,39 @@ export default function BibliotecaContaMensagensConversa({
     }, [ajustarAlturaMensagem]);
 
     const podeEscrever = conversa.pode_enviar_mensagens && conversa.estado !== 'declined';
+
+    function openEditMessage(message: ChatMensagem): void {
+        setEditMessage(message);
+        editForm.setData('body', message.body);
+        editForm.clearErrors();
+    }
+
+    function submitEditMessage(): void {
+        if (!editMessage) {
+            return;
+        }
+
+        const next = editForm.data.body.trim();
+        if (!next) {
+            return;
+        }
+
+        editForm.patch(`${basePath}/mensagem/${encodeURIComponent(editMessage.id)}`, {
+            preserveScroll: true,
+            onSuccess: () => setEditMessage(null),
+        });
+    }
+
+    function submitDeleteMessage(): void {
+        if (!deleteMessage) {
+            return;
+        }
+
+        router.delete(`${basePath}/mensagem/${encodeURIComponent(deleteMessage.id)}`, {
+            preserveScroll: true,
+            onSuccess: () => setDeleteMessage(null),
+        });
+    }
 
     return (
         <BibliotecaContaLayout
@@ -416,6 +454,146 @@ export default function BibliotecaContaMensagensConversa({
                 </DialogContent>
             </Dialog>
 
+            <Dialog open={clearOpen} onOpenChange={setClearOpen}>
+                <DialogContent className="border-(--brotero-borda) bg-(--brotero-branco) text-(--brotero-texto) sm:max-w-sm">
+                    <DialogHeader>
+                        <DialogTitle>Limpar conversa</DialogTitle>
+                        <DialogDescription className="text-(--brotero-texto-cinza)">
+                            Remove as mensagens e sugestões de livros desta conversa.
+                        </DialogDescription>
+                    </DialogHeader>
+                    <DialogFooter className="gap-[8px] sm:justify-end">
+                        <button
+                            type="button"
+                            className="btn-brotero btn-brotero-secondary btn-sm"
+                            onClick={() => setClearOpen(false)}
+                        >
+                            Cancelar
+                        </button>
+                        <Form
+                            action={`${basePath}/limpar`}
+                            method="post"
+                            className="inline"
+                            onSuccess={() => setClearOpen(false)}
+                        >
+                            <button
+                                type="submit"
+                                className="btn-brotero btn-brotero-primary btn-sm"
+                            >
+                                Limpar
+                            </button>
+                        </Form>
+                    </DialogFooter>
+                </DialogContent>
+            </Dialog>
+
+            <Dialog open={destroyOpen} onOpenChange={setDestroyOpen}>
+                <DialogContent className="border-(--brotero-borda) bg-(--brotero-branco) text-(--brotero-texto) sm:max-w-sm">
+                    <DialogHeader>
+                        <DialogTitle>Apagar conversa</DialogTitle>
+                        <DialogDescription className="text-(--brotero-texto-cinza)">
+                            Apaga esta conversa e todo o histórico partilhado. Esta ação não pode ser desfeita.
+                        </DialogDescription>
+                    </DialogHeader>
+                    <DialogFooter className="gap-[8px] sm:justify-end">
+                        <button
+                            type="button"
+                            className="btn-brotero btn-brotero-secondary btn-sm"
+                            onClick={() => setDestroyOpen(false)}
+                        >
+                            Cancelar
+                        </button>
+                        <Form
+                            action={basePath}
+                            method="delete"
+                            className="inline"
+                            onSuccess={() => setDestroyOpen(false)}
+                        >
+                            <button
+                                type="submit"
+                                className="btn-brotero btn-brotero-danger btn-sm"
+                            >
+                                Apagar conversa
+                            </button>
+                        </Form>
+                    </DialogFooter>
+                </DialogContent>
+            </Dialog>
+
+            <Dialog
+                open={editMessage !== null}
+                onOpenChange={(open) => {
+                    if (!open && !editForm.processing) {
+                        setEditMessage(null);
+                    }
+                }}
+            >
+                <DialogContent className="border-(--brotero-borda) bg-(--brotero-branco) text-(--brotero-texto) sm:max-w-md">
+                    <DialogHeader>
+                        <DialogTitle>Editar mensagem</DialogTitle>
+                        <DialogDescription className="text-(--brotero-texto-cinza)">
+                            Atualize o texto da sua mensagem.
+                        </DialogDescription>
+                    </DialogHeader>
+                    <textarea
+                        autoFocus
+                        rows={4}
+                        maxLength={2000}
+                        className="resize-y rounded-[10px] border border-(--brotero-borda) px-[10px] py-[8px]"
+                        value={editForm.data.body}
+                        onChange={(e) => editForm.setData('body', e.target.value)}
+                    />
+                    {editForm.errors.body ? (
+                        <p className="m-0 text-[13px] font-medium text-red-700">{editForm.errors.body}</p>
+                    ) : null}
+                    <DialogFooter className="gap-[8px] sm:justify-end">
+                        <button
+                            type="button"
+                            className="btn-brotero btn-brotero-secondary btn-sm"
+                            disabled={editForm.processing}
+                            onClick={() => setEditMessage(null)}
+                        >
+                            Cancelar
+                        </button>
+                        <button
+                            type="button"
+                            className="btn-brotero btn-brotero-primary btn-sm"
+                            disabled={editForm.processing}
+                            onClick={submitEditMessage}
+                        >
+                            Guardar
+                        </button>
+                    </DialogFooter>
+                </DialogContent>
+            </Dialog>
+
+            <Dialog open={deleteMessage !== null} onOpenChange={(open) => !open && setDeleteMessage(null)}>
+                <DialogContent className="border-(--brotero-borda) bg-(--brotero-branco) text-(--brotero-texto) sm:max-w-sm">
+                    <DialogHeader>
+                        <DialogTitle>Apagar mensagem</DialogTitle>
+                        <DialogDescription className="text-(--brotero-texto-cinza)">
+                            Esta ação não pode ser desfeita.
+                        </DialogDescription>
+                    </DialogHeader>
+                    <DialogFooter className="gap-[8px] sm:justify-end">
+                        <button
+                            type="button"
+                            className="btn-brotero btn-brotero-secondary btn-sm"
+                            onClick={() => setDeleteMessage(null)}
+                        >
+                            Cancelar
+                        </button>
+                        <button
+                            type="button"
+                            className="btn-brotero btn-brotero-danger btn-sm"
+                            onClick={submitDeleteMessage}
+                        >
+                            Apagar
+                        </button>
+                    </DialogFooter>
+                </DialogContent>
+            </Dialog>
+
             {/* Painel de conversa: largura total da coluna + altura até ao rodapé */}
             <div className="flex min-h-0 flex-1 flex-col overflow-hidden rounded-[18px] border border-(--brotero-borda-suave) bg-(--brotero-branco) shadow-[0_8px_28px_rgba(42,38,48,0.07)]">
                 <div className="flex shrink-0 items-center gap-[10px] border-b border-(--brotero-borda-suave) px-[14px] py-[12px]">
@@ -443,18 +621,30 @@ export default function BibliotecaContaMensagensConversa({
                                 className="min-w-52 border border-(--brotero-borda) bg-(--brotero-branco) p-[6px] text-(--brotero-texto) shadow-lg"
                             >
                                 {conversa.mostrar_perfil_peer && peerBase ? (
-                                    <DropdownMenuItem asChild className="cursor-pointer rounded-[8px] text-[14px]">
+                                    <DropdownMenuItem asChild className="cursor-pointer rounded-[8px] text-[14px] focus:bg-(--brotero-fundo) data-[highlighted]:bg-(--brotero-fundo)">
                                         <Link href={peerBase}>Ver perfil</Link>
                                     </DropdownMenuItem>
                                 ) : null}
                                 <DropdownMenuItem
-                                    className="cursor-pointer rounded-[8px] text-[14px]"
+                                    className="cursor-pointer rounded-[8px] text-[14px] focus:bg-(--brotero-fundo) data-[highlighted]:bg-(--brotero-fundo)"
                                     onSelect={() => setReportOpen(true)}
                                 >
                                     Denunciar…
                                 </DropdownMenuItem>
                                 <DropdownMenuItem
-                                    className="cursor-pointer rounded-[8px] text-[14px] text-red-800 focus:text-red-900"
+                                    className="cursor-pointer rounded-[8px] text-[14px] focus:bg-(--brotero-fundo) data-[highlighted]:bg-(--brotero-fundo)"
+                                    onSelect={() => setClearOpen(true)}
+                                >
+                                    Limpar conversa
+                                </DropdownMenuItem>
+                                <DropdownMenuItem
+                                    className="cursor-pointer rounded-[8px] text-[14px] text-red-800 focus:bg-(--brotero-fundo) focus:text-red-900 data-[highlighted]:bg-(--brotero-fundo) data-[highlighted]:text-red-900"
+                                    onSelect={() => setDestroyOpen(true)}
+                                >
+                                    Apagar conversa
+                                </DropdownMenuItem>
+                                <DropdownMenuItem
+                                    className="cursor-pointer rounded-[8px] text-[14px] text-red-800 focus:bg-(--brotero-fundo) focus:text-red-900 data-[highlighted]:bg-(--brotero-fundo) data-[highlighted]:text-red-900"
                                     onSelect={() => setBlockOpen(true)}
                                 >
                                     Bloquear leitor
@@ -543,17 +733,49 @@ export default function BibliotecaContaMensagensConversa({
                             timeline.map((item) => {
                                 if (item.kind === 'message') {
                                     const m = item.data;
+                                    const foiEditada =
+                                        Boolean(m.updated_at) &&
+                                        Boolean(m.created_at) &&
+                                        m.updated_at !== m.created_at;
 
                                     return (
                                         <div
                                             key={`m-${m.id}`}
                                             className={cn(
-                                                'flex max-w-[min(92%,26rem)] flex-col gap-[4px] rounded-[14px] px-[12px] py-[9px] text-[14px] leading-snug',
+                                                'relative flex max-w-[min(92%,26rem)] flex-col gap-[4px] rounded-[14px] px-[12px] py-[9px] text-[14px] leading-snug',
                                                 m.minha
-                                                    ? 'ml-[6%] self-end bg-violet-100 text-violet-950'
+                                                    ? 'ml-[6%] self-end bg-violet-100 pr-[40px] text-violet-950'
                                                     : 'mr-[6%] self-start bg-(--brotero-fundo) text-(--brotero-texto)',
                                             )}
                                         >
+                                            {m.minha ? (
+                                                <DropdownMenu>
+                                                    <DropdownMenuTrigger
+                                                        type="button"
+                                                        className="absolute top-[6px] right-[6px] inline-flex size-[24px] cursor-pointer items-center justify-center rounded-[8px] border border-violet-200/80 bg-white/70 text-violet-900 hover:bg-white"
+                                                        aria-label="Opções da mensagem"
+                                                    >
+                                                        <MoreHorizontal className="size-[14px]" aria-hidden />
+                                                    </DropdownMenuTrigger>
+                                                    <DropdownMenuContent
+                                                        align="end"
+                                                        className="min-w-36 border border-(--brotero-borda) bg-(--brotero-branco) p-[6px] text-(--brotero-texto) shadow-lg"
+                                                    >
+                                                        <DropdownMenuItem
+                                                            className="cursor-pointer rounded-[8px] text-[13px]"
+                                                            onSelect={() => openEditMessage(m)}
+                                                        >
+                                                            Editar
+                                                        </DropdownMenuItem>
+                                                        <DropdownMenuItem
+                                                            className="cursor-pointer rounded-[8px] text-[13px] text-red-800 focus:text-red-900"
+                                                            onSelect={() => setDeleteMessage(m)}
+                                                        >
+                                                            Apagar
+                                                        </DropdownMenuItem>
+                                                    </DropdownMenuContent>
+                                                </DropdownMenu>
+                                            ) : null}
                                             {!m.minha ? (
                                                 <span className="text-[11px] font-semibold text-(--brotero-texto-cinza)">
                                                     {m.remetente_label}
@@ -562,6 +784,7 @@ export default function BibliotecaContaMensagensConversa({
                                             <p className="m-0 whitespace-pre-wrap wrap-break-word">{m.body}</p>
                                             <span className="text-[10px] text-(--brotero-texto-cinza)">
                                                 {formatHora(m.created_at)}
+                                                {foiEditada ? ' · editada' : ''}
                                             </span>
                                         </div>
                                     );

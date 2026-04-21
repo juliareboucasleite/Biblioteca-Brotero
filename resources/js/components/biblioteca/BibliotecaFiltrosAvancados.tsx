@@ -1,7 +1,7 @@
 import { OPCOES_LINGUA } from '@/constants/biblioteca-filtros';
 
 const inputSelectClass =
-    'w-full p-[6px_10px] text-[13px] border border-(--brotero-borda) rounded-(--raio) bg-(--brotero-branco) text-(--brotero-texto) focus:outline-none focus:outline-2 focus:outline-(--brotero-primaria) focus:outline-offset-0';
+    'h-[34px] w-full p-[6px_10px] text-[13px] border border-(--brotero-borda) rounded-(--raio) bg-(--brotero-branco) text-(--brotero-texto) focus:outline-none focus:outline-2 focus:outline-(--brotero-primaria) focus:outline-offset-0';
 
 const labelClass = 'block mb-[4px] text-[12px] font-semibold text-(--brotero-texto-cinza)';
 
@@ -97,7 +97,7 @@ export function BibliotecaFiltrosAvancados({
                 <div className="w-full min-[500px]:w-auto shrink-0">
                     <button
                         type="submit"
-                        className="w-full min-[500px]:w-auto px-[16px] py-[8px] rounded-(--raio) bg-(--brotero-primaria) text-white text-[14px] font-semibold border-0 cursor-pointer hover:opacity-95"
+                        className="h-[34px] w-full min-[500px]:w-auto px-[12px] rounded-(--raio) bg-(--brotero-primaria) text-white text-[13px] font-semibold border-0 cursor-pointer hover:opacity-95"
                     >
                         Aplicar filtros
                     </button>

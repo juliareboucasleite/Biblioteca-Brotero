@@ -46,10 +46,10 @@ export default function LibraryBook({ livro, patron_share = null }: LibraryBookP
             <Head title={pageTitle} />
 
             <BibliotecaCatalogShell>
-                <div className="pt-[4px] pb-[8px] lg:pt-0">
+                <div className="pt-1 pb-2 lg:pt-0">
                     {flash?.success ? (
                         <p
-                            className="m-0 mb-[16px] rounded-(--raio) border border-emerald-200/90 bg-emerald-50/95 px-[14px] py-[11px] text-[14px] text-emerald-900 shadow-[0_4px_14px_rgba(5,46,22,0.08)]"
+                            className="m-0 mb-4 rounded-(--raio) border border-emerald-200/90 bg-emerald-50/95 px-3.5 py-2.75 text-[14px] text-emerald-900 shadow-[0_4px_14px_rgba(5,46,22,0.08)]"
                             role="status"
                         >
                             {flash.success}
@@ -58,7 +58,7 @@ export default function LibraryBook({ livro, patron_share = null }: LibraryBookP
 
                     <nav
                         aria-label="Navegação do catálogo"
-                        className="m-0 mb-[22px] flex flex-wrap items-center gap-x-[14px] gap-y-[8px] text-[14px]"
+                        className="m-0 mb-5.5 flex flex-wrap items-center gap-x-3.5 gap-y-2 text-[14px]"
                     >
                         <a
                             href="/biblioteca"
@@ -76,7 +76,7 @@ export default function LibraryBook({ livro, patron_share = null }: LibraryBookP
                             Todos os livros
                         </a>
                     </nav>
-                    <div className="grid grid-cols-[280px_1fr_320px] gap-[32px] items-start max-[900px]:grid-cols-2 max-[600px]:grid-cols-1">
+                    <div className="grid grid-cols-[280px_1fr_320px] gap-8 items-start max-[900px]:grid-cols-2 max-[600px]:grid-cols-1">
                         <BookCover coverSrc={coverSrc} titulo={livro.titulo} placeholder={placeholder} />
                         <BookDetailContent
                             livro={livro}
@@ -85,7 +85,7 @@ export default function LibraryBook({ livro, patron_share = null }: LibraryBookP
                             authorsLabel={authorsLabel}
                         />
                         {!placeholder && bookApi === null && livro.tem_ebook ? (
-                            <aside className="border border-(--brotero-borda) rounded-(--raio) p-[20px] bg-(--brotero-branco) text-[14px] text-(--brotero-texto-cinza) shadow-[0_1px_3px_rgba(0,0,0,0.06)] max-[900px]:col-span-2 max-[600px]:col-span-1">
+                            <aside className="border border-(--brotero-borda) rounded-(--raio) p-5 bg-(--brotero-branco) text-[14px] text-(--brotero-texto-cinza) shadow-[0_1px_3px_rgba(0,0,0,0.06)] max-[900px]:col-span-2 max-[600px]:col-span-1">
                                 A carregar detalhes do e-book…
                             </aside>
                         ) : bookApi?.has_ebook ? (

@@ -72,7 +72,7 @@ function EstadoPedidoBadge({ status }: { status: string }) {
     return (
         <span
             className={cn(
-                'inline-flex shrink-0 rounded-full px-[10px] py-[3px] text-[12px] font-semibold leading-tight',
+                'inline-flex shrink-0 rounded-full px-2.5 py-0.75 text-[12px] font-semibold leading-tight',
                 isPending
                     ? 'border border-amber-200 bg-amber-50 text-amber-950'
                     : 'border border-emerald-200 bg-emerald-50 text-emerald-900',
@@ -130,10 +130,10 @@ export default function BibliotecaContaPedidos({ pedidos }: Props) {
         return (
             <li
                 key={p.id}
-                className="flex flex-col gap-[12px] p-[16px] bg-(--brotero-branco) border border-(--brotero-borda) rounded-(--raio) sm:flex-row sm:items-center sm:gap-[16px]"
+                className="flex flex-col gap-3 p-4 bg-(--brotero-branco) border border-(--brotero-borda) rounded-(--raio) sm:flex-row sm:items-center sm:gap-4"
             >
                 <div className="min-w-0 flex-1">
-                    <p className="m-0 mb-[8px] flex flex-wrap items-center gap-2 text-[16px] font-bold text-(--brotero-texto)">
+                    <p className="m-0 mb-2 flex flex-wrap items-center gap-2 text-[16px] font-bold text-(--brotero-texto)">
                         <span className="min-w-0">{p.book_title}</span>
                         <EstadoPedidoBadge status={p.status} />
                     </p>
@@ -143,7 +143,7 @@ export default function BibliotecaContaPedidos({ pedidos }: Props) {
                         {!isPending && p.cacifo_code ? ` · Código ${p.cacifo_code}` : ''}
                     </p>
                     {p.patron_visible_note ? (
-                        <p className="m-0 mt-[8px] border-l-2 border-(--brotero-primaria) pl-[10px] text-[13px] text-(--brotero-texto)">
+                        <p className="m-0 mt-[8px] border-l-2 border-(--brotero-primaria) pl-2.5 text-[13px] text-(--brotero-texto)">
                             <span className="font-semibold text-(--brotero-texto-cinza)">
                                 Mensagem da biblioteca:{' '}
                             </span>
@@ -165,7 +165,7 @@ export default function BibliotecaContaPedidos({ pedidos }: Props) {
                                 <p className="m-0 mt-[8px]">
                                     <span
                                         className={cn(
-                                            'inline-flex rounded-full border px-[10px] py-[3px] text-[12px] font-semibold',
+                                            'inline-flex rounded-full border px-2.5 py-0.75 text-[12px] font-semibold',
                                             prazo.classe,
                                         )}
                                     >
@@ -197,7 +197,7 @@ export default function BibliotecaContaPedidos({ pedidos }: Props) {
         <BibliotecaContaLayout title="Os meus pedidos" secao="pedidos">
             {flash?.success ? (
                 <p
-                    className="m-0 mb-[12px] rounded-(--raio) border border-emerald-200 bg-emerald-50 px-[14px] py-[10px] text-[13px] text-emerald-900"
+                    className="m-0 mb-3 rounded-(--raio) border border-emerald-200 bg-emerald-50 px-3.5 py-2.5 text-[13px] text-emerald-900"
                     role="status"
                 >
                     {flash.success}
@@ -205,18 +205,18 @@ export default function BibliotecaContaPedidos({ pedidos }: Props) {
             ) : null}
             {flash?.error ? (
                 <p
-                    className="m-0 mb-[12px] rounded-(--raio) border border-red-200 bg-red-50 px-[14px] py-[10px] text-[13px] text-red-900"
+                    className="m-0 mb-3 rounded-(--raio) border border-red-200 bg-red-50 px-3.5 py-2.5 text-[13px] text-red-900"
                     role="alert"
                 >
                     {flash.error}
                 </p>
             ) : null}
 
-            <h2 className="m-0 mb-[16px] text-[1.15rem] font-bold text-(--brotero-texto)">
+            <h2 className="m-0 mb-4 text-[1.15rem] font-bold text-(--brotero-texto)">
                 À aguardar aprovação
             </h2>
             {pendentes.length === 0 ? (
-                <div className="mb-[28px] rounded-(--raio) border border-dashed border-(--brotero-borda) bg-(--brotero-branco) p-[16px] text-(--brotero-texto-cinza)">
+                <div className="mb-7 rounded-(--raio) border border-dashed border-(--brotero-borda) bg-(--brotero-branco) p-4 text-(--brotero-texto-cinza)">
                     <p className="m-0">Não tem pedidos pendentes de validação.</p>
                     <p className="m-0 mt-[8px] text-[13px]">
                         Próximo passo: explore o{' '}
@@ -227,14 +227,14 @@ export default function BibliotecaContaPedidos({ pedidos }: Props) {
                     </p>
                 </div>
             ) : (
-                <ul className="m-0 mb-[28px] flex list-none flex-col gap-[12px] p-0">
+                <ul className="m-0 mb-7 flex list-none flex-col gap-3 p-0">
                     {pendentes.map(renderPedidoCard)}
                 </ul>
             )}
 
-            <h2 className="m-0 mb-[16px] text-[1.15rem] font-bold text-(--brotero-texto)">Pedidos ativos</h2>
+            <h2 className="m-0 mb-4 text-[1.15rem] font-bold text-(--brotero-texto)">Pedidos ativos</h2>
             {ativos.length === 0 ? (
-                <p className="m-0 p-[16px] bg-(--brotero-branco) border border-dashed border-(--brotero-borda) rounded-(--raio) text-(--brotero-texto-cinza)">
+                <p className="m-0 p-4 bg-(--brotero-branco) border border-dashed border-(--brotero-borda) rounded-(--raio) text-(--brotero-texto-cinza)">
                     Não tem requisições em curso. Explore o{' '}
                     <Link href="/biblioteca" className="text-(--brotero-texto-link) hover:underline">
                         catálogo
@@ -242,7 +242,7 @@ export default function BibliotecaContaPedidos({ pedidos }: Props) {
                     .
                 </p>
             ) : (
-                <ul className="m-0 p-0 list-none flex flex-col gap-[12px]">{ativos.map(renderPedidoCard)}</ul>
+                <ul className="m-0 p-0 list-none flex flex-col gap-3">{ativos.map(renderPedidoCard)}</ul>
             )}
 
             <Dialog

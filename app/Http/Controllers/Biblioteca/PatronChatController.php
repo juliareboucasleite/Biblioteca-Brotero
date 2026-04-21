@@ -291,6 +291,106 @@ class PatronChatController extends Controller
             ->with('success', 'Mensagem enviada.');
     }
 
+    public function updateMessage(
+        Request $request,
+        PatronConversation $patron_conversation,
+        PatronConversationMessage $message,
+    ): RedirectResponse {
+        /** @var LibraryPatron $patron */
+        $patron = $request->user('patron');
+
+        if (! $this->isMember($patron_conversation, $patron)) {
+            abort(403);
+        }
+
+        if ($message->patron_conversation_id !== $patron_conversation->id || $message->library_patron_id !== $patron->id) {
+            abort(403);
+        }
+
+        $data = $request->validate([
+            'body' => ['required', 'string', 'max:2000'],
+        ]);
+
+        $body = trim((string) $data['body']);
+        if ($body === '') {
+            return redirect()->back()->with('error', 'Escreva uma mensagem válida.');
+        }
+
+        $message->forceFill(['body' => $body])->save();
+        $patron_conversation->touch();
+        AuditLogger::log($request, 'chat.edit_message', PatronConversation::class, (int) $patron_conversation->id);
+
+        return redirect()->back()->with('success', 'Mensagem editada.');
+    }
+
+    public function destroyMessage(
+        Request $request,
+        PatronConversation $patron_conversation,
+        PatronConversationMessage $message,
+    ): RedirectResponse {
+        /** @var LibraryPatron $patron */
+        $patron = $request->user('patron');
+
+        if (! $this->isMember($patron_conversation, $patron)) {
+            abort(403);
+        }
+
+        if ($message->patron_conversation_id !== $patron_conversation->id || $message->library_patron_id !== $patron->id) {
+            abort(403);
+        }
+
+        $message->delete();
+        $patron_conversation->touch();
+        AuditLogger::log($request, 'chat.delete_message', PatronConversation::class, (int) $patron_conversation->id);
+
+        return redirect()->back()->with('success', 'Mensagem apagada.');
+    }
+
+    public function clearConversation(Request $request, PatronConversation $patron_conversation): RedirectResponse
+    {
+        /** @var LibraryPatron $patron */
+        $patron = $request->user('patron');
+
+        if (! $this->isMember($patron_conversation, $patron)) {
+            abort(403);
+        }
+
+        $other = $patron_conversation->otherPatron($patron);
+        if ($other !== null) {
+            PatronPeerBookShare::query()->forPatronPair($patron->id, $other->id)->delete();
+        }
+
+        $patron_conversation->messages()->delete();
+        $patron_conversation->touch();
+        $this->markRead($patron_conversation, $patron);
+        AuditLogger::log($request, 'chat.clear_conversation', PatronConversation::class, (int) $patron_conversation->id);
+
+        return redirect()->back()->with('success', 'Conversa limpa.');
+    }
+
+    public function destroyConversation(Request $request, PatronConversation $patron_conversation): RedirectResponse
+    {
+        /** @var LibraryPatron $patron */
+        $patron = $request->user('patron');
+
+        if (! $this->isMember($patron_conversation, $patron)) {
+            abort(403);
+        }
+
+        $other = $patron_conversation->otherPatron($patron);
+        if ($other !== null) {
+            PatronPeerBookShare::query()->forPatronPair($patron->id, $other->id)->delete();
+        }
+
+        $conversationId = (int) $patron_conversation->id;
+        $patron_conversation->delete();
+        AuditLogger::log($request, 'chat.delete_conversation', PatronConversation::class, $conversationId);
+
+        return redirect()
+            ->route('biblioteca.conta.mensagens.index')
+            ->with('success', 'Conversa apagada.');
+    }
+
     public function accept(Request $request, PatronConversation $patron_conversation): RedirectResponse
     {
         /** @var LibraryPatron $patron */
@@ -454,7 +554,7 @@ class PatronChatController extends Controller
     }
 
     /**
-     * @return array{id: string, body: string, created_at: string, minha: bool, remetente_label: string}
+     * @return array{id: string, body: string, created_at: string, updated_at: string, minha: bool, remetente_label: string}
      */
     private function messagePayload(PatronConversationMessage $message, LibraryPatron $viewer): array
     {
@@ -464,6 +564,7 @@ class PatronChatController extends Controller
             'id' => (string) $message->id,
             'body' => $message->body,
             'created_at' => $message->created_at?->toIso8601String() ?? '',
+            'updated_at' => $message->updated_at?->toIso8601String() ?? '',
             'minha' => $minha,
             'remetente_label' => PatronLabel::format($message->sender),
         ];

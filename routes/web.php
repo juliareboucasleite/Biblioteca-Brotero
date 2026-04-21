@@ -44,7 +44,6 @@ Route::get('/biblioteca/livro', [BibliotecaController::class, 'livro'])->name('b
 Route::post('/books/isbn', [BookController::class, 'storeFromIsbn']);
 Route::get('/books/{id}/details', [BookController::class, 'showDetails']);
 Route::post('/biblioteca/requisitar', [BookRequestController::class, 'store'])
-    ->withoutMiddleware([VerifyCsrfToken::class])
     ->middleware('throttle:20,1')
     ->name('biblioteca.requisitar');
 
@@ -133,6 +132,18 @@ Route::middleware('auth:patron')
                 Route::post('/mensagens/{patron_conversation}', [PatronChatController::class, 'store'])->middleware('throttle:40,1')->name(
                     'mensagens.store',
                 );
+                Route::patch('/mensagens/{patron_conversation}/mensagem/{message}', [PatronChatController::class, 'updateMessage'])->name(
+                    'mensagens.message.update',
+                );
+                Route::delete('/mensagens/{patron_conversation}/mensagem/{message}', [PatronChatController::class, 'destroyMessage'])->name(
+                    'mensagens.message.destroy',
+                );
+                Route::post('/mensagens/{patron_conversation}/limpar', [PatronChatController::class, 'clearConversation'])->name(
+                    'mensagens.clear',
+                );
+                Route::delete('/mensagens/{patron_conversation}', [PatronChatController::class, 'destroyConversation'])->name(
+                    'mensagens.destroy',
+                );
                 Route::post('/mensagens/{patron_conversation}/aceitar', [PatronChatController::class, 'accept'])->name(
                     'mensagens.accept',
                 );
@@ -146,6 +157,7 @@ Route::middleware('auth:patron')
                 Route::post('/favoritos/{book}', [PatronFavoriteController::class, 'store'])->name('favoritos.store');
                 Route::delete('/favoritos/{book}', [PatronFavoriteController::class, 'destroy'])->name('favoritos.destroy');
                 Route::post('/listas', [PatronReadingListController::class, 'store'])->name('listas.store');
+                Route::patch('/listas/{readingList}', [PatronReadingListController::class, 'update'])->name('listas.update');
                 Route::post('/listas/livros/{book}', [PatronReadingListController::class, 'storeBook'])->name('listas.livros.store');
                 Route::patch('/listas/{readingList}/livros/{book}/progresso', [PatronReadingListController::class, 'updateBookProgress'])->name(
                     'listas.livros.progress',

@@ -16,4 +16,6 @@ COPY --from=composer:latest /usr/bin/composer /usr/bin/composer
 
 RUN composer install --no-dev --optimize-autoloader
 
-CMD php artisan serve --host=0.0.0.0 --port=$PORT
+RUN chmod +x /app/docker/start.sh
+
+CMD ["/app/docker/start.sh"]
